@@ -1,0 +1,41 @@
+<html >
+<head>
+    <meta charset="UTF-8">
+    <title>CitiBikeViz</title>
+
+    <script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyDCb3P4wJcwKoeUnNxp9GbT88-fX6K-O6M",
+            authDomain: "citiviz3-83044.firebaseapp.com",
+            databaseURL: "https://citiviz3-83044.firebaseio.com",
+            storageBucket: "citiviz3-83044.appspot.com",
+            messagingSenderId: "200437723375"
+        };
+        firebase.initializeApp(config);
+    </script>
+    <script src="./lib/d3.js"></script>
+    <script src="./js/viz.js"></script>
+    <link href="./css/myStyles.css" rel="stylesheet">
+</head><body onload="init()"> <!-- init() method defined in coffee.js-->
+
+<div style="margin:30;">
+  <div style="display: table-cell; width: 150;">
+    <button id="update" onclick="updateClicked()">Update</button>
+  </div>
+  <div style="display: table-cell; width: 150;">
+    <button id="update" onclick="byGender()">Sort by Gender</button>
+  </div>
+  <div style="display: table-cell; width: 150;">
+    <button id="update" onclick="byType()">Sort by Type</button>
+  </div>
+  <div style="display: table-cell; width: 150;">
+    <button id="update" onclick="byTime()">Sort by Time</button>
+  </div>
+</div>
+
+<div id="vis"></div>
+
+</body>
+</html>

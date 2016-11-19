@@ -1,0 +1,25 @@
+<html >
+<head>
+    <meta charset="UTF-8">
+    <title>CoffeeVis</title>
+    <script src="./lib/d3.js"></script>
+    <script src="./js/coffee.js"></script>
+    <link href="./css/main.css" rel="stylesheet">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.27.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.27.0/mapbox-gl.css' rel='stylesheet' />   
+</head>
+<body onload="init()"> <!-- init() method defined in coffee.js-->
+
+<div id="mapresults"></div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo&libraries=places&callback=initMap" async defer></script>
+ 
+
+<div id='mapBoxMap' style='width: 50%; height: 100%;'></div>
+
+
+<div id="map" width ="0" height="0"></div>
+
+<button id='flyButton'>Move to Next Station</button>
+
+</body>
+</html>
