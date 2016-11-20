@@ -1,0 +1,49 @@
+.body {
+   margin: 0;
+   display: block;
+}
+
+#map {
+    position: relative;
+    width: 0px;
+    height: 0px;
+}
+
+.marker {
+    display: block;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+}
+
+.mapboxgl-marker {
+    height: 50px;
+    width: 50px;
+    background-color: aqua;
+}
+
+#mapBoxMap {
+    float: right;
+    width: 50%;
+    height: 100%;
+}
+
+#flyButton {
+    display: inline;
+    position: relative;
+    margin: 10px auto;
+    width: 50%;
+    height: 40px;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    font-size: 12px;
+    text-align: center;
+    color: #fff;
+    background: #ee8a65;
+}
+
+.theStationImage {
+   width: 50%;
+}

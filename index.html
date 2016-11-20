@@ -1,4 +1,5 @@
-<html >
+<!-- <!DOCTYPE html> -->
+<html>
 <head>
     <meta charset="UTF-8">
     <title>CitiBikeViz</title>
@@ -15,12 +16,27 @@
         };
         firebase.initializeApp(config);
     </script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.27.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.27.0/mapbox-gl.css' rel='stylesheet' />
     <script src="./lib/d3.js"></script>
     <script src="./js/viz.js"></script>
     <link href="./css/myStyles.css" rel="stylesheet">
 </head><body onload="init()"> <!-- init() method defined in coffee.js-->
 
-<div style="margin:30;">
+
+<div id="vis" style='width: 100%; height: 100%; margin: 0'>
+
+
+
+<!-- <div id='mapBoxMap' style='width: 50%; height: 100%;'></div>
+
+<button id='flyButton'>Move to Next Station</button> -->
+
+
+
+</div>
+
+<div style="margin:0;">
   <div style="display: table-cell; width: 150;">
     <button id="update" onclick="updateClicked()">Update</button>
   </div>
@@ -34,8 +50,5 @@
     <button id="update" onclick="byTime()">Sort by Time</button>
   </div>
 </div>
-
-<div id="vis"></div>
-
 </body>
 </html>
