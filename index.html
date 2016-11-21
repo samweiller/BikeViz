@@ -1,18 +1,23 @@
-<!-- <!DOCTYPE html> -->
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>CitiBikeViz</title>
-
+    <link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|PT+Sans|PT+Sans+Narrow" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
     <script>
         // Initialize Firebase
         var config = {
-            apiKey: "AIzaSyDCb3P4wJcwKoeUnNxp9GbT88-fX6K-O6M",
-            authDomain: "citiviz3-83044.firebaseapp.com",
-            databaseURL: "https://citiviz3-83044.firebaseio.com",
-            storageBucket: "citiviz3-83044.appspot.com",
-            messagingSenderId: "200437723375"
+            // apiKey: "AIzaSyDCb3P4wJcwKoeUnNxp9GbT88-fX6K-O6M",
+            // authDomain: "citiviz3-83044.firebaseapp.com",
+            // databaseURL: "https://citiviz3-83044.firebaseio.com",
+            // storageBucket: "citiviz3-83044.appspot.com",
+            // messagingSenderId: "200437723375"
+            apiKey: "AIzaSyDsVBdmHWV5wNtbWbLLR7A5lLJTWIsBBh8",
+             authDomain: "citivizsandbox.firebaseapp.com",
+             databaseURL: "https://citivizsandbox.firebaseio.com",
+             storageBucket: "citivizsandbox.appspot.com",
+             messagingSenderId: "934960558493"
         };
         firebase.initializeApp(config);
     </script>
@@ -21,34 +26,19 @@
     <script src="./lib/d3.js"></script>
     <script src="./js/viz.js"></script>
     <link href="./css/myStyles.css" rel="stylesheet">
-</head><body onload="init()"> <!-- init() method defined in coffee.js-->
+</head>
 
+<body onload="init()">
+   <div class='container'>
+      <section class="main">
+         <div class="col topCopy"></div>
+    <div class="col top" id="vis"></div>
+    <div class="col middle"></div>
+    <div class="col bottom"></div>
+  </section>
+  <section class="right"></section>
+    <!-- init() method defined in coffee.js-->
 
-<div id="vis" style='width: 100%; height: 100%; margin: 0'>
-
-
-
-<!-- <div id='mapBoxMap' style='width: 50%; height: 100%;'></div>
-
-<button id='flyButton'>Move to Next Station</button> -->
-
-
-
-</div>
-
-<div style="margin:0;">
-  <div style="display: table-cell; width: 150;">
-    <button id="update" onclick="updateClicked()">Update</button>
-  </div>
-  <div style="display: table-cell; width: 150;">
-    <button id="update" onclick="byGender()">Sort by Gender</button>
-  </div>
-  <div style="display: table-cell; width: 150;">
-    <button id="update" onclick="byType()">Sort by Type</button>
-  </div>
-  <div style="display: table-cell; width: 150;">
-    <button id="update" onclick="byTime()">Sort by Time</button>
-  </div>
-</div>
 </body>
+
 </html>
