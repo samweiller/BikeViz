@@ -2,15 +2,15 @@
 
 var chart;
 
-var width = 500; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
+var width = 700; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
 var height = 400; // THIS TOO.
 
-var boxSize = 4;
-var boxSpacing = 2;
+var boxSize = 5;
+var boxSpacing = 1;
 var boxSpaceMultipler = boxSize + boxSpacing
 
-var xSpacing = 50;
-var ySpacing = 200;
+var xSpacing = 75;
+var ySpacing = 350;
 
 var map;
 var service;
@@ -29,19 +29,26 @@ function init() {
     //PUT YOUR INIT CODE BELOW
 }
 
-updateViz('gender');
+updateViz('time');
 // initMap();
 
 //Called when the update button is clicked
 function updateViz(sortType) {
-    getRidesForBike(23458).then(function(dataset) {
+    getRidesForBike(23457).then(function(dataset) {
 
       // console.log(dataset)
         console.log('getting rides')
 
         var ridesByAge = sortDataBy(sortType, dataset)
 
+        // Get width of div
+        var element = document.getElementsByClassName('main');
+        console.log(element[0].clientWidth)
+
         var axisBoxWidth = (10 * boxSize) + (9 * boxSpacing)
+        var totalAxisWidth = (axisBoxWidth*6) + (boxSpacing*4)
+
+        xSpacing = (element[0].clientWidth - totalAxisWidth)/2
 
         // AXIS DEFINITION
         vis.append('g')
@@ -50,7 +57,7 @@ function updateViz(sortType) {
             .enter()
             .append('rect')
             .attr('x', function(d,i) {
-               return (xSpacing-2)+((i+1)*boxSpacing)+(i*axisBoxWidth)
+               return (xSpacing-1)+((i+1)*boxSpacing)+(i*axisBoxWidth)
             })
             .attr('y', ySpacing+8)
             .attr('height', 15)
@@ -110,9 +117,9 @@ function updateViz(sortType) {
                } else {
                 if (d.gender == 1) {
                   //  console.log('male')
-                    return "blue";
+                    return "#7E8A96";
                 } else {
-                    return "red";
+                    return "#C47856";
                 }
              }
 
@@ -211,16 +218,17 @@ function initMap() {
     var stationObjects = demoSetupCode();
 
     // Create neccessary HTML objects - SW
-    var visDiv = document.getElementById('vis');
+    var rightDiv = document.getElementsByClassName('right');
     var mapBoxMapDiv = document.createElement('div');
     mapBoxMapDiv.id = 'mapBoxMap';
-    visDiv.appendChild(mapBoxMapDiv);
+    rightDiv[0].appendChild(mapBoxMapDiv);
 
+    var bottomLeftDiv = document.getElementsByClassName('bottom');
     var flyButtonObject = document.createElement('button');
     flyButtonObject.id = 'flyButton';
     var btnText = document.createTextNode('Move to Next Station');
     flyButtonObject.appendChild(btnText);
-    visDiv.appendChild(flyButtonObject);
+    bottomLeftDiv[0].appendChild(flyButtonObject);
 
    //  console.log(stationObjects)
     // Initialize the MapBox Map
@@ -510,8 +518,9 @@ function findImageForCoords(latitude, longitude) {
     img.height = 200;
 
     // This next line will just add it to the <body> tag
-    var visDiv = document.getElementById('vis');
-    var buttonDiv = document.getElementById('flyButton');
-    visDiv.insertBefore(img, buttonDiv);
+   //  var visDiv = document.getElementById('vis');
+   //  var buttonDiv = document.getElementById('flyButton');
+   var imageDiv = document.getElementsByClassName('middle');
+    imageDiv[0].append(img);
 
 }
