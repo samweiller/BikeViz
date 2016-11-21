@@ -272,6 +272,15 @@ function initMap() {
 
         currentStationCentered = currentStationCentered + 1;
 
+        getBirthStationForBike(23458).then(function(dataset) {
+          console.log(dataset);
+
+          getStation(3230).then(function(stationData) {
+              console.log("returned Object" + JSON.stringify(stationData));
+              //console.log("getting the station latitude " + stationData.latitude)
+          });
+        });
+
         map.flyTo({
             speed: 0.4, // make the flying slow
             curve: 1, // change the speed at which it zooms out
@@ -311,6 +320,51 @@ function demoSetupCode () {
     return stationObjectsArray
 
 }
+
+
+function getBirthStationForBike(bikeID) {
+    var db = firebase.database();
+    var ref = db.ref("/");
+
+    var birthStation = "";
+    return ref.child('bikes/' + bikeID + '/rides/').orderByKey().once("value").then(function(snapshot) {
+
+      snapshot.forEach(function(childSnapshot) {
+
+        var dataObject = childSnapshot.val();
+
+        if (birthStation == "") {
+          birthStation = dataObject.startStation;
+        }
+
+      });
+
+    }).then(function() {
+        return birthStation;
+    });
+};
+
+
+function getStation(stationID) {
+    var db = firebase.database();
+    var ref = db.ref("/");
+
+    var stationObject = new Object();
+    return ref.child('stations/' + stationID).orderByKey().once("value").then(function(snapshot) {
+        snapshot.forEach(function(childSnapshot) {
+            var dataObject = childSnapshot.val()
+
+            if (dataObject.latitude) {
+              stationObject = dataObject;
+            }
+
+        });
+    }).then(function() {
+        return stationObject;
+    });
+};
+
+
 
 function getMarkers (theStations) {
 
@@ -451,7 +505,7 @@ function findImageForCoords(latitude, longitude) {
 
     var img = document.createElement("img");
     img.className = 'theStationImage'
-    img.src = "https://maps.googleapis.com/maps/api/streetview?size=400x400&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
+    img.src = "https://maps.googleapis.com/maps/api/streetview?size=640x180&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
     img.width = 500;
     img.height = 200;
 
