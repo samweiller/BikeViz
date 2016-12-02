@@ -3,26 +3,62 @@ font-family: 'Cabin Condensed', sans-serif;
 font-family: 'PT Sans', sans-serif;
 font-family: 'PT Sans Narrow', sans-serif;*/
 
-
+/* GENERAL STUFF */
 html {
    height: 100%;
 }
 
 body {
-   margin: 0;
+   margin: 0px;
    display: block;
    height: 100%;
 }
 
-.bikeVizTitle {
-   font-family: 'Cabin', sans-serif;
-   font-size: 34px;
+/* LAYOUT STUFF */
+.bikeView-container {
+  display: flex;
+  flex-direction: row;
+  min-height: 50px;
+  height: 100%;
 }
 
-.vis {
+.bikeView-left {
+  flex:0;
+  background-color: lightgray;
+  margin-right: 5px;
+  width: 75%
+}
+
+.bikeView-right {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin: 0;
+}
+
+.col {
+  margin: 0px;
+}
+
+.bikeView-mapSection {
+   height: 75%;
+   margin-bottom: 5px;
+  }
+
+.bikeView-imageSection {
+   height: 20%;
+   background: white;
    margin: 0;
-}
+  }
 
+.bikeView-UIsection {
+   height: 5%;
+   background: white;
+   margin: 0;
+  }
+
+/* MAP STUFF */
 #map {
     position: relative;
     width: 0px;
@@ -53,7 +89,7 @@ body {
     display: inline;
     position: relative;
     margin: 10px auto;
-    width: 50%;
+    /*width: 50%;*/
     height: 40px;
     padding: 10px;
     border: none;
@@ -64,61 +100,28 @@ body {
     background: #ee8a65;
 }
 
-.theStationImage {
-   width: 50%;
-}
-
-.container {
-  display: flex;
-  flex-direction: row;
-  min-height: 50px;
-  height: 100%;
-}
-
-.main {
-  width: 50%;
-  background-color: #f5eccd;
-  display: flex;
-  flex-direction: column;
-  flex: 0;
-  margin: 0;
-}
-
-.right {
-  flex:1;
-  background-color: white;
-  margin: 0;
-  width: 50%
-}
-
-.col {
-  margin: 2px;
-}
-
-.top {
-   height: 75%;
-   margin: 0;
-  }
-
-.middle {
-   height: 20%;
-   background: white;
-   margin: 0;
-  }
-
-.bottom {
-   height: 5%;
-   background: white;
-   margin: 0;
-  }
-
-.theStationImage {
-   width: 100%;
-   height: 100%;
-}
-
 #flyButton {
    width: 100%;
    height: 100%;
+   margin: 0;
+}
+
+/* IMAGE STUFF */
+.theStationImage {
+   /*width: 50%;*/
+}
+
+.theStationImage {
+   width: 100%;
+   height: 100%;
+}
+
+/* VIZ STUFF */
+.bikeVizTitle {
+   font-family: 'Cabin', sans-serif;
+   font-size: 34px;
+}
+
+.vis {
    margin: 0;
 }
