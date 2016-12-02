@@ -2,11 +2,11 @@
 
 var chart;
 
-var width = 700; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
+var width = 850; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
 var height = 400; // THIS TOO.
 
-var boxSize = 5;
-var boxSpacing = 1;
+var boxSize = 6;
+var boxSpacing = 2;
 var boxSpaceMultipler = boxSize + boxSpacing
 
 var xSpacing = 75;
@@ -29,7 +29,7 @@ function init() {
     //PUT YOUR INIT CODE BELOW
 }
 
-updateViz('time');
+updateViz('gender');
 // initMap();
 
 //Called when the update button is clicked
@@ -42,7 +42,7 @@ function updateViz(sortType) {
         var ridesByAge = sortDataBy(sortType, dataset)
 
         // Get width of div
-        var element = document.getElementsByClassName('main');
+        var element = document.getElementsByClassName('bikeView-left');
         console.log(element[0].clientWidth)
 
         var axisBoxWidth = (10 * boxSize) + (9 * boxSpacing)
@@ -218,12 +218,12 @@ function initMap() {
     var stationObjects = demoSetupCode();
 
     // Create neccessary HTML objects - SW
-    var rightDiv = document.getElementsByClassName('right');
+    var rightDiv = document.getElementsByClassName('bikeView-mapSection');
     var mapBoxMapDiv = document.createElement('div');
     mapBoxMapDiv.id = 'mapBoxMap';
     rightDiv[0].appendChild(mapBoxMapDiv);
 
-    var bottomLeftDiv = document.getElementsByClassName('bottom');
+    var bottomLeftDiv = document.getElementsByClassName('bikeView-UIsection');
     var flyButtonObject = document.createElement('button');
     flyButtonObject.id = 'flyButton';
     var btnText = document.createTextNode('Move to Next Station');
@@ -520,7 +520,7 @@ function findImageForCoords(latitude, longitude) {
     // This next line will just add it to the <body> tag
    //  var visDiv = document.getElementById('vis');
    //  var buttonDiv = document.getElementById('flyButton');
-   var imageDiv = document.getElementsByClassName('middle');
+   var imageDiv = document.getElementsByClassName('bikeView-imageSection');
     imageDiv[0].append(img);
 
 }

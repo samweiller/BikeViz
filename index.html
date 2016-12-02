@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>CitiBikeViz</title>
@@ -14,10 +15,10 @@
             // storageBucket: "citiviz3-83044.appspot.com",
             // messagingSenderId: "200437723375"
             apiKey: "AIzaSyDsVBdmHWV5wNtbWbLLR7A5lLJTWIsBBh8",
-             authDomain: "citivizsandbox.firebaseapp.com",
-             databaseURL: "https://citivizsandbox.firebaseio.com",
-             storageBucket: "citivizsandbox.appspot.com",
-             messagingSenderId: "934960558493"
+            authDomain: "citivizsandbox.firebaseapp.com",
+            databaseURL: "https://citivizsandbox.firebaseio.com",
+            storageBucket: "citivizsandbox.appspot.com",
+            messagingSenderId: "934960558493"
         };
         firebase.initializeApp(config);
     </script>
@@ -29,15 +30,15 @@
 </head>
 
 <body onload="init()">
-   <div class='container'>
-      <section class="main">
-         <div class="col topCopy"></div>
-    <div class="col top" id="vis"></div>
-    <div class="col middle"></div>
-    <div class="col bottom"></div>
-  </section>
-  <section class="right"></section>
-    <!-- init() method defined in coffee.js-->
+    <div class='bikeView-container'>
+        <section class="bikeView-left" id="vis"></section>
+        <section class="bikeView-right">
+            <div class="col bikeView-mapSection"></div>
+            <div class="col bikeView-imageSection"></div>
+            <div class="col bikeView-UIsection"></div>
+        </section>
+
+        <!-- init() method defined in coffee.js-->
 
 </body>
 
