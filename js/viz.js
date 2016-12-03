@@ -29,7 +29,7 @@ function init() {
     //PUT YOUR INIT CODE BELOW
 }
 
-updateViz('month', 'gender');
+updateViz('age', 'gender');
 // initMap();
 
 //Called when the update button is clicked
@@ -152,7 +152,12 @@ function getRidesForBike(bikeID) {
     var db = firebase.database();
     var ref = db.ref("/");
 
-    var fullDataArray = new Array();
+   //  var fullDataArray = new Object();
+   //  var fullDataArray.subscriber = []
+   //  var fullDataArray.customer = []
+
+    var fullDataArray = {'subscriber': [], 'customer': []}
+
     return ref.child('bikes/' + bikeID + '/rides/').orderByKey().once("value").then(function(snapshot) {
         snapshot.forEach(function(childSnapshot) {
             var dataObject = childSnapshot.val()
@@ -176,6 +181,7 @@ function getRidesForBike(bikeID) {
                segmentNumber = 4
             }
 
+            if (dataObject.user.type == 'Subscriber') {
             var theRefactoredObject = {
                 'rideID': childSnapshot.key,
                 'bikeID': bikeID,
@@ -187,7 +193,21 @@ function getRidesForBike(bikeID) {
                 'segment': segmentNumber
             }
 
-            fullDataArray.push(theRefactoredObject);
+            fullDataArray.subscriber.push(theRefactoredObject);
+         } else if (dataObject.user.type == 'Customer') {
+            var theRefactoredObject = {
+                'rideID': childSnapshot.key,
+                'bikeID': bikeID,
+                'stationID': dataObject.startStation,
+                'gender': 'not available',
+                'userType': dataObject.user.type,
+                'age': 'not available',
+                'startTime': dataObject.startTime,
+                'segment': segmentNumber
+            }
+
+            fullDataArray.customer.push(theRefactoredObject);
+         }
         });
     }).then(function() {
         return fullDataArray
@@ -201,27 +221,42 @@ function sortDataBy2(organizer, sorter, dataset) {
     // Nest rides by age (for AGE AXIS)
     if (organizer == 'age') {
         var sortedRides = d3.nest()
-            .key(function(d) {
-                return d.age; // return age as nesting key
-            })
-            .entries(dataset);
+           .key(function(d) {
+              return d.age; // return age as nesting key
+           }).sortKeys(d3.ascending) // Sort by age within bin
+            .entries(dataset.subscriber);
 
-        sortedRides = sortedRides.sort(function(a, b) {
-            return d3.ascending(a.key, b.key);
-        })
+        // correct for missing ages
+        // add option to sort by gender.
+        var validAges = 60;
+        var minAge = 16
+        var maxAge = 75
 
-        for (i = 0; i <= sortedRides.length; i++) { // Iterate over all entries in sortedRides
-            // TODO: THIS IS WRONG.
-            if (sortedRides[i] !== undefined) { // make sure given level of sortedRides exists
-                if (sortType == 'time') { // sort by time
-                    return sortedRides
-                } else { // otherwise sort by gender
-                    sortedRides[i].values = sortedRides[i].values.sort(function(a, b) {
-                        return d3.ascending(a.gender, b.gender);
-                    });
-                }
-            }
+        console.log(sortedRides)
+        for (age = 0; age < validAges; age++) {
+           console.log(age)
+           console.log(sortedRides[age].key)
+           if (sortedRides[age].key == age+16) {
+             // all is well
+          } else {
+             var myQuickKey = age+16;
+             sortedRides.splice(age, 0, {key: String(age+16)});
+          }
         }
+      //   console.log(sortedRides)
+
+      //   for (i = 0; i <= sortedRides.length; i++) { // Iterate over all entries in sortedRides
+      //       // TODO: THIS IS WRONG.
+      //       if (sortedRides[i] !== undefined) { // make sure given level of sortedRides exists
+      //           if (sortType == 'time') { // sort by time
+      //               return sortedRides
+      //           } else { // otherwise sort by gender
+      //               sortedRides[i].values = sortedRides[i].values.sort(function(a, b) {
+      //                   return d3.ascending(a.gender, b.gender);
+      //               });
+      //           }
+      //       }
+      //   }
 
     // Nest rides by time (for TIME AXIS)
     } else if (organizer == 'month') {
@@ -235,13 +270,14 @@ function sortDataBy2(organizer, sorter, dataset) {
             .key(function(d) {
                return d.segment; // Subnest by segment
             }).sortKeys(d3.ascending)
-            .entries(dataset);
+            .entries(dataset.subscriber);
 
         var validMonths = 8; // Number of continuous months with valid data
         var numSegments = 5; // Number of segments per month
         var segmentSize = 6; // Number of days per segment
 
         // This makes sure that array index matches month key. If a given month has no rides, insert an empty object in that space in the array.
+        console.log(sortedRides)
         for (month = 0; month < validMonths; month++) {
            if (sortedRides[month].key == month) {
              // all is well
