@@ -3,14 +3,19 @@
 var chart;
 
 var width = 850; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 400; // THIS TOO.
+var height = 700; // THIS TOO.
 
 var boxSize = 6;
+var boxWidth = 10;
+var boxHeight = 4;
 var boxSpacing = 2;
-var boxSpaceMultipler = boxSize + boxSpacing
+var boxWidthMultipler = boxWidth + boxSpacing
+var boxHeightMultipler = boxHeight + boxSpacing
 
 var xSpacing = 75;
-var ySpacing = 350;
+var ySpacing = 500;
+
+var theBikeID = 23459;
 
 var map;
 var service;
@@ -34,18 +39,18 @@ updateViz('age', 'gender');
 
 //Called when the update button is clicked
 function updateViz(organizer, sorter) {
-    getRidesForBike(23456).then(function(dataset) {
+    getRidesForBike(theBikeID).then(function(dataset) {
 
         // console.log(dataset)
         console.log('getting rides')
 
-        var ridesByAge = sortDataBy2(organizer, sorter, dataset)
-
+        var ridesByAge = sortDataBy2(organizer, sorter, dataset) // returns data already parsed by customer type
+        console.log(ridesByAge)
         // Get width of div
         var element = document.getElementsByClassName('bikeView-left');
         console.log(element[0].clientWidth)
 
-        var axisBoxWidth = (10 * boxSize) + (9 * boxSpacing)
+        var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
         var totalAxisWidth = (axisBoxWidth * 6) + (boxSpacing * 4)
 
         xSpacing = (element[0].clientWidth - totalAxisWidth) / 2
@@ -92,14 +97,15 @@ function updateViz(organizer, sorter) {
                     .data(ridesByAge[i].values)
                     .enter()
                     .append('rect')
-                    .attr('x', ((i + 0) * boxSpaceMultipler) + xSpacing + 1) // circle -> cx
+                    .attr('x', ((i + 0) * boxWidthMultipler) + xSpacing + 1) // circle -> cx
                     .attr('y', function(d, j) { // circle -> cy
                         //   console.log(d)
                         //   console.log(j)
-                        return ySpacing - (j * boxSpaceMultipler);
+                        // console.log(ySpacing - (j * boxHeightMultipler))
+                        return ySpacing - (j * boxHeightMultipler);
                     })
-                    .attr('height', boxSize) // circle -> r -> boxSize/2
-                    .attr('width', boxSize)
+                    .attr('height', boxHeight) // circle -> r -> boxSize/2
+                    .attr('width', boxWidth)
                     .attr("class", function(d, i) {
                        if (d.gender == 1) {
                            var genderClass = 'case-male';
