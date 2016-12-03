@@ -34,7 +34,7 @@ updateViz('age', 'gender');
 
 //Called when the update button is clicked
 function updateViz(organizer, sorter) {
-    getRidesForBike(23458).then(function(dataset) {
+    getRidesForBike(23456).then(function(dataset) {
 
         // console.log(dataset)
         console.log('getting rides')
@@ -81,22 +81,18 @@ function updateViz(organizer, sorter) {
             .style('fill', 'white')
             .style('font-size', '14px')
 
-        // console.log(ridesByAge)
-
         for (i = 16 - 16; i <= 75 - 16; i++) {
             var svg = d3.select('svg');
 
-            if (ridesByAge[i] !== undefined) {
-                // console.log(ridesByAge[i-16].values)
+            if (ridesByAge[i].values !== undefined) {
 
-                // svg.selectAll('body')
                 // Gender Dist
                 vis.append('g')
                     .selectAll('body')
                     .data(ridesByAge[i].values)
                     .enter()
                     .append('rect')
-                    .attr('x', ((i + 1) * boxSpaceMultipler) + xSpacing) // circle -> cx
+                    .attr('x', ((i + 0) * boxSpaceMultipler) + xSpacing + 1) // circle -> cx
                     .attr('y', function(d, j) { // circle -> cy
                         //   console.log(d)
                         //   console.log(j)
@@ -105,24 +101,16 @@ function updateViz(organizer, sorter) {
                     .attr('height', boxSize) // circle -> r -> boxSize/2
                     .attr('width', boxSize)
                     .attr("class", function(d, i) {
-                        return "rect" + d.age
+                       if (d.gender == 1) {
+                           var genderClass = 'case-male';
+                       } else {
+                           var genderClass = 'case-female';
+                       }
+
+                       var rectClass = 'age' + d.age;
+
+                       return 'ride-box ' + rectClass + ' ' + genderClass
                     })
-                    .style("fill", function(d) {
-                        if (sortType == 'type') {
-                            if (d.userType == 'Customer') {
-                                return "cyan";
-                            } else {
-                                return "purple";
-                            }
-                        } else {
-                            if (d.gender == 1) {
-                                //  console.log('male')
-                                return "#7E8A96";
-                            } else {
-                                return "#C47856";
-                            }
-                        }
-                    });
             }
         }
         initMap();
@@ -176,9 +164,9 @@ function getRidesForBike(bikeID) {
             } else if (dateStamp.getDate() > segmentSize*2 && dateStamp.getDate() <= segmentSize*3) {
                segmentNumber = 2;
             } else if (dateStamp.getDate() > segmentSize*3 && dateStamp.getDate() <= segmentSize*4) {
-               segmentNumber = 3
+               segmentNumber = 3;
             } else if (dateStamp.getDate() > segmentSize*3) {
-               segmentNumber = 4
+               segmentNumber = 4;
             }
 
             if (dataObject.user.type == 'Subscriber') {
@@ -226,16 +214,12 @@ function sortDataBy2(organizer, sorter, dataset) {
            }).sortKeys(d3.ascending) // Sort by age within bin
             .entries(dataset.subscriber);
 
-        // correct for missing ages
         // add option to sort by gender.
         var validAges = 60;
         var minAge = 16
         var maxAge = 75
 
-        console.log(sortedRides)
         for (age = 0; age < validAges; age++) {
-           console.log(age)
-           console.log(sortedRides[age].key)
            if (sortedRides[age].key == age+16) {
              // all is well
           } else {
@@ -243,7 +227,8 @@ function sortDataBy2(organizer, sorter, dataset) {
              sortedRides.splice(age, 0, {key: String(age+16)});
           }
         }
-      //   console.log(sortedRides)
+
+        sortedRides = sortedRides.slice(0, validAges);
 
       //   for (i = 0; i <= sortedRides.length; i++) { // Iterate over all entries in sortedRides
       //       // TODO: THIS IS WRONG.
@@ -293,6 +278,8 @@ function sortDataBy2(organizer, sorter, dataset) {
           }
         }
     }
+
+    return sortedRides
 }
 
 function sortDataBy(sortType, dataset) {
@@ -324,7 +311,6 @@ function sortDataBy(sortType, dataset) {
 
     return ridesByAge
 }
-
 
 function initMap() {
     console.log('foo')
@@ -449,7 +435,6 @@ function demoSetupCode() {
 
 }
 
-
 function getBirthStationForBike(bikeID) {
     var db = firebase.database();
     var ref = db.ref("/");
@@ -472,7 +457,6 @@ function getBirthStationForBike(bikeID) {
     });
 };
 
-
 function getStation(stationID) {
     var db = firebase.database();
     var ref = db.ref("/");
@@ -491,8 +475,6 @@ function getStation(stationID) {
         return stationObject;
     });
 };
-
-
 
 function getMarkers(theStations) {
 
@@ -571,9 +553,6 @@ function getMarkers(theStations) {
     return thisTest;
 
 }
-
-
-
 
 function demoSetupCode() {
 
