@@ -11,9 +11,10 @@ var boxWidthMultipler = boxWidth + boxSpacing
 var boxHeightMultipler = boxHeight + boxSpacing
 
 var xSpacing = 50;
-var ySpacing = 500;
+var ySpacing = 430;
 
-var theBikeID = 23458;
+var theBikeID = getRandomBikeNumber();
+console.log(theBikeID)
 
 // DATA THINGS
 var validMonths = 8;
@@ -368,10 +369,50 @@ function plotDataByMonth(sortedData, customerData) {
                         .attr('height', boxHeight) // circle -> r -> boxSize/2
                         .attr('width', boxWidth)
                         .attr("class", function(d, i) {
+                           if (d.gender == 1) {
+                              var genderClass = 'case-male';
+                           } else if (d.gender == 2) {
+                              var genderClass = 'case-female';
+                           } else {
+                              var genderClass = 'case-genderUnknown';
+                           }
+
+                            var rectClass = 'month' + month + ' segment' + seg + ' age' + d.age;
+
+                            return 'ride-box ' + rectClass + ' ' + genderClass
+                        })
+                }
+            }
+        }
+    }
+
+    // Customers
+    for (month = 0; month < validMonths; month++) {
+        var svg = d3.select('svg');
+        if (customerData[month].values !== undefined) {
+            for (seg = 0; seg < numSegments; seg++) {
+                if (customerData[month].values[seg].values !== undefined) {
+                    console.log('hello')
+                        // Gender Dist
+                    var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
+                    vis.append('g')
+                        .selectAll('body')
+                        .data(customerData[month].values[seg].values)
+                        .enter()
+                        .append('rect')
+                        .attr('x', xLoc) // circle -> cx
+                        .attr('y', function(d, j) { // circle -> cy
+                            return ySpacing + 27 + (j * boxHeightMultipler);
+                        })
+                        .attr('height', boxHeight) // circle -> r -> boxSize/2
+                        .attr('width', boxWidth)
+                        .attr("class", function(d, i) {
                             if (d.gender == 1) {
                                 var genderClass = 'case-male';
-                            } else {
+                            } else if (d.gender == 2) {
                                 var genderClass = 'case-female';
+                            } else {
+                               var genderClass = 'case-genderUnknown';
                             }
 
                             var rectClass = 'month' + month + ' segment' + seg + ' age' + d.age;
@@ -382,4 +423,277 @@ function plotDataByMonth(sortedData, customerData) {
             }
         }
     }
+}
+
+function getRandomBikeNumber() {
+   var bikeObject = new Object()
+   bikeObject = {
+     "19125" : true,
+     "20778" : true,
+     "25285" : true,
+     "17079" : true,
+     "21999" : true,
+     "20323" : true,
+     "16997" : true,
+     "14779" : true,
+     "22578" : true,
+     "15822" : true,
+     "15469" : true,
+     "21299" : true,
+     "16065" : true,
+     "21327" : true,
+     "25962" : true,
+     "23927" : true,
+     "20077" : true,
+     "21526" : true,
+     "22064" : true,
+     "17254" : true,
+     "24282" : true,
+     "21080" : true,
+     "16217" : true,
+     "25067" : true,
+     "14820" : true,
+     "22219" : true,
+     "25912" : true,
+     "18703" : true,
+     "18482" : true,
+     "23647" : true,
+     "15771" : true,
+     "23398" : true,
+     "23854" : true,
+     "18388" : true,
+     "16846" : true,
+     "16544" : true,
+     "22818" : true,
+     "22285" : true,
+     "25112" : true,
+     "16939" : true,
+     "18716" : true,
+     "24800" : true,
+     "14548" : true,
+     "18434" : true,
+     "16074" : true,
+     "23268" : true,
+     "25832" : true,
+     "19444" : true,
+     "18251" : true,
+     "24658" : true,
+     "25761" : true,
+     "17547" : true,
+     "22545" : true,
+     "15314" : true,
+     "26004" : true,
+     "16353" : true,
+     "18779" : true,
+     "26456" : true,
+     "22988" : true,
+     "14947" : true,
+     "22874" : true,
+     "26079" : true,
+     "16127" : true,
+     "22274" : true,
+     "19344" : true,
+     "21475" : true,
+     "23309" : true,
+     "16625" : true,
+     "16984" : true,
+     "23469" : true,
+     "23985" : true,
+     "21145" : true,
+     "21703" : true,
+     "15448" : true,
+     "23735" : true,
+     "16657" : true,
+     "25011" : true,
+     "22899" : true,
+     "16513" : true,
+     "26356" : true,
+     "18966" : true,
+     "25790" : true,
+     "15496" : true,
+     "23407" : true,
+     "24636" : true,
+     "17750" : true,
+     "23488" : true,
+     "18417" : true,
+     "25187" : true,
+     "23934" : true,
+     "19489" : true,
+     "16331" : true,
+     "19632" : true,
+     "19016" : true,
+     "22422" : true,
+     "26446" : true,
+     "15848" : true,
+     "23826" : true,
+     "26784" : true,
+     "16562" : true,
+     "22769" : true,
+     "17392" : true,
+     "22585" : true,
+     "22161" : true,
+     "25499" : true,
+     "16201" : true,
+     "19819" : true,
+     "24236" : true,
+     "17766" : true,
+     "25616" : true,
+     "15967" : true,
+     "25151" : true,
+     "16681" : true,
+     "22977" : true,
+     "23369" : true,
+     "20187" : true,
+     "24303" : true,
+     "20228" : true,
+     "26396" : true,
+     "23134" : true,
+     "17440" : true,
+     "26815" : true,
+     "19207" : true,
+     "23687" : true,
+     "25973" : true,
+     "22252" : true,
+     "17347" : true,
+     "17947" : true,
+     "24247" : true,
+     "23724" : true,
+     "25336" : true,
+     "18140" : true,
+     "22659" : true,
+     "23382" : true,
+     "26606" : true,
+     "15108" : true,
+     "24217" : true,
+     "19804" : true,
+     "18800" : true,
+     "25144" : true,
+     "19647" : true,
+     "17539" : true,
+     "26725" : true,
+     "25751" : true,
+     "23713" : true,
+     "22150" : true,
+     "21577" : true,
+     "16379" : true,
+     "26409" : true,
+     "17466" : true,
+     "23754" : true,
+     "24863" : true,
+     "19591" : true,
+     "25078" : true,
+     "22198" : true,
+     "21085" : true,
+     "15787" : true,
+     "16307" : true,
+     "25890" : true,
+     "23596" : true,
+     "17987" : true,
+     "22411" : true,
+     "19236" : true,
+     "18997" : true,
+     "24463" : true,
+     "24822" : true,
+     "21469" : true,
+     "18746" : true,
+     "15877" : true,
+     "17616" : true,
+     "25971" : true,
+     "16294" : true,
+     "19046" : true,
+     "20217" : true,
+     "23040" : true,
+     "17210" : true,
+     "20299" : true,
+     "25229" : true,
+     "23707" : true,
+     "18579" : true,
+     "21096" : true,
+     "23354" : true,
+     "18011" : true,
+     "15520" : true,
+     "26046" : true,
+     "16577" : true,
+     "24643" : true,
+     "16511" : true,
+     "15155" : true,
+     "22029" : true,
+     "25775" : true,
+     "24597" : true,
+     "20598" : true,
+     "18489" : true,
+     "26934" : true,
+     "19825" : true,
+     "19621" : true,
+     "22859" : true,
+     "25004" : true,
+     "22314" : true,
+     "22346" : true,
+     "18324" : true,
+     "15627" : true,
+     "14624" : true,
+     "19308" : true,
+     "16410" : true,
+     "25393" : true,
+     "16018" : true,
+     "17470" : true,
+     "25656" : true,
+     "18840" : true,
+     "20558" : true,
+     "23123" : true,
+     "22905" : true,
+     "20793" : true,
+     "22188" : true,
+     "15405" : true,
+     "17682" : true,
+     "17873" : true,
+     "24939" : true,
+     "16763" : true,
+     "24130" : true,
+     "26693" : true,
+     "20690" : true,
+     "18097" : true,
+     "23054" : true,
+     "19404" : true,
+     "25825" : true,
+     "24736" : true,
+     "26028" : true,
+     "22061" : true,
+     "16528" : true,
+     "22638" : true,
+     "21659" : true,
+     "25545" : true,
+     "16001" : true,
+     "21566" : true,
+     "15575" : true,
+     "22679" : true,
+     "18222" : true,
+     "25982" : true,
+     "26367" : true,
+     "18952" : true,
+     "23397" : true,
+     "22199" : true,
+     "19658" : true,
+     "25472" : true,
+     "21915" : true,
+     "20803" : true,
+     "19199" : true,
+     "15651" : true,
+     "23189" : true,
+     "17593" : true,
+     "26037" : true,
+     "19580" : true,
+     "20863" : true,
+     "15415" : true,
+     "26614" : true,
+     "26564" : true,
+     "25451" : true,
+     "21398" : true,
+     "20620" : true,
+     "21648" : true,
+     "16111" : true
+  }
+
+  var myArray = Object.keys(bikeObject)
+return myArray[Math.floor(Math.random() * myArray.length)];
 }

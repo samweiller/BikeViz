@@ -184,3 +184,7 @@ body {
 .case-female {
    fill: #C47856;
 }
+
+.case-genderUnknown {
+   fill: #4F1948;
+}
