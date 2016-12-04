@@ -236,6 +236,7 @@ function sortDataBy2(organizer, sorter, dataset) {
     return sortedRides
 }
 
+// Let's clean some shit up
 function sortDataBy(sortType, dataset) {
     var ridesByAge = d3.nest()
         .key(function(d) {
