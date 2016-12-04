@@ -125,3 +125,15 @@ body {
 .vis {
    margin: 0;
 }
+
+.ride-box:hover {
+   fill: yellow
+}
+
+.case-male {
+   fill: #7E8A96;
+}
+
+.case-female {
+   fill: #C47856;
+}

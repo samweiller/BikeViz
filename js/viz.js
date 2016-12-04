@@ -3,14 +3,24 @@
 var chart;
 
 var width = 850; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 400; // THIS TOO.
+var height = 700; // THIS TOO.
 
 var boxSize = 6;
+var boxWidth = 10;
+var boxHeight = 3;
 var boxSpacing = 2;
-var boxSpaceMultipler = boxSize + boxSpacing
+var boxWidthMultipler = boxWidth + boxSpacing
+var boxHeightMultipler = boxHeight + boxSpacing
 
 var xSpacing = 75;
-var ySpacing = 350;
+var ySpacing = 500;
+
+var theBikeID = 23458;
+
+// DATA THINGS
+validMonths = 8;
+var numSegments = 5; // Number of segments per month
+var segmentSize = 6; // Number of days per segment
 
 var map;
 var service;
@@ -20,119 +30,34 @@ var bikeIDForTesting = 23458;
 var allStations;
 var allPOIs;
 
-
 //DEFINE YOUR VARIABLES UP HERE
 console.log('in')
 
 //Gets called when the page is loaded.
 function init() {
     chart = d3.select('#vis').append('svg')
-      .attr("width", width)
-      .attr("height", height);
+        .attr("width", width)
+        .attr("height", height);
     vis = chart.append('g');
     //PUT YOUR INIT CODE BELOW
 }
 
-updateViz('gender');
+updateViz('month', 'gender');
 // initMap();
 
 //Called when the update button is clicked
-function updateViz(sortType) {
-    getRidesForBike(23457).then(function(dataset) {
+function updateViz(organizer, sorter) {
+    getRidesForBike(theBikeID).then(function(dataset) {
 
-      // console.log(dataset)
+        // console.log(dataset)
         console.log('getting rides')
 
-        var ridesByAge = sortDataBy(sortType, dataset)
+        var sortedData = sortDataBy2(organizer, sorter, dataset) // returns data already parsed by customer type
+        console.log(sortedData)
 
-        // Get width of div
-        var element = document.getElementsByClassName('bikeView-left');
-        console.log(element[0].clientWidth)
+        plotDataByMonth(sortedData)
 
-        var axisBoxWidth = (10 * boxSize) + (9 * boxSpacing)
-        var totalAxisWidth = (axisBoxWidth*6) + (boxSpacing*4)
-
-        xSpacing = (element[0].clientWidth - totalAxisWidth)/2
-
-        // AXIS DEFINITION
-        vis.append('g')
-            .selectAll('body')
-            .data([0,1,2,3,4,5])
-            .enter()
-            .append('rect')
-            .attr('x', function(d,i) {
-               return (xSpacing-1)+((i+1)*boxSpacing)+(i*axisBoxWidth)
-            })
-            .attr('y', ySpacing+8)
-            .attr('height', 15)
-            .attr('width', axisBoxWidth)
-            .style('fill', 'black')
-
-         vis.append('g')
-            .selectAll('body')
-            .data(['16-25', '26-35', '36-45', '46-55', '56-65', '66-75'])
-            .enter()
-            .append('text')
-            .text(function(d) {
-               return d;
-            })
-            .attr('x', function(d,i) {
-               return ((xSpacing-2)+((i+1)*boxSpacing)+(i*axisBoxWidth))+10
-            })
-            .attr('y', ySpacing + 20)
-            .attr('height', 25)
-            .attr('width', axisBoxWidth)
-            .style('fill', 'white')
-            .style('font-size', '14px')
-
-      // console.log(ridesByAge)
-
-      for (i = 16-16; i <= 75-16; i++) {
-         var svg = d3.select('svg');
-
-         if (ridesByAge[i] !== undefined) {
-            // console.log(ridesByAge[i-16].values)
-
-            // svg.selectAll('body')
-           // Gender Dist
-           vis.append('g')
-              .selectAll('body')
-              .data(ridesByAge[i].values)
-              .enter()
-              .append('rect')
-              .attr('x', ((i+1)*boxSpaceMultipler) + xSpacing) // circle -> cx
-              .attr('y', function(d, j) { // circle -> cy
-               //   console.log(d)
-               //   console.log(j)
-                return ySpacing - (j*boxSpaceMultipler);
-              })
-              .attr('height', boxSize) // circle -> r -> boxSize/2
-              .attr('width', boxSize)
-              .attr("class", function(d, i) {
-                  return "rect" + d.age
-              })
-              .style("fill", function(d) {
-                if (sortType == 'type') {
-                  if (d.userType == 'Customer') {
-                      return "cyan";
-                  } else {
-                      return "purple";
-                  }
-               } else {
-                if (d.gender == 1) {
-                  //  console.log('male')
-                    return "#7E8A96";
-                } else {
-                    return "#C47856";
-                }
-             }
-
-              });
-
-
-           }
-     }
-     initMap();
+        initMap();
     });
 };
 
@@ -143,72 +68,363 @@ function update(rawdata) {
 }
 
 function byGender() {
-   updateViz('gender');
+    updateViz('gender');
 }
 
 function byType() {
-   updateViz('type');
+    updateViz('type');
 }
 
 function byTime() {
-   updateViz('time');
+    updateViz('time');
 }
 
 function getRidesForBike(bikeID) {
     var db = firebase.database();
     var ref = db.ref("/");
 
-    var fullDataArray = new Array();
+    //  var fullDataArray = new Object();
+    //  var fullDataArray.subscriber = []
+    //  var fullDataArray.customer = []
+
+    var fullDataArray = {
+        'subscriber': [],
+        'customer': []
+    }
+
     return ref.child('bikes/' + bikeID + '/rides/').orderByKey().once("value").then(function(snapshot) {
         snapshot.forEach(function(childSnapshot) {
             var dataObject = childSnapshot.val()
 
-            var theRefactoredObject = {
-                'rideID': childSnapshot.key,
-                'bikeID': bikeID,
-                'stationID': dataObject.startStation,
-                'gender': dataObject.user.gender,
-                'userType': dataObject.user.type,
-                'age': 2016 - Number(dataObject.user.birthYear)
+            var dateStamp = new Date(dataObject.startTime);
+
+            var segmentNumber = -1;
+
+            // For some reason this didn't work at all as a simple for loop.
+            if (dateStamp.getDate() <= segmentSize) {
+                segmentNumber = 0;
+            } else if (dateStamp.getDate() > segmentSize && dateStamp.getDate() <= segmentSize * 2) {
+                segmentNumber = 1;
+            } else if (dateStamp.getDate() > segmentSize * 2 && dateStamp.getDate() <= segmentSize * 3) {
+                segmentNumber = 2;
+            } else if (dateStamp.getDate() > segmentSize * 3 && dateStamp.getDate() <= segmentSize * 4) {
+                segmentNumber = 3;
+            } else if (dateStamp.getDate() > segmentSize * 3) {
+                segmentNumber = 4;
             }
 
-            fullDataArray.push(theRefactoredObject);
+            if (dataObject.user.type == 'Subscriber') {
+                var theRefactoredObject = {
+                    'rideID': childSnapshot.key,
+                    'bikeID': bikeID,
+                    'stationID': dataObject.startStation,
+                    'gender': dataObject.user.gender,
+                    'userType': dataObject.user.type,
+                    'age': 2016 - Number(dataObject.user.birthYear),
+                    'startTime': dataObject.startTime,
+                    'segment': segmentNumber
+                }
+
+                fullDataArray.subscriber.push(theRefactoredObject);
+            } else if (dataObject.user.type == 'Customer') {
+                var theRefactoredObject = {
+                    'rideID': childSnapshot.key,
+                    'bikeID': bikeID,
+                    'stationID': dataObject.startStation,
+                    'gender': 'not available',
+                    'userType': dataObject.user.type,
+                    'age': 'not available',
+                    'startTime': dataObject.startTime,
+                    'segment': segmentNumber
+                }
+
+                fullDataArray.customer.push(theRefactoredObject);
+            }
         });
     }).then(function() {
         return fullDataArray
     });
 };
 
-function sortDataBy(sortType, dataset) {
-   var ridesByAge = d3.nest()
-       .key(function(d) {
-           return d.age;
-       })
-       .entries(dataset);
+function sortDataBy2(organizer, sorter, dataset) {
+    // Organizer -> age/month (x axis)
+    // Sorter -> gender/time (y axis)
 
-   ridesByAge = ridesByAge.sort(function(a, b) {
-      return d3.ascending(a.key, b.key);
-   })
+    // Nest rides by age (for AGE AXIS)
+    if (organizer == 'age') {
+        var sortedRides = d3.nest()
+            .key(function(d) {
+                return d.age; // return age as nesting key
+            }).sortKeys(d3.ascending) // Sort by age within bin
+            .entries(dataset.subscriber);
 
-   for (i = 0; i <= ridesByAge.length; i++) {
-      if (ridesByAge[i] !== undefined) {
-         if (sortType == 'type') {
-            ridesByAge[i].values = ridesByAge[i].values.sort(function(a, b) {
-               return d3.ascending(a.userType, b.userType);
-            });
-         } else if (sortType == 'time') {
-            return ridesByAge
-         } else {
-            ridesByAge[i].values = ridesByAge[i].values.sort(function(a, b) {
-               return d3.ascending(a.gender, b.gender);
-            });
-         }
-      }
-   }
+        // add option to sort by gender.
+        var validAges = 60;
+        var minAge = 16
+        var maxAge = 75
 
-   return ridesByAge
+        for (age = 0; age < validAges; age++) {
+            if (sortedRides[age].key == age + 16) {
+                // all is well
+            } else {
+                var myQuickKey = age + 16;
+                sortedRides.splice(age, 0, {
+                    key: String(age + 16)
+                });
+            }
+        }
+
+        sortedRides = sortedRides.slice(0, validAges);
+
+        //   for (i = 0; i <= sortedRides.length; i++) { // Iterate over all entries in sortedRides
+        //       // TODO: THIS IS WRONG.
+        //       if (sortedRides[i] !== undefined) { // make sure given level of sortedRides exists
+        //           if (sortType == 'time') { // sort by time
+        //               return sortedRides
+        //           } else { // otherwise sort by gender
+        //               sortedRides[i].values = sortedRides[i].values.sort(function(a, b) {
+        //                   return d3.ascending(a.gender, b.gender);
+        //               });
+        //           }
+        //       }
+        //   }
+
+        // Nest rides by time (for TIME AXIS)
+    } else if (organizer == 'month') {
+        // This is a beautiful sort function. This developer must be really smart.
+        var sortedRides = d3.nest() // Nest into months
+            .key(function(d) {
+                var dateObject = new Date(d.startTime); // Convert timestamp to Date object
+                console.log(dateObject.getMonth())
+                return dateObject.getMonth(); // return month from object
+            }).sortKeys(d3.ascending)
+            .key(function(d) {
+                return d.segment; // Subnest by segment
+            }).sortKeys(d3.ascending)
+            .entries(dataset.subscriber);
+
+        var validMonths = 8; // Number of continuous months with valid data
+        //   var numSegments = 5; // Number of segments per month
+        //   var segmentSize = 6; // Number of days per segment
+
+        // This makes sure that array index matches month key. If a given month has no rides, insert an empty object in that space in the array.
+        console.log(sortedRides)
+        for (month = 0; month < validMonths; month++) {
+            if (sortedRides[month] == undefined) {
+                sortedRides[month] = {
+                    key: 'x'
+                }
+            }
+            if (sortedRides[month].key == month) {
+                // all is well
+                for (seg = 0; seg < numSegments; seg++) { // Same as above, but for segments.
+                    if (sortedRides[month].values[seg] == undefined) {
+                        sortedRides[month].values[seg] = {
+                            key: 'x'
+                        }
+                    }
+                    if (sortedRides[month].values[seg].key == seg) {
+                        // all is well
+                    } else {
+                        sortedRides[month].values.splice(seg, 0, {
+                            seg: 'x'
+                        });
+                    }
+                }
+                sortedRides[month].values = sortedRides[month].values.slice(0, numSegments);
+            } else {
+                sortedRides.splice(month, 0, {
+                    month: 'x'
+                });
+            }
+        }
+    }
+
+    return sortedRides
 }
 
+function sortDataBy(sortType, dataset) {
+    var ridesByAge = d3.nest()
+        .key(function(d) {
+            return d.age;
+        })
+        .entries(dataset);
+
+    ridesByAge = ridesByAge.sort(function(a, b) {
+        return d3.ascending(a.key, b.key);
+    })
+
+    for (i = 0; i <= ridesByAge.length; i++) {
+        if (ridesByAge[i] !== undefined) {
+            if (sortType == 'type') {
+                ridesByAge[i].values = ridesByAge[i].values.sort(function(a, b) {
+                    return d3.ascending(a.userType, b.userType);
+                });
+            } else if (sortType == 'time') {
+                return ridesByAge
+            } else {
+                ridesByAge[i].values = ridesByAge[i].values.sort(function(a, b) {
+                    return d3.ascending(a.gender, b.gender);
+                });
+            }
+        }
+    }
+
+    return ridesByAge
+}
+
+function plotDataByAge(ridesByAge) {
+    // Get width of div
+    var element = document.getElementsByClassName('bikeView-left');
+    // console.log(element[0].clientWidth)
+
+    var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
+    var totalAxisWidth = (axisBoxWidth * 6) + (boxSpacing * 4)
+
+    xSpacing = (element[0].clientWidth - totalAxisWidth) / 2
+
+    // AXIS DEFINITION
+    vis.append('g')
+        .selectAll('body')
+        .data([0, 1, 2, 3, 4, 5])
+        .enter()
+        .append('rect')
+        .attr('x', function(d, i) {
+            return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)
+        })
+        .attr('y', ySpacing + 8)
+        .attr('height', 15)
+        .attr('width', axisBoxWidth)
+        .style('fill', 'black')
+
+    vis.append('g')
+        .selectAll('body')
+        .data(['16-25', '26-35', '36-45', '46-55', '56-65', '66-75'])
+        .enter()
+        .append('text')
+        .text(function(d) {
+            return d;
+        })
+        .attr('x', function(d, i) {
+            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + 10
+        })
+        .attr('y', ySpacing + 20)
+        .attr('height', 25)
+        .attr('width', axisBoxWidth)
+        .style('fill', 'white')
+        .style('font-size', '14px')
+
+    for (i = 16 - 16; i <= 75 - 16; i++) {
+        var svg = d3.select('svg');
+
+        if (ridesByAge[i].values !== undefined) {
+
+            // Gender Dist
+            vis.append('g')
+                .selectAll('body')
+                .data(ridesByAge[i].values)
+                .enter()
+                .append('rect')
+                .attr('x', ((i + 0) * boxWidthMultipler) + xSpacing + 1) // circle -> cx
+                .attr('y', function(d, j) { // circle -> cy
+                    //   console.log(d)
+                    //   console.log(j)
+                    // console.log(ySpacing - (j * boxHeightMultipler))
+                    return ySpacing - (j * boxHeightMultipler);
+                })
+                .attr('height', boxHeight) // circle -> r -> boxSize/2
+                .attr('width', boxWidth)
+                .attr("class", function(d, i) {
+                    if (d.gender == 1) {
+                        var genderClass = 'case-male';
+                    } else {
+                        var genderClass = 'case-female';
+                    }
+
+                    var rectClass = 'age' + d.age;
+
+                    return 'ride-box ' + rectClass + ' ' + genderClass
+                })
+        }
+    }
+}
+
+function plotDataByMonth(sortedData) {
+    var axisBoxWidth = (5 * boxWidth) + (4 * boxSpacing)
+    var totalAxisWidth = (axisBoxWidth * 12) + (boxSpacing * 10)
+
+    // AXIS DEFINITION
+    vis.append('g')
+        .selectAll('body')
+        .data([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+        .enter()
+        .append('rect')
+        .attr('x', function(d, i) {
+            return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)
+        })
+        .attr('y', ySpacing + 8)
+        .attr('height', 15)
+        .attr('width', axisBoxWidth)
+        .style('fill', 'black')
+
+    vis.append('g')
+        .selectAll('body')
+        .data(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+        .enter()
+        .append('text')
+        .text(function(d) {
+            return d;
+        })
+        .attr('x', function(d, i) {
+            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + 10
+        })
+        .attr('y', ySpacing + 20)
+        .attr('height', 25)
+        .attr('width', axisBoxWidth)
+        .style('fill', 'white')
+        .style('font-size', '14px')
+
+    console.log(sortedData)
+    for (month = 0; month < validMonths; month++) {
+        var svg = d3.select('svg');
+        if (sortedData[month].values !== undefined) {
+            for (seg = 0; seg < numSegments; seg++) {
+               // console.log(sortedData[month].values[seg].values)
+                if (sortedData[month].values[seg].values !== undefined) {
+                   console.log('hello')
+                    // Gender Dist
+                    var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
+                  //   var xLoc = ((month * seg * boxWidthMultipler) + xSpacing + 1)
+                    vis.append('g')
+                        .selectAll('body')
+                        .data(sortedData[month].values[seg].values)
+                        .enter()
+                        .append('rect')
+                        .attr('x', xLoc) // circle -> cx
+                        .attr('y', function(d, j) { // circle -> cy
+                            //   console.log(d)
+                            //   console.log(j)
+                            // console.log(ySpacing - (j * boxHeightMultipler))
+                            return ySpacing - (j * boxHeightMultipler);
+                        })
+                        .attr('height', boxHeight) // circle -> r -> boxSize/2
+                        .attr('width', boxWidth)
+                        .attr("class", function(d, i) {
+                            if (d.gender == 1) {
+                                var genderClass = 'case-male';
+                            } else {
+                                var genderClass = 'case-female';
+                            }
+
+                            var rectClass = 'month' + month + ' segment' + seg + ' age' + d.age;
+
+                            return 'ride-box ' + rectClass + ' ' + genderClass
+                        })
+                }
+            }
+        }
+    }
+}
 
 /* Notes
 Page Loads
@@ -219,11 +435,11 @@ Get Images for each POI
 */
 
 function initMap() {
-   console.log('foo')
-    // Assumes Birth Station is listed first
-   //  var innerDiv = document.createElement('div');
-   // innerDiv.className = 'mapBoxMap';
-   //  document.getElementsByTagName('body')[0].appendChild(innerDiv);
+    console.log('foo')
+        // Assumes Birth Station is listed first
+        //  var innerDiv = document.createElement('div');
+        // innerDiv.className = 'mapBoxMap';
+        //  document.getElementsByTagName('body')[0].appendChild(innerDiv);
 
     var allStations = new Array();
     var allPOIs = new Array();
@@ -264,6 +480,8 @@ function initMap() {
           //for each station, step through and grab a POI near it from Foursquare
 
           //TODO getPOIForStation(stationData);
+    // Once the map loads, add the Markers from the GeoJSON File
+    map.on('style.load', function() {
 
           //getStationForID(3230).then(function(stationReturned) {
           //    console.log("returned Object" + JSON.stringify(stationReturned));
@@ -274,7 +492,6 @@ function initMap() {
               console.log("popular station IDs - " + stationsList);
 
               for (var i = 0; i < stationsList.length; i++) {
-
                   if (i == (stationsList.length - 1)) {
                     getStationForID(stationsList[i]).then(function(theStation) {
                         allStations.push(theStation);
@@ -312,12 +529,8 @@ function initMap() {
 
                   }
 
-
               }
-
-
-
-
+    document.getElementById('flyButton').addEventListener('click', function() {
           });
 
       });
@@ -328,13 +541,13 @@ function initMap() {
     document.getElementById('flyButton').addEventListener('click', function () {
 
         currentStationCentered = currentStationCentered + 1;
-
         map.flyTo({
             speed: 0.4, // make the flying slow
             curve: 1, // change the speed at which it zooms out
             center: [
                 allStations[currentStationCentered].longitude,
                 allStations[currentStationCentered].latitude]
+            ]
         });
 
         findImageForCoords(allStations[currentStationCentered].latitude, allStations[currentStationCentered].longitude);
@@ -343,7 +556,7 @@ function initMap() {
 
 }
 
-function demoSetupCode () {
+function demoSetupCode() {
 
     var station1Example = '{"details":{"latitude":"40.74854862","longitude":"-73.98808416","name":"Broadway & W 32 St","stationNumber":"498"}}';
 
@@ -368,7 +581,6 @@ function demoSetupCode () {
 
 }
 
-
 function getBirthStationForBike(bikeID) {
     var db = firebase.database();
     var ref = db.ref("/");
@@ -376,22 +588,21 @@ function getBirthStationForBike(bikeID) {
     var birthStation = "";
     return ref.child('bikes/' + bikeID + '/rides/').orderByKey().limitToFirst(1).once("value").then(function(snapshot) {
 
-      snapshot.forEach(function(childSnapshot) {
+        snapshot.forEach(function(childSnapshot) {
 
         var dataObject = childSnapshot.val();
         console.log("see this -" + dataObject.startStation);
 
-        if (birthStation == "") {
-          birthStation = dataObject.startStation;
-        }
+            if (birthStation == "") {
+                birthStation = dataObject.startStation;
+            }
 
-      });
+        });
 
     }).then(function() {
         return birthStation;
     });
 };
-
 
 function getStationForID(stationID) {
     var db = firebase.database();
@@ -406,15 +617,13 @@ function getStationForID(stationID) {
             var dataObject = snapshot.val()
 
             if (dataObject.latitude) {
-              stationObject = dataObject;
+                stationObject = dataObject;
             }
 
     }).then(function() {
         return stationObject;
     });
 };
-
-
 
 function getPopularStationIDsForBike(bikeID) {
     var db = firebase.database();
@@ -563,16 +772,12 @@ function getMarkers(theStations) {
                         "marker-symbol": "bicycle"
                     }
                 }]
-            };
-
+            }
     return thisTest;
 
 }
 
-
-
-
-function demoSetupCode () {
+function demoSetupCode() {
 
     var station1Example = '{"details":{"latitude":"40.74854862","longitude":"-73.98808416","name":"Broadway & W 32 St","stationNumber":"498"}}';
 
@@ -617,8 +822,8 @@ function findPOINear(station) {
     };
 
     // Perform Places Search & run callback on completion
-   //  service = new google.maps.places.PlacesService(map);
-   //  service.nearbySearch(request, foundStationPOIs);
+    //  service = new google.maps.places.PlacesService(map);
+    //  service.nearbySearch(request, foundStationPOIs);
 
 }
 
@@ -631,9 +836,9 @@ function findImageForCoords(latitude, longitude) {
     img.height = 200;
 
     // This next line will just add it to the <body> tag
-   //  var visDiv = document.getElementById('vis');
-   //  var buttonDiv = document.getElementById('flyButton');
-   var imageDiv = document.getElementsByClassName('bikeView-imageSection');
+    //  var visDiv = document.getElementById('vis');
+    //  var buttonDiv = document.getElementById('flyButton');
+    var imageDiv = document.getElementsByClassName('bikeView-imageSection');
     imageDiv[0].append(img);
 
 }
