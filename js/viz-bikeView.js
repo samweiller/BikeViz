@@ -9,9 +9,10 @@ var boxHeight = 4;
 var boxSpacing = 2;
 var boxWidthMultipler = boxWidth + boxSpacing
 var boxHeightMultipler = boxHeight + boxSpacing
+var boxRadius = 0;
 
 var xSpacing = 50;
-var ySpacing = 430;
+var ySpacing = 350;
 
 var theBikeID = getRandomBikeNumber();
 console.log(theBikeID)
@@ -309,6 +310,8 @@ function plotDataByAge(ridesByAge) {
 
                     return 'ride-box ' + rectClass + ' ' + genderClass
                 })
+                .attr("rx", boxRadius)
+                .attr("ry", boxRadius)
         }
     }
 }
@@ -347,6 +350,7 @@ function plotDataByMonth(sortedData, customerData) {
         .attr('width', axisBoxWidth)
         .style('fill', 'white')
         .style('font-size', '14px')
+        .attr('class', 'bikeView-year-label')
 
     console.log(sortedData)
     for (month = 0; month < validMonths; month++) {
@@ -381,6 +385,8 @@ function plotDataByMonth(sortedData, customerData) {
 
                             return 'ride-box ' + rectClass + ' ' + genderClass
                         })
+                        .attr("rx", boxRadius)
+                        .attr("ry", boxRadius)
                 }
             }
         }
@@ -419,6 +425,8 @@ function plotDataByMonth(sortedData, customerData) {
 
                             return 'ride-box ' + rectClass + ' ' + genderClass
                         })
+                        .attr("rx", boxRadius)
+                        .attr("ry", boxRadius)
                 }
             }
         }

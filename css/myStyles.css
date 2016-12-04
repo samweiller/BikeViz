@@ -188,3 +188,11 @@ body {
 .case-genderUnknown {
    fill: #4F1948;
 }
+
+.bikeView-year-label {
+   font-family: Cabin;
+}
+
+.ride-box {
+   border-radius: 5px;
+}
