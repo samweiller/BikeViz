@@ -3,7 +3,7 @@
 var chart;
 
 var width = 850; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 700; // THIS TOO.
+var height = 600; // THIS TOO.
 
 var boxSize = 6;
 var boxWidth = 10;
@@ -56,8 +56,6 @@ function updateViz(organizer, sorter) {
         console.log(sortedData)
 
         plotDataByMonth(sortedData)
-
-        initMap();
     });
 };
 
@@ -82,11 +80,6 @@ function byTime() {
 function getRidesForBike(bikeID) {
     var db = firebase.database();
     var ref = db.ref("/");
-
-    //  var fullDataArray = new Object();
-    //  var fullDataArray.subscriber = []
-    //  var fullDataArray.customer = []
-
     var fullDataArray = {
         'subscriber': [],
         'customer': []
@@ -275,7 +268,7 @@ function sortDataBy(sortType, dataset) {
 
 function plotDataByAge(ridesByAge) {
     // Get width of div
-    var element = document.getElementsByClassName('bikeView-left');
+    var element = document.getElementsByClassName('viz-area');
     // console.log(element[0].clientWidth)
 
     var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)

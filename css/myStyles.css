@@ -5,28 +5,75 @@ font-family: 'PT Sans Narrow', sans-serif;*/
 
 /* GENERAL STUFF */
 html {
-   height: 100%;
+   /*height: 100%;*/
 }
 
 body {
    margin: 0px;
    display: block;
-   height: 100%;
+   /*height: 100%;*/
 }
 
 /* LAYOUT STUFF */
-.bikeView-container {
+.bikeView-page {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   min-height: 50px;
   height: 100%;
+  width: 100%;
 }
 
-.bikeView-left {
-  flex:0;
+.master-nav {
+   flex: 0;
+   background-color: yellow;
+   min-height: 30px;
+   height: 5%;
+   width: 100%;
+}
+
+.viz-container {
+   display: flex;
+   flex-direction: row;
+   width: 100%;
+   justify-content: center;
+}
+
+.left-rail {
+   flex: 0;
+   background-color: blue;
+   min-width: 10px;
+   flex-grow: 1;
+}
+
+.right-rail {
+   flex: 2;
+   background-color: blue;
+   flex-grow: 1;
+}
+
+.action-area {
+   flex: 1;
+   display: flex;
+   flex-direction: column;
+   max-width: 1000px;
+}
+
+.title-area {
+   flex: 0;
+   background-color: green;
+}
+
+.viz-area {
+  flex: 1;
   background-color: lightgray;
-  margin-right: 5px;
-  width: 75%
+  /*margin-right: 5px;*/
+  /*width: 75%*/
+}
+
+.UI-area {
+   flex: 2;
+   background-color: purple;
+   min-height: 70px;
 }
 
 .bikeView-right {
