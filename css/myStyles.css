@@ -66,8 +66,8 @@ body {
 .viz-area {
   flex: 1;
   background-color: lightgray;
-  /*margin-right: 5px;*/
-  /*width: 75%*/
+  margin-right: 0px;
+  width: 75%
 }
 
 .UI-area {
@@ -88,21 +88,9 @@ body {
   margin: 0px;
 }
 
-.bikeView-mapSection {
-   height: 75%;
-   margin-bottom: 5px;
-  }
-
-.bikeView-imageSection {
-   height: 20%;
-   background: white;
-   margin: 0;
-  }
-
-.bikeView-UIsection {
-   height: 5%;
-   background: white;
-   margin: 0;
+.transitionView-mapSection {
+   height: 100%;
+   margin-bottom: 0px;
   }
 
 /* MAP STUFF */
@@ -196,3 +184,56 @@ body {
 .ride-box {
    border-radius: 5px;
 }
+
+/* TRANSITION VIEW */
+#transitionView-streetViewImage {
+  position: fixed;
+  height: 150px;
+  width: 300px;
+  background-color: black;
+  top: 85%;
+  left: 50%;
+  opacity: 0;
+  /* bring your own prefixes */
+  transform: translate(-50%, -85%);
+}
+
+#transitionView-stationLabel {
+  position: fixed;
+  text-align: center;
+  font-size: 160%;
+  font-family: Lato;
+  height: 100px;
+  width: 300px;
+  top: 97%;
+  left: 50%;
+  background-color: white;
+  /* bring your own prefixes */
+  transform: translate(-50%, -97%);
+  opacity: 0;
+}
+
+.storypart {
+  position: absolute;
+  width: 600px;
+  height: 300px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: table;
+}
+
+.storypart p {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  font-family: Lato;
+  font-size: 190%;
+}
+
+#beginningStoryText {
+  opactiy: 0;
+}
+
+#FullScreenMapBoxMap {
+  opacity: 0;

@@ -5,16 +5,6 @@ var chart;
 var width = 850; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
 var height = 700; // THIS TOO.
 
-var boxSize = 6;
-var boxWidth = 10;
-var boxHeight = 3;
-var boxSpacing = 2;
-var boxWidthMultipler = boxWidth + boxSpacing
-var boxHeightMultipler = boxHeight + boxSpacing
-
-var xSpacing = 75;
-var ySpacing = 500;
-
 var theBikeID = 23458;
 
 // DATA THINGS
@@ -26,405 +16,82 @@ var map;
 var service;
 var currentStationCentered = 0;
 
-var bikeIDForTesting = 23458;
+var bikeIDForTesting = 23459;
 var allStations;
 var allPOIs;
 
-//DEFINE YOUR VARIABLES UP HERE
-console.log('in')
+var theIMG;
+
+
+
 
 //Gets called when the page is loaded.
 function init() {
-    chart = d3.select('#vis').append('svg')
-        .attr("width", width)
-        .attr("height", height);
-    vis = chart.append('g');
-    //PUT YOUR INIT CODE BELOW
-}
 
-updateViz('month', 'gender');
-// initMap();
+    // Create neccessary HTML objects - SW
+    var rightDiv = document.getElementsByClassName('transitionView-mapSection');
+    var mapBoxMapDiv = document.createElement('div');
+    mapBoxMapDiv.id = 'mapBoxMap';
+    rightDiv[0].appendChild(mapBoxMapDiv);
 
-//Called when the update button is clicked
-function updateViz(organizer, sorter) {
-    getRidesForBike(theBikeID).then(function(dataset) {
+    // Initialize the MapBox Map - Center on the middle of New York
+    mapboxgl.accessToken = 'pk.eyJ1IjoiY2VlZm9zdGVyIiwiYSI6ImJJdjN1V1UifQ.7unwlg_mgObhfSto2HqA-w';
+    map = new mapboxgl.Map({
+        container: 'mapBoxMap',
+        center: [-73.985130, 40.758896],
+        zoom: 14,
+        style: 'mapbox://styles/ceefoster/civshbtsd00052jqixmnpt9n6'
+    });
 
-        // console.log(dataset)
-        console.log('getting rides')
-
-        var sortedData = sortDataBy2(organizer, sorter, dataset) // returns data already parsed by customer type
-        console.log(sortedData)
-
-        plotDataByMonth(sortedData)
-
+    map.on('load', function () {
         initMap();
     });
-};
 
-//Callback for when data is loaded
-function update(rawdata) {
-    //PUT YOUR UPDATE CODE BELOW
+    var fadeInStory = document.getElementById("beginningStoryText");
+    console.log(fadeInStory);
+    fadeIn(fadeInStory);
+
+    setTimeout(fadeInMapComponents, 5000);
 
 }
 
-function byGender() {
-    updateViz('gender');
+
+function fadeOutEverything() {
+
+
+    var element1 = document.getElementById("transitionView-streetViewImage");
+    fadeOut(element1);
+
+    var element2 = document.getElementById("transitionView-stationLabel");
+    fadeOut(element2);
+
+    var element3 = document.getElementById("FullScreenMapBoxMap");
+    fadeOut(element3);
+
+    var fadeOutStory = document.getElementById("beginningStoryText");
+    fadeOutStory.style.display = "table-cell";
+    fadeIn(fadeOutStory);
+
+
 }
 
-function byType() {
-    updateViz('type');
+
+function fadeInMapComponents() {
+
+  var element1 = document.getElementById("transitionView-streetViewImage");
+  fadeIn(element1);
+
+  var element2 = document.getElementById("transitionView-stationLabel");
+  fadeIn(element2);
+
+  var element3 = document.getElementById("FullScreenMapBoxMap");
+  fadeIn(element3);
+
+  var fadeOutStory = document.getElementById("beginningStoryText");
+  fadeOut(fadeOutStory);
+
 }
 
-function byTime() {
-    updateViz('time');
-}
-
-function getRidesForBike(bikeID) {
-    var db = firebase.database();
-    var ref = db.ref("/");
-
-    //  var fullDataArray = new Object();
-    //  var fullDataArray.subscriber = []
-    //  var fullDataArray.customer = []
-
-    var fullDataArray = {
-        'subscriber': [],
-        'customer': []
-    }
-
-    return ref.child('bikes/' + bikeID + '/rides/').orderByKey().once("value").then(function(snapshot) {
-        snapshot.forEach(function(childSnapshot) {
-            var dataObject = childSnapshot.val()
-
-            var dateStamp = new Date(dataObject.startTime);
-
-            var segmentNumber = -1;
-
-            // For some reason this didn't work at all as a simple for loop.
-            if (dateStamp.getDate() <= segmentSize) {
-                segmentNumber = 0;
-            } else if (dateStamp.getDate() > segmentSize && dateStamp.getDate() <= segmentSize * 2) {
-                segmentNumber = 1;
-            } else if (dateStamp.getDate() > segmentSize * 2 && dateStamp.getDate() <= segmentSize * 3) {
-                segmentNumber = 2;
-            } else if (dateStamp.getDate() > segmentSize * 3 && dateStamp.getDate() <= segmentSize * 4) {
-                segmentNumber = 3;
-            } else if (dateStamp.getDate() > segmentSize * 3) {
-                segmentNumber = 4;
-            }
-
-            if (dataObject.user.type == 'Subscriber') {
-                var theRefactoredObject = {
-                    'rideID': childSnapshot.key,
-                    'bikeID': bikeID,
-                    'stationID': dataObject.startStation,
-                    'gender': dataObject.user.gender,
-                    'userType': dataObject.user.type,
-                    'age': 2016 - Number(dataObject.user.birthYear),
-                    'startTime': dataObject.startTime,
-                    'segment': segmentNumber
-                }
-
-                fullDataArray.subscriber.push(theRefactoredObject);
-            } else if (dataObject.user.type == 'Customer') {
-                var theRefactoredObject = {
-                    'rideID': childSnapshot.key,
-                    'bikeID': bikeID,
-                    'stationID': dataObject.startStation,
-                    'gender': 'not available',
-                    'userType': dataObject.user.type,
-                    'age': 'not available',
-                    'startTime': dataObject.startTime,
-                    'segment': segmentNumber
-                }
-
-                fullDataArray.customer.push(theRefactoredObject);
-            }
-        });
-    }).then(function() {
-        return fullDataArray
-    });
-};
-
-function sortDataBy2(organizer, sorter, dataset) {
-    // Organizer -> age/month (x axis)
-    // Sorter -> gender/time (y axis)
-
-    // Nest rides by age (for AGE AXIS)
-    if (organizer == 'age') {
-        var sortedRides = d3.nest()
-            .key(function(d) {
-                return d.age; // return age as nesting key
-            }).sortKeys(d3.ascending) // Sort by age within bin
-            .entries(dataset.subscriber);
-
-        // add option to sort by gender.
-        var validAges = 60;
-        var minAge = 16
-        var maxAge = 75
-
-        for (age = 0; age < validAges; age++) {
-            if (sortedRides[age].key == age + 16) {
-                // all is well
-            } else {
-                var myQuickKey = age + 16;
-                sortedRides.splice(age, 0, {
-                    key: String(age + 16)
-                });
-            }
-        }
-
-        sortedRides = sortedRides.slice(0, validAges);
-
-        //   for (i = 0; i <= sortedRides.length; i++) { // Iterate over all entries in sortedRides
-        //       // TODO: THIS IS WRONG.
-        //       if (sortedRides[i] !== undefined) { // make sure given level of sortedRides exists
-        //           if (sortType == 'time') { // sort by time
-        //               return sortedRides
-        //           } else { // otherwise sort by gender
-        //               sortedRides[i].values = sortedRides[i].values.sort(function(a, b) {
-        //                   return d3.ascending(a.gender, b.gender);
-        //               });
-        //           }
-        //       }
-        //   }
-
-        // Nest rides by time (for TIME AXIS)
-    } else if (organizer == 'month') {
-        // This is a beautiful sort function. This developer must be really smart.
-        var sortedRides = d3.nest() // Nest into months
-            .key(function(d) {
-                var dateObject = new Date(d.startTime); // Convert timestamp to Date object
-                console.log(dateObject.getMonth())
-                return dateObject.getMonth(); // return month from object
-            }).sortKeys(d3.ascending)
-            .key(function(d) {
-                return d.segment; // Subnest by segment
-            }).sortKeys(d3.ascending)
-            .entries(dataset.subscriber);
-
-        var validMonths = 8; // Number of continuous months with valid data
-        //   var numSegments = 5; // Number of segments per month
-        //   var segmentSize = 6; // Number of days per segment
-
-        // This makes sure that array index matches month key. If a given month has no rides, insert an empty object in that space in the array.
-        console.log(sortedRides)
-        for (month = 0; month < validMonths; month++) {
-            if (sortedRides[month] == undefined) {
-                sortedRides[month] = {
-                    key: 'x'
-                }
-            }
-            if (sortedRides[month].key == month) {
-                // all is well
-                for (seg = 0; seg < numSegments; seg++) { // Same as above, but for segments.
-                    if (sortedRides[month].values[seg] == undefined) {
-                        sortedRides[month].values[seg] = {
-                            key: 'x'
-                        }
-                    }
-                    if (sortedRides[month].values[seg].key == seg) {
-                        // all is well
-                    } else {
-                        sortedRides[month].values.splice(seg, 0, {
-                            seg: 'x'
-                        });
-                    }
-                }
-                sortedRides[month].values = sortedRides[month].values.slice(0, numSegments);
-            } else {
-                sortedRides.splice(month, 0, {
-                    month: 'x'
-                });
-            }
-        }
-    }
-
-    return sortedRides
-}
-
-function sortDataBy(sortType, dataset) {
-    var ridesByAge = d3.nest()
-        .key(function(d) {
-            return d.age;
-        })
-        .entries(dataset);
-
-    ridesByAge = ridesByAge.sort(function(a, b) {
-        return d3.ascending(a.key, b.key);
-    })
-
-    for (i = 0; i <= ridesByAge.length; i++) {
-        if (ridesByAge[i] !== undefined) {
-            if (sortType == 'type') {
-                ridesByAge[i].values = ridesByAge[i].values.sort(function(a, b) {
-                    return d3.ascending(a.userType, b.userType);
-                });
-            } else if (sortType == 'time') {
-                return ridesByAge
-            } else {
-                ridesByAge[i].values = ridesByAge[i].values.sort(function(a, b) {
-                    return d3.ascending(a.gender, b.gender);
-                });
-            }
-        }
-    }
-
-    return ridesByAge
-}
-
-function plotDataByAge(ridesByAge) {
-    // Get width of div
-    var element = document.getElementsByClassName('bikeView-left');
-    // console.log(element[0].clientWidth)
-
-    var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
-    var totalAxisWidth = (axisBoxWidth * 6) + (boxSpacing * 4)
-
-    xSpacing = (element[0].clientWidth - totalAxisWidth) / 2
-
-    // AXIS DEFINITION
-    vis.append('g')
-        .selectAll('body')
-        .data([0, 1, 2, 3, 4, 5])
-        .enter()
-        .append('rect')
-        .attr('x', function(d, i) {
-            return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)
-        })
-        .attr('y', ySpacing + 8)
-        .attr('height', 15)
-        .attr('width', axisBoxWidth)
-        .style('fill', 'black')
-
-    vis.append('g')
-        .selectAll('body')
-        .data(['16-25', '26-35', '36-45', '46-55', '56-65', '66-75'])
-        .enter()
-        .append('text')
-        .text(function(d) {
-            return d;
-        })
-        .attr('x', function(d, i) {
-            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + 10
-        })
-        .attr('y', ySpacing + 20)
-        .attr('height', 25)
-        .attr('width', axisBoxWidth)
-        .style('fill', 'white')
-        .style('font-size', '14px')
-
-    for (i = 16 - 16; i <= 75 - 16; i++) {
-        var svg = d3.select('svg');
-
-        if (ridesByAge[i].values !== undefined) {
-
-            // Gender Dist
-            vis.append('g')
-                .selectAll('body')
-                .data(ridesByAge[i].values)
-                .enter()
-                .append('rect')
-                .attr('x', ((i + 0) * boxWidthMultipler) + xSpacing + 1) // circle -> cx
-                .attr('y', function(d, j) { // circle -> cy
-                    //   console.log(d)
-                    //   console.log(j)
-                    // console.log(ySpacing - (j * boxHeightMultipler))
-                    return ySpacing - (j * boxHeightMultipler);
-                })
-                .attr('height', boxHeight) // circle -> r -> boxSize/2
-                .attr('width', boxWidth)
-                .attr("class", function(d, i) {
-                    if (d.gender == 1) {
-                        var genderClass = 'case-male';
-                    } else {
-                        var genderClass = 'case-female';
-                    }
-
-                    var rectClass = 'age' + d.age;
-
-                    return 'ride-box ' + rectClass + ' ' + genderClass
-                })
-        }
-    }
-}
-
-function plotDataByMonth(sortedData) {
-    var axisBoxWidth = (5 * boxWidth) + (4 * boxSpacing)
-    var totalAxisWidth = (axisBoxWidth * 12) + (boxSpacing * 10)
-
-    // AXIS DEFINITION
-    vis.append('g')
-        .selectAll('body')
-        .data([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
-        .enter()
-        .append('rect')
-        .attr('x', function(d, i) {
-            return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)
-        })
-        .attr('y', ySpacing + 8)
-        .attr('height', 15)
-        .attr('width', axisBoxWidth)
-        .style('fill', 'black')
-
-    vis.append('g')
-        .selectAll('body')
-        .data(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
-        .enter()
-        .append('text')
-        .text(function(d) {
-            return d;
-        })
-        .attr('x', function(d, i) {
-            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + 10
-        })
-        .attr('y', ySpacing + 20)
-        .attr('height', 25)
-        .attr('width', axisBoxWidth)
-        .style('fill', 'white')
-        .style('font-size', '14px')
-
-    console.log(sortedData)
-    for (month = 0; month < validMonths; month++) {
-        var svg = d3.select('svg');
-        if (sortedData[month].values !== undefined) {
-            for (seg = 0; seg < numSegments; seg++) {
-                // console.log(sortedData[month].values[seg].values)
-                if (sortedData[month].values[seg].values !== undefined) {
-                    console.log('hello')
-                        // Gender Dist
-                    var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
-                        //   var xLoc = ((month * seg * boxWidthMultipler) + xSpacing + 1)
-                    vis.append('g')
-                        .selectAll('body')
-                        .data(sortedData[month].values[seg].values)
-                        .enter()
-                        .append('rect')
-                        .attr('x', xLoc) // circle -> cx
-                        .attr('y', function(d, j) { // circle -> cy
-                            //   console.log(d)
-                            //   console.log(j)
-                            // console.log(ySpacing - (j * boxHeightMultipler))
-                            return ySpacing - (j * boxHeightMultipler);
-                        })
-                        .attr('height', boxHeight) // circle -> r -> boxSize/2
-                        .attr('width', boxWidth)
-                        .attr("class", function(d, i) {
-                            if (d.gender == 1) {
-                                var genderClass = 'case-male';
-                            } else {
-                                var genderClass = 'case-female';
-                            }
-
-                            var rectClass = 'month' + month + ' segment' + seg + ' age' + d.age;
-
-                            return 'ride-box ' + rectClass + ' ' + genderClass
-                        })
-                }
-            }
-        }
-    }
-}
 
 /* Notes
 Page Loads
@@ -434,47 +101,39 @@ Get POI for each Station
 Get Images for each POI
 */
 
+///////////////////////////////////////////////////////////////////////////////
+// EVERYTHING
+
 function initMap() {
-    console.log('foo')
-        // Assumes Birth Station is listed first
-        //  var innerDiv = document.createElement('div');
-        // innerDiv.className = 'mapBoxMap';
-        //  document.getElementsByTagName('body')[0].appendChild(innerDiv);
 
-    var allStations = new Array();
-    var allPOIs = new Array();
+  allStations = new Array();
+  allPOIs = new Array();
 
-    var stationObjects = demoSetupCode();
+  setTimeout(flyToNextStation, 8000);
+  setTimeout(flyToNextStation, 12000);
+  setTimeout(flyToNextStation, 16000);
+  setTimeout(flyToNextStation, 20000);
 
-    // Create neccessary HTML objects - SW
-    var rightDiv = document.getElementsByClassName('bikeView-mapSection');
-    var mapBoxMapDiv = document.createElement('div');
-    mapBoxMapDiv.id = 'mapBoxMap';
-    rightDiv[0].appendChild(mapBoxMapDiv);
-
-    var bottomLeftDiv = document.getElementsByClassName('bikeView-UIsection');
-    var flyButtonObject = document.createElement('button');
-    flyButtonObject.id = 'flyButton';
-    var btnText = document.createTextNode('Move to Next Station');
-    flyButtonObject.appendChild(btnText);
-    bottomLeftDiv[0].appendChild(flyButtonObject);
-
-    // Initialize the MapBox Map
-    // Center on the middle of New York
-    mapboxgl.accessToken = 'pk.eyJ1IjoiY2VlZm9zdGVyIiwiYSI6ImJJdjN1V1UifQ.7unwlg_mgObhfSto2HqA-w';
-    var map = new mapboxgl.Map({
-        container: 'mapBoxMap',
-        center: [-73.985130, 40.758896],
-        zoom: 14,
-        style: 'mapbox://styles/ceefoster/civshbtsd00052jqixmnpt9n6'
-    });
-
+  setTimeout(fadeOutEverything, 25000);
 
     //Get Birth Station
     getBirthStationForBike(bikeIDForTesting).then(function(birthStationID) {
 
         getStationForID(birthStationID).then(function(stationData) {
+
             allStations.push(stationData);
+
+            //Now that we have the birth station, center the map.
+            map.flyTo({
+
+                center: [
+                    allStations[0].longitude,
+                    allStations[0].latitude
+                ]
+            });
+
+            document.getElementById('transitionView-stationLabel').innerHTML = allStations[0].name;
+
             //console.log("Station Data" + JSON.stringify(stationData));
             //console.log("getting the station latitude " + stationData.latitude)
             //for each station, step through and grab a POI near it from Foursquare
@@ -526,50 +185,38 @@ function initMap() {
             })
         })
     })
+}
 
-    //Code for the Fly Button
-    document.getElementById('flyButton').addEventListener('click', function() {
 
-        currentStationCentered = currentStationCentered + 1;
-        map.flyTo({
-            speed: 0.4, // make the flying slow
-            curve: 1, // change the speed at which it zooms out
-            center: [
-                allStations[currentStationCentered].longitude,
-                allStations[currentStationCentered].latitude
-            ]
-        });
 
-        findImageForCoords(allStations[currentStationCentered].latitude, allStations[currentStationCentered].longitude);
 
-    });
+
+///////////////////////////////////////////////////////////////////////////////
+// FLY FUNCTION
+
+function flyToNextStation() {
+
+  currentStationCentered = currentStationCentered + 1;
+
+  map.flyTo({
+      speed: 0.4, // make the flying slow
+      curve: 1, // change the speed at which it zooms out
+      center: [
+          allStations[currentStationCentered].longitude,
+          allStations[currentStationCentered].latitude
+      ]
+  });
+
+  document.getElementById('transitionView-stationLabel').innerHTML = allStations[currentStationCentered].name;
+
+  findImageForCoords(allStations[currentStationCentered].latitude, allStations[currentStationCentered].longitude);
 
 }
 
-function demoSetupCode() {
 
-    var station1Example = '{"details":{"latitude":"40.74854862","longitude":"-73.98808416","name":"Broadway & W 32 St","stationNumber":"498"}}';
 
-    var station2Example = '{"details":{"latitude":"40.7390169121","longitude":"-74.0026376103","name":"Greenwich Ave & 8 Ave","stationNumber":"284"}}';
-
-    var station3Example = '{"details":{"latitude":"40.6845683","longitude":"-73.95881081","name":"Monroe St & Classon Ave","stationNumber":"289"}}';
-
-    var station4Example = '{"details":{"latitude":"40.72953837","longitude":"-73.98426726","name":"E 11 St & 1 Ave","stationNumber":"326"}}';
-
-    var station5Example = '{"details":{"latitude":"40.7047177","longitude":"-74.00926027","name":"Pearl St & Hanover Square","stationNumber":"415"}}';
-
-    var s1parsed = JSON.parse(station1Example);
-    var s2parsed = JSON.parse(station2Example);
-    var s3parsed = JSON.parse(station3Example);
-    var s4parsed = JSON.parse(station4Example);
-    var s5parsed = JSON.parse(station5Example);
-
-    //Combine into an array.
-    var stationObjectsArray = [s1parsed, s2parsed, s3parsed, s4parsed, s5parsed];
-
-    return stationObjectsArray
-
-}
+///////////////////////////////////////////////////////////////////////////////
+// FIREBASE CALLS - GET BIRTH STATION, GET POPULAR STATION IDS, GET STATION FOR ID
 
 function getBirthStationForBike(bikeID) {
     var db = firebase.database();
@@ -594,6 +241,26 @@ function getBirthStationForBike(bikeID) {
     });
 };
 
+function getPopularStationIDsForBike(bikeID) {
+    var db = firebase.database();
+    var ref = db.ref("/");
+
+    var stations = new Array();
+    return ref.child('bikes/' + bikeID + '/stations/').orderByValue().limitToFirst(4).once("value").then(function(snapshot) {
+
+        snapshot.forEach(function(childSnapshot) {
+
+            var dataObject = childSnapshot.val();
+            console.log("see this - " + childSnapshot.key);
+            stations.push(childSnapshot.key);
+
+        });
+
+    }).then(function() {
+        return stations;
+    });
+};
+
 function getStationForID(stationID) {
     var db = firebase.database();
     var ref = db.ref("/");
@@ -615,26 +282,10 @@ function getStationForID(stationID) {
     });
 };
 
-function getPopularStationIDsForBike(bikeID) {
-    var db = firebase.database();
-    var ref = db.ref("/");
 
-    var stations = new Array();
-    return ref.child('bikes/' + bikeID + '/stations/').orderByValue().limitToFirst(4).once("value").then(function(snapshot) {
 
-        snapshot.forEach(function(childSnapshot) {
-
-            var dataObject = childSnapshot.val();
-            console.log("see this - " + childSnapshot.key);
-            stations.push(childSnapshot.key);
-
-        });
-
-    }).then(function() {
-        return stations;
-    });
-};
-
+///////////////////////////////////////////////////////////////////////////////
+// GET POIs NEAR A STATION - USING FOURSQUARE API
 
 function getPOIForStation(station) {
 
@@ -681,6 +332,8 @@ function getPOIForStation(station) {
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+// CREATE MARKERS FOR MAPBOX FROM FIREBASE OBJECTS
 
 
 function getMarkers(theStations) {
@@ -763,68 +416,47 @@ function getMarkers(theStations) {
 
 }
 
-function demoSetupCode() {
 
-    var station1Example = '{"details":{"latitude":"40.74854862","longitude":"-73.98808416","name":"Broadway & W 32 St","stationNumber":"498"}}';
 
-    var station2Example = '{"details":{"latitude":"40.7390169121","longitude":"-74.0026376103","name":"Greenwich Ave & 8 Ave","stationNumber":"284"}}';
 
-    var station3Example = '{"details":{"latitude":"40.6845683","longitude":"-73.95881081","name":"Monroe St & Classon Ave","stationNumber":"289"}}';
-
-    var station4Example = '{"details":{"latitude":"40.72953837","longitude":"-73.98426726","name":"E 11 St & 1 Ave","stationNumber":"326"}}';
-
-    var station5Example = '{"details":{"latitude":"40.7047177","longitude":"-74.00926027","name":"Pearl St & Hanover Square","stationNumber":"415"}}';
-
-    var s1parsed = JSON.parse(station1Example);
-    var s2parsed = JSON.parse(station2Example);
-    var s3parsed = JSON.parse(station3Example);
-    var s4parsed = JSON.parse(station4Example);
-    var s5parsed = JSON.parse(station5Example);
-
-    //Combine into an array.
-    var stationObjectsArray = [s1parsed, s2parsed, s3parsed, s4parsed, s5parsed];
-
-    return stationObjectsArray
-
-}
-
-function findPOINear(station) {
-
-    // Create google maps location object
-    var stationLocation = new google.maps.LatLng(station.latitude, station.longitude);
-
-    // Create & initialize Google Map with Existing HTML Element "map"
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: stationLocation,
-        zoom: 15
-    });
-
-    // Specify parameters for the Places Search - location, radius, type.
-    // supported types - https://developers.google.com/places/supported_types
-    var request = {
-        location: stationLocation,
-        radius: '500',
-        types: ['park']
-    };
-
-    // Perform Places Search & run callback on completion
-    //  service = new google.maps.places.PlacesService(map);
-    //  service.nearbySearch(request, foundStationPOIs);
-
-}
+///////////////////////////////////////////////////////////////////////////////
+// GOOGLE STREET VIEW IMAGE
 
 function findImageForCoords(latitude, longitude) {
 
-    var img = document.createElement("img");
-    img.className = 'theStationImage'
-    img.src = "https://maps.googleapis.com/maps/api/streetview?size=640x180&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
-    img.width = 500;
-    img.height = 200;
+    if (!theIMG) {
+      theIMG = document.createElement("IMG");
+    }
 
-    // This next line will just add it to the <body> tag
-    //  var visDiv = document.getElementById('vis');
-    //  var buttonDiv = document.getElementById('flyButton');
-    var imageDiv = document.getElementsByClassName('bikeView-imageSection');
-    imageDiv[0].append(img);
+    theIMG.src = "https://maps.googleapis.com/maps/api/streetview?size=300x150&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
 
+    var img = document.getElementById('transitionView-streetViewImage').appendChild(theIMG);
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// HELPER FUNCTIONS
+
+function fadeIn(el) {
+  el.style.opacity = 0;
+  var tick = function () {
+    el.style.opacity = +el.style.opacity + 0.01;
+    if (+el.style.opacity < 1) {
+        (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16)
+    }
+  };
+  tick();
+}
+
+function fadeOut(el){
+  el.style.opacity = 1;
+
+  (function fade() {
+    if ((el.style.opacity -= .1) < 0) {
+      el.style.display = "none";
+    } else {
+      requestAnimationFrame(fade);
+    }
+  })();
 }

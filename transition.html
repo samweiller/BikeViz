@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>CitiBikeViz</title>
-    <link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|PT+Sans|PT+Sans+Narrow" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|PT+Sans|PT+Sans+Narrow|Lato" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
     <script>
         // Initialize Firebase
@@ -30,14 +30,13 @@
 </head>
 
 <body onload="init()">
-    <div class='bikeView-container'>
-        <section class="bikeView-left" id="vis"></section>
-        <section class="bikeView-right">
-            <div class="col bikeView-mapSection"></div>
-            <div class="col bikeView-imageSection"></div>
-            <div class="col bikeView-UIsection"></div>
-        </section>
+    <div class="transitionView-mapSection" id="FullScreenMapBoxMap"></div>
+    <p id="transitionView-stationLabel">Penn Station</p>
+    <div id="transitionView-streetViewImage"></div>
 
+    <div class="storypart">
+        <p id="beginningStoryText">This is the story about bikes.  Bikes that have been places.  Lots of places.  Like all over New York.  Do you know how large New York is? It's pretty big.  So that's pretty cool.</p>
+    </div>
         <!-- init() method defined in coffee.js-->
 
 </body>
