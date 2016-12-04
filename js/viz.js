@@ -15,7 +15,7 @@ var boxHeightMultipler = boxHeight + boxSpacing
 var xSpacing = 75;
 var ySpacing = 500;
 
-var theBikeID = 23456;
+var theBikeID = 23458;
 
 // DATA THINGS
 validMonths = 8;
@@ -95,8 +95,6 @@ function getRidesForBike(bikeID) {
 
             var dateStamp = new Date(dataObject.startTime);
 
-            // var numSegments = 5; // Number of segments per month
-            // var segmentSize = 6; // Number of days per segment
             var segmentNumber = -1;
 
             // For some reason this didn't work at all as a simple for loop.
