@@ -389,12 +389,12 @@ function plotDataByMonth(sortedData) {
         var svg = d3.select('svg');
         if (sortedData[month].values !== undefined) {
             for (seg = 0; seg < numSegments; seg++) {
-               // console.log(sortedData[month].values[seg].values)
+                // console.log(sortedData[month].values[seg].values)
                 if (sortedData[month].values[seg].values !== undefined) {
-                   console.log('hello')
-                    // Gender Dist
+                    console.log('hello')
+                        // Gender Dist
                     var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
-                  //   var xLoc = ((month * seg * boxWidthMultipler) + xSpacing + 1)
+                        //   var xLoc = ((month * seg * boxWidthMultipler) + xSpacing + 1)
                     vis.append('g')
                         .selectAll('body')
                         .data(sortedData[month].values[seg].values)
@@ -473,72 +473,62 @@ function initMap() {
     //Get Birth Station
     getBirthStationForBike(bikeIDForTesting).then(function(birthStationID) {
 
-      getStationForID(birthStationID).then(function(stationData) {
-          allStations.push(stationData);
-          //console.log("Station Data" + JSON.stringify(stationData));
-          //console.log("getting the station latitude " + stationData.latitude)
-          //for each station, step through and grab a POI near it from Foursquare
+        getStationForID(birthStationID).then(function(stationData) {
+            allStations.push(stationData);
+            //console.log("Station Data" + JSON.stringify(stationData));
+            //console.log("getting the station latitude " + stationData.latitude)
+            //for each station, step through and grab a POI near it from Foursquare
 
-          //TODO getPOIForStation(stationData);
-    // Once the map loads, add the Markers from the GeoJSON File
-    map.on('style.load', function() {
+            //TODO getPOIForStation(stationData);
+            // Once the map loads, add the Markers from the GeoJSON File
+            //   map.on('style.load', function() {
+            getPopularStationIDsForBike(bikeIDForTesting).then(function(stationsList) {
+                console.log("popular station IDs - " + stationsList);
 
-          //getStationForID(3230).then(function(stationReturned) {
-          //    console.log("returned Object" + JSON.stringify(stationReturned));
-          //    stations.push(stationReturned);
-          //});
+                for (var i = 0; i < stationsList.length; i++) {
+                    if (i == (stationsList.length - 1)) {
+                        getStationForID(stationsList[i]).then(function(theStation) {
+                            allStations.push(theStation);
 
-          getPopularStationIDsForBike(bikeIDForTesting).then(function(stationsList) {
-              console.log("popular station IDs - " + stationsList);
+                            console.log("all da stations" + JSON.stringify(allStations));
 
-              for (var i = 0; i < stationsList.length; i++) {
-                  if (i == (stationsList.length - 1)) {
-                    getStationForID(stationsList[i]).then(function(theStation) {
-                        allStations.push(theStation);
+                            map.addSource("markers", {
+                                "type": "geojson",
+                                "data": getMarkers(allStations)
+                            });
 
-                        console.log("all da stations" + JSON.stringify(allStations));
+                            map.addLayer({
+                                "id": "markers",
+                                "type": "symbol",
+                                "source": "markers",
+                                "layout": {
+                                    "icon-image": "{marker-symbol}-15",
+                                    "text-field": "{title}",
+                                    "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                                    "text-offset": [0, 0.6],
+                                    "text-anchor": "top"
+                                }
+                            });
 
-                        map.addSource("markers", {
-                            "type": "geojson",
-                            "data": getMarkers(allStations)
+                            // Find Streetview Images for a Lat & Long Pair
+                            findImageForCoords(allStations[0].latitude, allStations[0].longitude);
                         });
 
-                        map.addLayer({
-                            "id": "markers",
-                            "type": "symbol",
-                            "source": "markers",
-                            "layout": {
-                                "icon-image": "{marker-symbol}-15",
-                                "text-field": "{title}",
-                                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-                                "text-offset": [0, 0.6],
-                                "text-anchor": "top"
-                            }
+                    } else {
+
+                        getStationForID(stationsList[i]).then(function(theStation) {
+                            allStations.push(theStation);
                         });
 
-                        // Find Streetview Images for a Lat & Long Pair
-                        findImageForCoords(allStations[0].latitude, allStations[0].longitude);
+                    }
 
-                    });
-
-                  } else {
-
-                    getStationForID(stationsList[i]).then(function(theStation) {
-                        allStations.push(theStation);
-                    });
-
-                  }
-
-              }
-    document.getElementById('flyButton').addEventListener('click', function() {
-          });
-
-      });
-    });
-
+                }
+            })
+        })
+    })
 
     //Code for the Fly Button
-    document.getElementById('flyButton').addEventListener('click', function () {
+    document.getElementById('flyButton').addEventListener('click', function() {
 
         currentStationCentered = currentStationCentered + 1;
         map.flyTo({
@@ -546,7 +536,7 @@ function initMap() {
             curve: 1, // change the speed at which it zooms out
             center: [
                 allStations[currentStationCentered].longitude,
-                allStations[currentStationCentered].latitude]
+                allStations[currentStationCentered].latitude
             ]
         });
 
@@ -590,8 +580,8 @@ function getBirthStationForBike(bikeID) {
 
         snapshot.forEach(function(childSnapshot) {
 
-        var dataObject = childSnapshot.val();
-        console.log("see this -" + dataObject.startStation);
+            var dataObject = childSnapshot.val();
+            console.log("see this -" + dataObject.startStation);
 
             if (birthStation == "") {
                 birthStation = dataObject.startStation;
@@ -611,14 +601,14 @@ function getStationForID(stationID) {
     var stationObject = new Object();
     return ref.child('stations/' + stationID + '/details/').orderByKey().once("value").then(function(snapshot) {
 
-            var latitude = snapshot.val();
-            console.log("hey - " + JSON.stringify(latitude));
+        var latitude = snapshot.val();
+        console.log("hey - " + JSON.stringify(latitude));
 
-            var dataObject = snapshot.val()
+        var dataObject = snapshot.val()
 
-            if (dataObject.latitude) {
-                stationObject = dataObject;
-            }
+        if (dataObject.latitude) {
+            stationObject = dataObject;
+        }
 
     }).then(function() {
         return stationObject;
@@ -632,13 +622,13 @@ function getPopularStationIDsForBike(bikeID) {
     var stations = new Array();
     return ref.child('bikes/' + bikeID + '/stations/').orderByValue().limitToFirst(4).once("value").then(function(snapshot) {
 
-      snapshot.forEach(function(childSnapshot) {
+        snapshot.forEach(function(childSnapshot) {
 
-        var dataObject = childSnapshot.val();
-        console.log("see this - " + childSnapshot.key);
-        stations.push(childSnapshot.key);
+            var dataObject = childSnapshot.val();
+            console.log("see this - " + childSnapshot.key);
+            stations.push(childSnapshot.key);
 
-      });
+        });
 
     }).then(function() {
         return stations;
@@ -648,45 +638,45 @@ function getPopularStationIDsForBike(bikeID) {
 
 function getPOIForStation(station) {
 
-  console.log("station object for POI - " + JSON.stringify(station));
-  var latitude = station.latitude;
-  var longitude = station.longitude;
-  console.log("the latitude " + latitude);
-  console.log("the lng " + longitude);
+    console.log("station object for POI - " + JSON.stringify(station));
+    var latitude = station.latitude;
+    var longitude = station.longitude;
+    console.log("the latitude " + latitude);
+    console.log("the lng " + longitude);
 
-  var fullURL = "https://api.foursquare.com/v2/venues/search?client_id=WGL01RK4VNICIVWY2R2HLI2QW0OWUCF0JFKB0TM1G4N1IF1K&client_secret=JP35VVFSRCL034AA45Y5VTZ55YGH510ZHXEIM5XKCMI5IW4H&v=20130815&ll=" + latitude + "," + longitude + "&radius=400&intent=browse";
-  console.log("theURL is " + fullURL);
+    var fullURL = "https://api.foursquare.com/v2/venues/search?client_id=WGL01RK4VNICIVWY2R2HLI2QW0OWUCF0JFKB0TM1G4N1IF1K&client_secret=JP35VVFSRCL034AA45Y5VTZ55YGH510ZHXEIM5XKCMI5IW4H&v=20130815&ll=" + latitude + "," + longitude + "&radius=400&intent=browse";
+    console.log("theURL is " + fullURL);
 
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.onreadystatechange = function() {
-      if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-          //console.log(xmlHttp.responseText);
-          var results = JSON.parse(xmlHttp.responseText);
-          var allVenues = results.response.venues;
-          var highestCheckinVenueIndex = 0;
-          var bestCheckinValue = 0;
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            //console.log(xmlHttp.responseText);
+            var results = JSON.parse(xmlHttp.responseText);
+            var allVenues = results.response.venues;
+            var highestCheckinVenueIndex = 0;
+            var bestCheckinValue = 0;
 
-          for (var i = 0; i < allVenues.length; i++) {
-            var checkinsCount = allVenues[i].stats.checkinsCount;
-            if (checkinsCount > bestCheckinValue) {
-              bestCheckinValue = checkinsCount;
-              highestCheckinVenueIndex = i;
+            for (var i = 0; i < allVenues.length; i++) {
+                var checkinsCount = allVenues[i].stats.checkinsCount;
+                if (checkinsCount > bestCheckinValue) {
+                    bestCheckinValue = checkinsCount;
+                    highestCheckinVenueIndex = i;
+                }
             }
-          }
 
-          var latitude = allVenues[highestCheckinVenueIndex].location.lat;
-          var longitude = allVenues[highestCheckinVenueIndex].location.lng;
+            var latitude = allVenues[highestCheckinVenueIndex].location.lat;
+            var longitude = allVenues[highestCheckinVenueIndex].location.lng;
 
-          console.log("the highest value " + bestCheckinValue + "with index " + highestCheckinVenueIndex + "with lat and lng" + latitude + longitude);
+            console.log("the highest value " + bestCheckinValue + "with index " + highestCheckinVenueIndex + "with lat and lng" + latitude + longitude);
 
-          allPOIs.push(allVenues[highestCheckinVenueIndex]);
+            allPOIs.push(allVenues[highestCheckinVenueIndex]);
 
-          //console.log(allPlaces);
-          //console.log("tipcount" + allPlaces.response.venues[1].stats.checkinsCount);
+            //console.log(allPlaces);
+            //console.log("tipcount" + allPlaces.response.venues[1].stats.checkinsCount);
         }
-  }
-  xmlHttp.open("GET", fullURL, true); // true for asynchronous
-  xmlHttp.send(null);
+    }
+    xmlHttp.open("GET", fullURL, true); // true for asynchronous
+    xmlHttp.send(null);
 
 }
 
@@ -695,8 +685,8 @@ function getPOIForStation(station) {
 
 function getMarkers(theStations) {
 
-   console.log("check all this " + theStations);
-   console.log("check all this " + JSON.stringify(theStations));
+    console.log("check all this " + theStations);
+    console.log("check all this " + JSON.stringify(theStations));
 
     var station1Lat = parseFloat(theStations[0].latitude);
     var station1Lng = parseFloat(theStations[0].longitude);
@@ -716,63 +706,59 @@ function getMarkers(theStations) {
 
 
     var thisTest = {
-                "type": "FeatureCollection",
-                "features": [{
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [station1Lng, station1Lat]
-                    },
-                    "properties": {
-                        "title": theStations[0].name,
-                        "marker-symbol": "star"
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [station2Lng, station2Lat]
-                    },
-                    "properties": {
-                        "title": theStations[1].name,
-                        "marker-symbol": "bicycle"
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [station3Lng, station3Lat]
-                    },
-                    "properties": {
-                        "title": theStations[2].name,
-                        "marker-symbol": "bicycle"
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [station4Lng, station4Lat]
-                    },
-                    "properties": {
-                        "title": theStations[3].name,
-                        "marker-symbol": "bicycle"
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [station5Lng, station5Lat]
-                    },
-                    "properties": {
-                        "title": theStations[4].name,
-                        "marker-symbol": "bicycle"
-                    }
-                }]
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [station1Lng, station1Lat]
+            },
+            "properties": {
+                "title": theStations[0].name,
+                "marker-symbol": "star"
             }
+        }, {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [station2Lng, station2Lat]
+            },
+            "properties": {
+                "title": theStations[1].name,
+                "marker-symbol": "bicycle"
+            }
+        }, {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [station3Lng, station3Lat]
+            },
+            "properties": {
+                "title": theStations[2].name,
+                "marker-symbol": "bicycle"
+            }
+        }, {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [station4Lng, station4Lat]
+            },
+            "properties": {
+                "title": theStations[3].name,
+                "marker-symbol": "bicycle"
+            }
+        }, {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [station5Lng, station5Lat]
+            },
+            "properties": {
+                "title": theStations[4].name,
+                "marker-symbol": "bicycle"
+            }
+        }]
+    }
     return thisTest;
 
 }
