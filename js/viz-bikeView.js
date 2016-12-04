@@ -1,26 +1,26 @@
-// FIREBASE INIT
-
 var chart;
 
-var width = 850; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 700; // THIS TOO.
+var width = 1300; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
+var height = 600; // THIS TOO.
 
 var boxSize = 6;
-var boxWidth = 10;
-var boxHeight = 3;
+var boxWidth = 9;
+var boxHeight = 4;
 var boxSpacing = 2;
 var boxWidthMultipler = boxWidth + boxSpacing
 var boxHeightMultipler = boxHeight + boxSpacing
+var boxRadius = 0;
 
-var xSpacing = 75;
-var ySpacing = 500;
+var xSpacing = 50;
+var ySpacing = 350;
 
-var theBikeID = 23458;
+var theBikeID = getRandomBikeNumber();
+console.log(theBikeID)
 
 // DATA THINGS
-validMonths = 8;
-var numSegments = 5; // Number of segments per month
-var segmentSize = 6; // Number of days per segment
+var validMonths = 8;
+var numSegments = 10; // Number of segments per month
+var segmentSize = 3; // Number of days per segment
 
 var map;
 var service;
@@ -36,14 +36,12 @@ console.log('in')
 //Gets called when the page is loaded.
 function init() {
     chart = d3.select('#vis').append('svg')
-        .attr("width", width)
-        .attr("height", height);
+        .attr('width', width)
+        .attr('height', height);
     vis = chart.append('g');
-    //PUT YOUR INIT CODE BELOW
 }
 
 updateViz('month', 'gender');
-// initMap();
 
 //Called when the update button is clicked
 function updateViz(organizer, sorter) {
@@ -52,19 +50,17 @@ function updateViz(organizer, sorter) {
         // console.log(dataset)
         console.log('getting rides')
 
-        var sortedData = sortDataBy2(organizer, sorter, dataset) // returns data already parsed by customer type
+        var sortedData = sortDataBy2(organizer, sorter, dataset, 'subscriber') // returns data already parsed by customer type
+        var customerData = sortDataBy2(organizer, sorter, dataset, 'customer')
         console.log(sortedData)
 
-        plotDataByMonth(sortedData)
-
-        initMap();
+        plotDataByMonth(sortedData, customerData)
     });
 };
 
 //Callback for when data is loaded
 function update(rawdata) {
     //PUT YOUR UPDATE CODE BELOW
-
 }
 
 function byGender() {
@@ -82,11 +78,6 @@ function byTime() {
 function getRidesForBike(bikeID) {
     var db = firebase.database();
     var ref = db.ref("/");
-
-    //  var fullDataArray = new Object();
-    //  var fullDataArray.subscriber = []
-    //  var fullDataArray.customer = []
-
     var fullDataArray = {
         'subscriber': [],
         'customer': []
@@ -109,8 +100,18 @@ function getRidesForBike(bikeID) {
                 segmentNumber = 2;
             } else if (dateStamp.getDate() > segmentSize * 3 && dateStamp.getDate() <= segmentSize * 4) {
                 segmentNumber = 3;
-            } else if (dateStamp.getDate() > segmentSize * 3) {
+            } else if (dateStamp.getDate() > segmentSize * 4 && dateStamp.getDate() <= segmentSize * 5) {
                 segmentNumber = 4;
+            } else if (dateStamp.getDate() > segmentSize * 5 && dateStamp.getDate() <= segmentSize * 6) {
+                segmentNumber = 5;
+            } else if (dateStamp.getDate() > segmentSize * 6 && dateStamp.getDate() <= segmentSize * 7) {
+                segmentNumber = 6;
+            } else if (dateStamp.getDate() > segmentSize * 7 && dateStamp.getDate() <= segmentSize * 8) {
+                segmentNumber = 7;
+            } else if (dateStamp.getDate() > segmentSize * 8 && dateStamp.getDate() <= segmentSize * 9) {
+                segmentNumber = 8;
+            } else if (dateStamp.getDate() > segmentSize * 9) {
+                segmentNumber = 9;
             }
 
             if (dataObject.user.type == 'Subscriber') {
@@ -146,7 +147,7 @@ function getRidesForBike(bikeID) {
     });
 };
 
-function sortDataBy2(organizer, sorter, dataset) {
+function sortDataBy2(organizer, sorter, dataset, userType) {
     // Organizer -> age/month (x axis)
     // Sorter -> gender/time (y axis)
 
@@ -176,22 +177,10 @@ function sortDataBy2(organizer, sorter, dataset) {
 
         sortedRides = sortedRides.slice(0, validAges);
 
-        //   for (i = 0; i <= sortedRides.length; i++) { // Iterate over all entries in sortedRides
-        //       // TODO: THIS IS WRONG.
-        //       if (sortedRides[i] !== undefined) { // make sure given level of sortedRides exists
-        //           if (sortType == 'time') { // sort by time
-        //               return sortedRides
-        //           } else { // otherwise sort by gender
-        //               sortedRides[i].values = sortedRides[i].values.sort(function(a, b) {
-        //                   return d3.ascending(a.gender, b.gender);
-        //               });
-        //           }
-        //       }
-        //   }
-
         // Nest rides by time (for TIME AXIS)
     } else if (organizer == 'month') {
         // This is a beautiful sort function. This developer must be really smart.
+        if (userType == 'subscriber') {
         var sortedRides = d3.nest() // Nest into months
             .key(function(d) {
                 var dateObject = new Date(d.startTime); // Convert timestamp to Date object
@@ -202,10 +191,20 @@ function sortDataBy2(organizer, sorter, dataset) {
                 return d.segment; // Subnest by segment
             }).sortKeys(d3.ascending)
             .entries(dataset.subscriber);
+         } else if (userType == 'customer') {
+            var sortedRides = d3.nest() // Nest into months
+                .key(function(d) {
+                    var dateObject = new Date(d.startTime); // Convert timestamp to Date object
+                    console.log(dateObject.getMonth())
+                    return dateObject.getMonth(); // return month from object
+                }).sortKeys(d3.ascending)
+                .key(function(d) {
+                    return d.segment; // Subnest by segment
+                }).sortKeys(d3.ascending)
+                .entries(dataset.customer);
+         }
 
         var validMonths = 8; // Number of continuous months with valid data
-        //   var numSegments = 5; // Number of segments per month
-        //   var segmentSize = 6; // Number of days per segment
 
         // This makes sure that array index matches month key. If a given month has no rides, insert an empty object in that space in the array.
         console.log(sortedRides)
@@ -243,40 +242,9 @@ function sortDataBy2(organizer, sorter, dataset) {
     return sortedRides
 }
 
-function sortDataBy(sortType, dataset) {
-    var ridesByAge = d3.nest()
-        .key(function(d) {
-            return d.age;
-        })
-        .entries(dataset);
-
-    ridesByAge = ridesByAge.sort(function(a, b) {
-        return d3.ascending(a.key, b.key);
-    })
-
-    for (i = 0; i <= ridesByAge.length; i++) {
-        if (ridesByAge[i] !== undefined) {
-            if (sortType == 'type') {
-                ridesByAge[i].values = ridesByAge[i].values.sort(function(a, b) {
-                    return d3.ascending(a.userType, b.userType);
-                });
-            } else if (sortType == 'time') {
-                return ridesByAge
-            } else {
-                ridesByAge[i].values = ridesByAge[i].values.sort(function(a, b) {
-                    return d3.ascending(a.gender, b.gender);
-                });
-            }
-        }
-    }
-
-    return ridesByAge
-}
-
 function plotDataByAge(ridesByAge) {
     // Get width of div
-    var element = document.getElementsByClassName('bikeView-left');
-    // console.log(element[0].clientWidth)
+    var element = document.getElementsByClassName('viz-area');
 
     var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
     var totalAxisWidth = (axisBoxWidth * 6) + (boxSpacing * 4)
@@ -327,9 +295,6 @@ function plotDataByAge(ridesByAge) {
                 .append('rect')
                 .attr('x', ((i + 0) * boxWidthMultipler) + xSpacing + 1) // circle -> cx
                 .attr('y', function(d, j) { // circle -> cy
-                    //   console.log(d)
-                    //   console.log(j)
-                    // console.log(ySpacing - (j * boxHeightMultipler))
                     return ySpacing - (j * boxHeightMultipler);
                 })
                 .attr('height', boxHeight) // circle -> r -> boxSize/2
@@ -345,18 +310,20 @@ function plotDataByAge(ridesByAge) {
 
                     return 'ride-box ' + rectClass + ' ' + genderClass
                 })
+                .attr("rx", boxRadius)
+                .attr("ry", boxRadius)
         }
     }
 }
 
-function plotDataByMonth(sortedData) {
-    var axisBoxWidth = (5 * boxWidth) + (4 * boxSpacing)
-    var totalAxisWidth = (axisBoxWidth * 12) + (boxSpacing * 10)
+function plotDataByMonth(sortedData, customerData) {
+    var axisBoxWidth = (numSegments * boxWidth) + ((numSegments - 1) * boxSpacing)
+    var totalAxisWidth = (axisBoxWidth * validMonths) + (boxSpacing * 10)
 
     // AXIS DEFINITION
     vis.append('g')
         .selectAll('body')
-        .data([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+        .data([0, 1, 2, 3, 4, 5, 6, 7])
         .enter()
         .append('rect')
         .attr('x', function(d, i) {
@@ -369,32 +336,31 @@ function plotDataByMonth(sortedData) {
 
     vis.append('g')
         .selectAll('body')
-        .data(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+        .data(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'])
         .enter()
         .append('text')
         .text(function(d) {
             return d;
         })
         .attr('x', function(d, i) {
-            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + 10
+            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + 40
         })
         .attr('y', ySpacing + 20)
         .attr('height', 25)
         .attr('width', axisBoxWidth)
         .style('fill', 'white')
         .style('font-size', '14px')
+        .attr('class', 'bikeView-year-label')
 
     console.log(sortedData)
     for (month = 0; month < validMonths; month++) {
         var svg = d3.select('svg');
         if (sortedData[month].values !== undefined) {
             for (seg = 0; seg < numSegments; seg++) {
-                // console.log(sortedData[month].values[seg].values)
                 if (sortedData[month].values[seg].values !== undefined) {
                     console.log('hello')
                         // Gender Dist
                     var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
-                        //   var xLoc = ((month * seg * boxWidthMultipler) + xSpacing + 1)
                     vis.append('g')
                         .selectAll('body')
                         .data(sortedData[month].values[seg].values)
@@ -402,429 +368,340 @@ function plotDataByMonth(sortedData) {
                         .append('rect')
                         .attr('x', xLoc) // circle -> cx
                         .attr('y', function(d, j) { // circle -> cy
-                            //   console.log(d)
-                            //   console.log(j)
-                            // console.log(ySpacing - (j * boxHeightMultipler))
                             return ySpacing - (j * boxHeightMultipler);
+                        })
+                        .attr('height', boxHeight) // circle -> r -> boxSize/2
+                        .attr('width', boxWidth)
+                        .attr("class", function(d, i) {
+                           if (d.gender == 1) {
+                              var genderClass = 'case-male';
+                           } else if (d.gender == 2) {
+                              var genderClass = 'case-female';
+                           } else {
+                              var genderClass = 'case-genderUnknown';
+                           }
+
+                            var rectClass = 'month' + month + ' segment' + seg + ' age' + d.age;
+
+                            return 'ride-box ' + rectClass + ' ' + genderClass
+                        })
+                        .attr("rx", boxRadius)
+                        .attr("ry", boxRadius)
+                }
+            }
+        }
+    }
+
+    // Customers
+    for (month = 0; month < validMonths; month++) {
+        var svg = d3.select('svg');
+        if (customerData[month].values !== undefined) {
+            for (seg = 0; seg < numSegments; seg++) {
+                if (customerData[month].values[seg].values !== undefined) {
+                    console.log('hello')
+                        // Gender Dist
+                    var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
+                    vis.append('g')
+                        .selectAll('body')
+                        .data(customerData[month].values[seg].values)
+                        .enter()
+                        .append('rect')
+                        .attr('x', xLoc) // circle -> cx
+                        .attr('y', function(d, j) { // circle -> cy
+                            return ySpacing + 27 + (j * boxHeightMultipler);
                         })
                         .attr('height', boxHeight) // circle -> r -> boxSize/2
                         .attr('width', boxWidth)
                         .attr("class", function(d, i) {
                             if (d.gender == 1) {
                                 var genderClass = 'case-male';
-                            } else {
+                            } else if (d.gender == 2) {
                                 var genderClass = 'case-female';
+                            } else {
+                               var genderClass = 'case-genderUnknown';
                             }
 
                             var rectClass = 'month' + month + ' segment' + seg + ' age' + d.age;
 
                             return 'ride-box ' + rectClass + ' ' + genderClass
                         })
+                        .attr("rx", boxRadius)
+                        .attr("ry", boxRadius)
                 }
             }
         }
     }
 }
 
-/* Notes
-Page Loads
-Get Birth Station
-Get Four Popular Stations
-Get POI for each Station
-Get Images for each POI
-*/
-
-function initMap() {
-    console.log('foo')
-        // Assumes Birth Station is listed first
-        //  var innerDiv = document.createElement('div');
-        // innerDiv.className = 'mapBoxMap';
-        //  document.getElementsByTagName('body')[0].appendChild(innerDiv);
-
-    var allStations = new Array();
-    var allPOIs = new Array();
-
-    var stationObjects = demoSetupCode();
-
-    // Create neccessary HTML objects - SW
-    var rightDiv = document.getElementsByClassName('bikeView-mapSection');
-    var mapBoxMapDiv = document.createElement('div');
-    mapBoxMapDiv.id = 'mapBoxMap';
-    rightDiv[0].appendChild(mapBoxMapDiv);
-
-    var bottomLeftDiv = document.getElementsByClassName('bikeView-UIsection');
-    var flyButtonObject = document.createElement('button');
-    flyButtonObject.id = 'flyButton';
-    var btnText = document.createTextNode('Move to Next Station');
-    flyButtonObject.appendChild(btnText);
-    bottomLeftDiv[0].appendChild(flyButtonObject);
-
-    // Initialize the MapBox Map
-    // Center on the middle of New York
-    mapboxgl.accessToken = 'pk.eyJ1IjoiY2VlZm9zdGVyIiwiYSI6ImJJdjN1V1UifQ.7unwlg_mgObhfSto2HqA-w';
-    var map = new mapboxgl.Map({
-        container: 'mapBoxMap',
-        center: [-73.985130, 40.758896],
-        zoom: 14,
-        style: 'mapbox://styles/ceefoster/civshbtsd00052jqixmnpt9n6'
-    });
-
-
-    //Get Birth Station
-    getBirthStationForBike(bikeIDForTesting).then(function(birthStationID) {
-
-        getStationForID(birthStationID).then(function(stationData) {
-            allStations.push(stationData);
-            //console.log("Station Data" + JSON.stringify(stationData));
-            //console.log("getting the station latitude " + stationData.latitude)
-            //for each station, step through and grab a POI near it from Foursquare
-
-            //TODO getPOIForStation(stationData);
-            // Once the map loads, add the Markers from the GeoJSON File
-            //   map.on('style.load', function() {
-            getPopularStationIDsForBike(bikeIDForTesting).then(function(stationsList) {
-                console.log("popular station IDs - " + stationsList);
-
-                for (var i = 0; i < stationsList.length; i++) {
-                    if (i == (stationsList.length - 1)) {
-                        getStationForID(stationsList[i]).then(function(theStation) {
-                            allStations.push(theStation);
-
-                            console.log("all da stations" + JSON.stringify(allStations));
-
-                            map.addSource("markers", {
-                                "type": "geojson",
-                                "data": getMarkers(allStations)
-                            });
-
-                            map.addLayer({
-                                "id": "markers",
-                                "type": "symbol",
-                                "source": "markers",
-                                "layout": {
-                                    "icon-image": "{marker-symbol}-15",
-                                    "text-field": "{title}",
-                                    "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-                                    "text-offset": [0, 0.6],
-                                    "text-anchor": "top"
-                                }
-                            });
-
-                            // Find Streetview Images for a Lat & Long Pair
-                            findImageForCoords(allStations[0].latitude, allStations[0].longitude);
-                        });
-
-                    } else {
-
-                        getStationForID(stationsList[i]).then(function(theStation) {
-                            allStations.push(theStation);
-                        });
-
-                    }
-
-                }
-            })
-        })
-    })
-
-    //Code for the Fly Button
-    document.getElementById('flyButton').addEventListener('click', function() {
-
-        currentStationCentered = currentStationCentered + 1;
-        map.flyTo({
-            speed: 0.4, // make the flying slow
-            curve: 1, // change the speed at which it zooms out
-            center: [
-                allStations[currentStationCentered].longitude,
-                allStations[currentStationCentered].latitude
-            ]
-        });
-
-        findImageForCoords(allStations[currentStationCentered].latitude, allStations[currentStationCentered].longitude);
-
-    });
-
-}
-
-function demoSetupCode() {
-
-    var station1Example = '{"details":{"latitude":"40.74854862","longitude":"-73.98808416","name":"Broadway & W 32 St","stationNumber":"498"}}';
-
-    var station2Example = '{"details":{"latitude":"40.7390169121","longitude":"-74.0026376103","name":"Greenwich Ave & 8 Ave","stationNumber":"284"}}';
-
-    var station3Example = '{"details":{"latitude":"40.6845683","longitude":"-73.95881081","name":"Monroe St & Classon Ave","stationNumber":"289"}}';
-
-    var station4Example = '{"details":{"latitude":"40.72953837","longitude":"-73.98426726","name":"E 11 St & 1 Ave","stationNumber":"326"}}';
-
-    var station5Example = '{"details":{"latitude":"40.7047177","longitude":"-74.00926027","name":"Pearl St & Hanover Square","stationNumber":"415"}}';
-
-    var s1parsed = JSON.parse(station1Example);
-    var s2parsed = JSON.parse(station2Example);
-    var s3parsed = JSON.parse(station3Example);
-    var s4parsed = JSON.parse(station4Example);
-    var s5parsed = JSON.parse(station5Example);
-
-    //Combine into an array.
-    var stationObjectsArray = [s1parsed, s2parsed, s3parsed, s4parsed, s5parsed];
-
-    return stationObjectsArray
-
-}
-
-function getBirthStationForBike(bikeID) {
-    var db = firebase.database();
-    var ref = db.ref("/");
-
-    var birthStation = "";
-    return ref.child('bikes/' + bikeID + '/rides/').orderByKey().limitToFirst(1).once("value").then(function(snapshot) {
-
-        snapshot.forEach(function(childSnapshot) {
-
-            var dataObject = childSnapshot.val();
-            console.log("see this -" + dataObject.startStation);
-
-            if (birthStation == "") {
-                birthStation = dataObject.startStation;
-            }
-
-        });
-
-    }).then(function() {
-        return birthStation;
-    });
-};
-
-function getStationForID(stationID) {
-    var db = firebase.database();
-    var ref = db.ref("/");
-
-    var stationObject = new Object();
-    return ref.child('stations/' + stationID + '/details/').orderByKey().once("value").then(function(snapshot) {
-
-        var latitude = snapshot.val();
-        console.log("hey - " + JSON.stringify(latitude));
-
-        var dataObject = snapshot.val()
-
-        if (dataObject.latitude) {
-            stationObject = dataObject;
-        }
-
-    }).then(function() {
-        return stationObject;
-    });
-};
-
-function getPopularStationIDsForBike(bikeID) {
-    var db = firebase.database();
-    var ref = db.ref("/");
-
-    var stations = new Array();
-    return ref.child('bikes/' + bikeID + '/stations/').orderByValue().limitToFirst(4).once("value").then(function(snapshot) {
-
-        snapshot.forEach(function(childSnapshot) {
-
-            var dataObject = childSnapshot.val();
-            console.log("see this - " + childSnapshot.key);
-            stations.push(childSnapshot.key);
-
-        });
-
-    }).then(function() {
-        return stations;
-    });
-};
-
-
-function getPOIForStation(station) {
-
-    console.log("station object for POI - " + JSON.stringify(station));
-    var latitude = station.latitude;
-    var longitude = station.longitude;
-    console.log("the latitude " + latitude);
-    console.log("the lng " + longitude);
-
-    var fullURL = "https://api.foursquare.com/v2/venues/search?client_id=WGL01RK4VNICIVWY2R2HLI2QW0OWUCF0JFKB0TM1G4N1IF1K&client_secret=JP35VVFSRCL034AA45Y5VTZ55YGH510ZHXEIM5XKCMI5IW4H&v=20130815&ll=" + latitude + "," + longitude + "&radius=400&intent=browse";
-    console.log("theURL is " + fullURL);
-
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            //console.log(xmlHttp.responseText);
-            var results = JSON.parse(xmlHttp.responseText);
-            var allVenues = results.response.venues;
-            var highestCheckinVenueIndex = 0;
-            var bestCheckinValue = 0;
-
-            for (var i = 0; i < allVenues.length; i++) {
-                var checkinsCount = allVenues[i].stats.checkinsCount;
-                if (checkinsCount > bestCheckinValue) {
-                    bestCheckinValue = checkinsCount;
-                    highestCheckinVenueIndex = i;
-                }
-            }
-
-            var latitude = allVenues[highestCheckinVenueIndex].location.lat;
-            var longitude = allVenues[highestCheckinVenueIndex].location.lng;
-
-            console.log("the highest value " + bestCheckinValue + "with index " + highestCheckinVenueIndex + "with lat and lng" + latitude + longitude);
-
-            allPOIs.push(allVenues[highestCheckinVenueIndex]);
-
-            //console.log(allPlaces);
-            //console.log("tipcount" + allPlaces.response.venues[1].stats.checkinsCount);
-        }
-    }
-    xmlHttp.open("GET", fullURL, true); // true for asynchronous
-    xmlHttp.send(null);
-
-}
-
-
-
-
-function getMarkers(theStations) {
-
-    console.log("check all this " + theStations);
-    console.log("check all this " + JSON.stringify(theStations));
-
-    var station1Lat = parseFloat(theStations[0].latitude);
-    var station1Lng = parseFloat(theStations[0].longitude);
-
-    var station2Lat = parseFloat(theStations[1].latitude);
-    var station2Lng = parseFloat(theStations[1].longitude);
-
-    var station3Lat = parseFloat(theStations[2].latitude);
-    var station3Lng = parseFloat(theStations[2].longitude);
-
-    var station4Lat = parseFloat(theStations[3].latitude);
-    var station4Lng = parseFloat(theStations[3].longitude);
-
-    var station5Lat = parseFloat(theStations[4].latitude);
-    var station5Lng = parseFloat(theStations[4].longitude);
-
-
-
-    var thisTest = {
-        "type": "FeatureCollection",
-        "features": [{
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [station1Lng, station1Lat]
-            },
-            "properties": {
-                "title": theStations[0].name,
-                "marker-symbol": "star"
-            }
-        }, {
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [station2Lng, station2Lat]
-            },
-            "properties": {
-                "title": theStations[1].name,
-                "marker-symbol": "bicycle"
-            }
-        }, {
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [station3Lng, station3Lat]
-            },
-            "properties": {
-                "title": theStations[2].name,
-                "marker-symbol": "bicycle"
-            }
-        }, {
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [station4Lng, station4Lat]
-            },
-            "properties": {
-                "title": theStations[3].name,
-                "marker-symbol": "bicycle"
-            }
-        }, {
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [station5Lng, station5Lat]
-            },
-            "properties": {
-                "title": theStations[4].name,
-                "marker-symbol": "bicycle"
-            }
-        }]
-    }
-    return thisTest;
-
-}
-
-function demoSetupCode() {
-
-    var station1Example = '{"details":{"latitude":"40.74854862","longitude":"-73.98808416","name":"Broadway & W 32 St","stationNumber":"498"}}';
-
-    var station2Example = '{"details":{"latitude":"40.7390169121","longitude":"-74.0026376103","name":"Greenwich Ave & 8 Ave","stationNumber":"284"}}';
-
-    var station3Example = '{"details":{"latitude":"40.6845683","longitude":"-73.95881081","name":"Monroe St & Classon Ave","stationNumber":"289"}}';
-
-    var station4Example = '{"details":{"latitude":"40.72953837","longitude":"-73.98426726","name":"E 11 St & 1 Ave","stationNumber":"326"}}';
-
-    var station5Example = '{"details":{"latitude":"40.7047177","longitude":"-74.00926027","name":"Pearl St & Hanover Square","stationNumber":"415"}}';
-
-    var s1parsed = JSON.parse(station1Example);
-    var s2parsed = JSON.parse(station2Example);
-    var s3parsed = JSON.parse(station3Example);
-    var s4parsed = JSON.parse(station4Example);
-    var s5parsed = JSON.parse(station5Example);
-
-    //Combine into an array.
-    var stationObjectsArray = [s1parsed, s2parsed, s3parsed, s4parsed, s5parsed];
-
-    return stationObjectsArray
-
-}
-
-function findPOINear(station) {
-
-    // Create google maps location object
-    var stationLocation = new google.maps.LatLng(station.latitude, station.longitude);
-
-    // Create & initialize Google Map with Existing HTML Element "map"
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: stationLocation,
-        zoom: 15
-    });
-
-    // Specify parameters for the Places Search - location, radius, type.
-    // supported types - https://developers.google.com/places/supported_types
-    var request = {
-        location: stationLocation,
-        radius: '500',
-        types: ['park']
-    };
-
-    // Perform Places Search & run callback on completion
-    //  service = new google.maps.places.PlacesService(map);
-    //  service.nearbySearch(request, foundStationPOIs);
-
-}
-
-function findImageForCoords(latitude, longitude) {
-
-    var img = document.createElement("img");
-    img.className = 'theStationImage'
-    img.src = "https://maps.googleapis.com/maps/api/streetview?size=640x180&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
-    img.width = 500;
-    img.height = 200;
-
-    // This next line will just add it to the <body> tag
-    //  var visDiv = document.getElementById('vis');
-    //  var buttonDiv = document.getElementById('flyButton');
-    var imageDiv = document.getElementsByClassName('bikeView-imageSection');
-    imageDiv[0].append(img);
-
+function getRandomBikeNumber() {
+   var bikeObject = new Object()
+   bikeObject = {
+     "19125" : true,
+     "20778" : true,
+     "25285" : true,
+     "17079" : true,
+     "21999" : true,
+     "20323" : true,
+     "16997" : true,
+     "14779" : true,
+     "22578" : true,
+     "15822" : true,
+     "15469" : true,
+     "21299" : true,
+     "16065" : true,
+     "21327" : true,
+     "25962" : true,
+     "23927" : true,
+     "20077" : true,
+     "21526" : true,
+     "22064" : true,
+     "17254" : true,
+     "24282" : true,
+     "21080" : true,
+     "16217" : true,
+     "25067" : true,
+     "14820" : true,
+     "22219" : true,
+     "25912" : true,
+     "18703" : true,
+     "18482" : true,
+     "23647" : true,
+     "15771" : true,
+     "23398" : true,
+     "23854" : true,
+     "18388" : true,
+     "16846" : true,
+     "16544" : true,
+     "22818" : true,
+     "22285" : true,
+     "25112" : true,
+     "16939" : true,
+     "18716" : true,
+     "24800" : true,
+     "14548" : true,
+     "18434" : true,
+     "16074" : true,
+     "23268" : true,
+     "25832" : true,
+     "19444" : true,
+     "18251" : true,
+     "24658" : true,
+     "25761" : true,
+     "17547" : true,
+     "22545" : true,
+     "15314" : true,
+     "26004" : true,
+     "16353" : true,
+     "18779" : true,
+     "26456" : true,
+     "22988" : true,
+     "14947" : true,
+     "22874" : true,
+     "26079" : true,
+     "16127" : true,
+     "22274" : true,
+     "19344" : true,
+     "21475" : true,
+     "23309" : true,
+     "16625" : true,
+     "16984" : true,
+     "23469" : true,
+     "23985" : true,
+     "21145" : true,
+     "21703" : true,
+     "15448" : true,
+     "23735" : true,
+     "16657" : true,
+     "25011" : true,
+     "22899" : true,
+     "16513" : true,
+     "26356" : true,
+     "18966" : true,
+     "25790" : true,
+     "15496" : true,
+     "23407" : true,
+     "24636" : true,
+     "17750" : true,
+     "23488" : true,
+     "18417" : true,
+     "25187" : true,
+     "23934" : true,
+     "19489" : true,
+     "16331" : true,
+     "19632" : true,
+     "19016" : true,
+     "22422" : true,
+     "26446" : true,
+     "15848" : true,
+     "23826" : true,
+     "26784" : true,
+     "16562" : true,
+     "22769" : true,
+     "17392" : true,
+     "22585" : true,
+     "22161" : true,
+     "25499" : true,
+     "16201" : true,
+     "19819" : true,
+     "24236" : true,
+     "17766" : true,
+     "25616" : true,
+     "15967" : true,
+     "25151" : true,
+     "16681" : true,
+     "22977" : true,
+     "23369" : true,
+     "20187" : true,
+     "24303" : true,
+     "20228" : true,
+     "26396" : true,
+     "23134" : true,
+     "17440" : true,
+     "26815" : true,
+     "19207" : true,
+     "23687" : true,
+     "25973" : true,
+     "22252" : true,
+     "17347" : true,
+     "17947" : true,
+     "24247" : true,
+     "23724" : true,
+     "25336" : true,
+     "18140" : true,
+     "22659" : true,
+     "23382" : true,
+     "26606" : true,
+     "15108" : true,
+     "24217" : true,
+     "19804" : true,
+     "18800" : true,
+     "25144" : true,
+     "19647" : true,
+     "17539" : true,
+     "26725" : true,
+     "25751" : true,
+     "23713" : true,
+     "22150" : true,
+     "21577" : true,
+     "16379" : true,
+     "26409" : true,
+     "17466" : true,
+     "23754" : true,
+     "24863" : true,
+     "19591" : true,
+     "25078" : true,
+     "22198" : true,
+     "21085" : true,
+     "15787" : true,
+     "16307" : true,
+     "25890" : true,
+     "23596" : true,
+     "17987" : true,
+     "22411" : true,
+     "19236" : true,
+     "18997" : true,
+     "24463" : true,
+     "24822" : true,
+     "21469" : true,
+     "18746" : true,
+     "15877" : true,
+     "17616" : true,
+     "25971" : true,
+     "16294" : true,
+     "19046" : true,
+     "20217" : true,
+     "23040" : true,
+     "17210" : true,
+     "20299" : true,
+     "25229" : true,
+     "23707" : true,
+     "18579" : true,
+     "21096" : true,
+     "23354" : true,
+     "18011" : true,
+     "15520" : true,
+     "26046" : true,
+     "16577" : true,
+     "24643" : true,
+     "16511" : true,
+     "15155" : true,
+     "22029" : true,
+     "25775" : true,
+     "24597" : true,
+     "20598" : true,
+     "18489" : true,
+     "26934" : true,
+     "19825" : true,
+     "19621" : true,
+     "22859" : true,
+     "25004" : true,
+     "22314" : true,
+     "22346" : true,
+     "18324" : true,
+     "15627" : true,
+     "14624" : true,
+     "19308" : true,
+     "16410" : true,
+     "25393" : true,
+     "16018" : true,
+     "17470" : true,
+     "25656" : true,
+     "18840" : true,
+     "20558" : true,
+     "23123" : true,
+     "22905" : true,
+     "20793" : true,
+     "22188" : true,
+     "15405" : true,
+     "17682" : true,
+     "17873" : true,
+     "24939" : true,
+     "16763" : true,
+     "24130" : true,
+     "26693" : true,
+     "20690" : true,
+     "18097" : true,
+     "23054" : true,
+     "19404" : true,
+     "25825" : true,
+     "24736" : true,
+     "26028" : true,
+     "22061" : true,
+     "16528" : true,
+     "22638" : true,
+     "21659" : true,
+     "25545" : true,
+     "16001" : true,
+     "21566" : true,
+     "15575" : true,
+     "22679" : true,
+     "18222" : true,
+     "25982" : true,
+     "26367" : true,
+     "18952" : true,
+     "23397" : true,
+     "22199" : true,
+     "19658" : true,
+     "25472" : true,
+     "21915" : true,
+     "20803" : true,
+     "19199" : true,
+     "15651" : true,
+     "23189" : true,
+     "17593" : true,
+     "26037" : true,
+     "19580" : true,
+     "20863" : true,
+     "15415" : true,
+     "26614" : true,
+     "26564" : true,
+     "25451" : true,
+     "21398" : true,
+     "20620" : true,
+     "21648" : true,
+     "16111" : true
+  }
+
+  var myArray = Object.keys(bikeObject)
+return myArray[Math.floor(Math.random() * myArray.length)];
 }
