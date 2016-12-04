@@ -30,15 +30,20 @@
 </head>
 
 <body onload="init()">
-    <div class='bikeView-container'>
-        <section class="bikeView-left" id="vis"></section>
-        <section class="bikeView-right">
-            <div class="col bikeView-mapSection"></div>
-            <div class="col bikeView-imageSection"></div>
-            <div class="col bikeView-UIsection"></div>
+    <div class='bikeView-page'>
+        <div class='master-nav'></div>
+        <section class='viz-container'>
+            <section class='rail left-rail'></section>
+            <section class='action-area'>
+                <div class='title-area'>
+                   <h1>Bike 03465</h1>
+                </div>
+                <div class='viz-area' id='vis'></div>
+                <div class='UI-area'></div>
+            </section>
+            <section class='rail left-rail'></section>
         </section>
-
-        <!-- init() method defined in coffee.js-->
+    </div>
 
 </body>
 
