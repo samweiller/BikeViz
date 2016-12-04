@@ -10,12 +10,15 @@ var boxSpacing = 2;
 var boxWidthMultipler = boxWidth + boxSpacing
 var boxHeightMultipler = boxHeight + boxSpacing
 var boxRadius = 0;
+var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
+var totalAxisWidth = (axisBoxWidth * 8) + (boxSpacing * 8)
+width = totalAxisWidth;
 
 // ANIMATION STUFF
 var shuffleAnimDuration = 700;
 var shuffleAnimType = d3.easeExpInOut;
 
-var xSpacing = 50;
+var xSpacing = 00;
 var ySpacing = 350;
 
 var theBikeID = getRandomBikeNumber();
@@ -41,7 +44,8 @@ console.log('in')
 function init() {
     chart = d3.select('#vis').append('svg')
         .attr('width', width)
-        .attr('height', height);
+        .attr('height', height)
+        .attr('class', 'svg-area');
     vis = chart.append('g');
 }
 
