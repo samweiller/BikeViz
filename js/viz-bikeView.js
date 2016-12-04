@@ -21,7 +21,7 @@ var shuffleAnimType = d3.easeExpInOut;
 var xSpacing = 00;
 var ySpacing = 350;
 
-var theBikeID = getRandomBikeNumber();
+var theBikeID = 26046;
 console.log(theBikeID)
 
 // DATA THINGS
@@ -49,19 +49,23 @@ function init() {
     vis = chart.append('g');
 }
 
-updateViz('month', 'gender');
+var theDataSets = updateViz('month', 'gender');
 
 //Called when the update button is clicked
-function updateViz(organizer, sorter) {
-    getRidesForBike(theBikeID).then(function(dataset) {
-
+function updateViz(organizer) {
+    return getRidesForBike(theBikeID).then(function(dataset) {
+      // START LOADING HERE
         console.log('getting rides')
 
-        var sortedData = sortDataBy2(organizer, sorter, dataset, 'subscriber') // returns data already parsed by customer type
-        var customerData = sortDataBy2(organizer, sorter, dataset, 'customer')
+        var ageData = sortDataBy2('age', dataset)
+
+        var sortedData = sortDataBy2(organizer, dataset, 'subscriber') // returns data already parsed by customer type
+        var customerData = sortDataBy2(organizer, dataset, 'customer')
       //   console.log(sortedData)
 
         plotDataByMonth(sortedData, customerData)
+        // END LOADING HERE
+        return [ageData, sortedData, customerData]
     });
 };
 
@@ -70,12 +74,16 @@ function update(rawdata) {
     //PUT YOUR UPDATE CODE BELOW
 }
 
-function byGender() {
-    updateViz('gender');
+function orgByMonth() {
+   theDataSets.then(function(data) {
+      plotDataByMonth(data[1], data[2])
+   })
 }
 
-function byType() {
-    updateViz('type');
+function orgByAge() {
+      theDataSets.then(function(data) {
+         plotDataByAge(data[0]) // age data
+      })
 }
 
 function byTime() {
@@ -154,9 +162,8 @@ function getRidesForBike(bikeID) {
     });
 };
 
-function sortDataBy2(organizer, sorter, dataset, userType) {
+function sortDataBy2(organizer, dataset, userType) {
     // Organizer -> age/month (x axis)
-    // Sorter -> gender/time (y axis)
 
     // Nest rides by age (for AGE AXIS)
     if (organizer == 'age') {
@@ -166,12 +173,18 @@ function sortDataBy2(organizer, sorter, dataset, userType) {
             }).sortKeys(d3.ascending) // Sort by age within bin
             .entries(dataset.subscriber);
 
-        // add option to sort by gender.
         var validAges = 60;
         var minAge = 16
         var maxAge = 75
 
+        // add fix for if ages
+
         for (age = 0; age < validAges; age++) {
+           if (sortedRides[age] == undefined) {
+              sortedRides[age] = {
+                   key: 'x'
+              }
+           }
             if (sortedRides[age].key == age + 16) {
                 // all is well
             } else {
@@ -212,7 +225,6 @@ function sortDataBy2(organizer, sorter, dataset, userType) {
         var validMonths = 8; // Number of continuous months with valid data
 
         // This makes sure that array index matches month key. If a given month has no rides, insert an empty object in that space in the array.
-      //   console.log(sortedRides)
         for (month = 0; month < validMonths; month++) {
             if (sortedRides[month] == undefined) {
                 sortedRides[month] = {
@@ -248,13 +260,14 @@ function sortDataBy2(organizer, sorter, dataset, userType) {
 }
 
 function plotDataByAge(ridesByAge) {
+   // console.log(ridesByAge)
     // Get width of div
     var element = document.getElementsByClassName('viz-area');
 
     var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
     var totalAxisWidth = (axisBoxWidth * 6) + (boxSpacing * 4)
 
-    xSpacing = (element[0].clientWidth - totalAxisWidth) / 2
+   xSpacing = axisBoxWidth + boxSpacing
 
     // AXIS DEFINITION
     vis.append('g')
@@ -298,6 +311,8 @@ function plotDataByAge(ridesByAge) {
                 .data(ridesByAge[i].values)
                 .enter()
                 .append('rect')
+                .transition().duration(shuffleAnimDuration)
+               .ease(shuffleAnimType)
                 .attr('x', ((i + 0) * boxWidthMultipler) + xSpacing + 1) // circle -> cx
                 .attr('y', function(d, j) { // circle -> cy
                     return ySpacing - (j * boxHeightMultipler);
@@ -371,6 +386,8 @@ function plotDataByMonth(sortedData, customerData) {
                         .data(sortedData[month].values[seg].values)
                         .enter()
                         .append('rect')
+                        .transition().duration(shuffleAnimDuration)
+                        .ease(shuffleAnimType)
                         .attr('x', xLoc) // circle -> cx
                         .attr('y', function(d, j) { // circle -> cy
                             return ySpacing - (j * boxHeightMultipler);
@@ -416,6 +433,8 @@ function plotDataByMonth(sortedData, customerData) {
                         .data(customerData[month].values[seg].values)
                         .enter()
                         .append('rect')
+                        .transition().duration(shuffleAnimDuration)
+                        .ease(shuffleAnimType)
                         .attr('x', xLoc) // circle -> cx
                         .attr('y', function(d, j) { // circle -> cy
                             return ySpacing + 27 + (j * boxHeightMultipler);
