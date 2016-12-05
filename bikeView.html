@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>CitiBikeViz</title>
     <link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|PT+Sans|PT+Sans+Narrow" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
     <script>
         // Initialize Firebase
@@ -25,6 +27,7 @@
     <script src='https://api.mapbox.com/mapbox-gl-js/v0.27.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.27.0/mapbox-gl.css' rel='stylesheet' />
     <script src="./lib/d3.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
     <script src="./js/viz-bikeView.js"></script>
     <link href="./css/myStyles.css" rel="stylesheet">
 </head>
@@ -36,10 +39,11 @@
             <section class='rail left-rail'></section>
             <section class='action-area'>
                 <div class='title-area'>
-                   <h1>Bike 03465</h1>
                 </div>
                 <div class='viz-area' id='vis'></div>
                 <div class='UI-area'>
+                   <button id="month" onclick="orgByMonth()">Organize by Month</button>
+                   <button id="age" onclick="orgByAge()">Organize by Age</button>
                    <button id="gender" onclick="sortByGender()">Sort by Gender</button>
                    <button id="time" onclick="sortByTime()">Sort by Time</button>
                 </div>
