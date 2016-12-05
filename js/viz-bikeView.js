@@ -1,7 +1,7 @@
 var chart;
 
 var width = 1300; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 600; // THIS TOO.
+var height = 550; // THIS TOO.
 
 var boxSize = 6;
 var boxWidth = 9;
@@ -12,30 +12,30 @@ var boxHeightMultipler = boxHeight + boxSpacing
 var boxRadius = 0;
 var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
 var totalAxisWidth = (axisBoxWidth * 8) + (boxSpacing * 8)
-width = totalAxisWidth;
+var widthAddition = 50;
+width = totalAxisWidth + (widthAddition*2);
 
 // ANIMATION STUFF
 var shuffleAnimDuration = 700;
 var shuffleAnimType = d3.easeExpInOut;
+var fwooshAnimDuration = 1000;
+var fwooshAnimType = d3.easePolyInOut;
+var axisAnimationDuration = 1000;
+var delayTime = 12;
 
 var xSpacing = 00;
-var ySpacing = 350;
+var ySpacing = 320;
 
-var theBikeID = 26046;
+var theBikeID = 17470;
 console.log(theBikeID)
+
+// BLACKLIST -> 17470, 24303, 16353, 15496
 
 // DATA THINGS
 var validMonths = 8;
 var numSegments = 10; // Number of segments per month
 var segmentSize = 3; // Number of days per segment
-
-var map;
-var service;
-var currentStationCentered = 0;
-
-var bikeIDForTesting = 23458;
-var allStations;
-var allPOIs;
+var tip;
 
 //DEFINE YOUR VARIABLES UP HERE
 console.log('in')
@@ -47,24 +47,30 @@ function init() {
         .attr('height', height)
         .attr('class', 'svg-area');
     vis = chart.append('g');
+    // Define the div for the tooltip
+
 }
 
-var theDataSets = updateViz('month', 'gender');
+var organizerType = 'month';
+var theDataSets = updateViz(organizerType, 'gender');
 
 //Called when the update button is clicked
 function updateViz(organizer) {
     return getRidesForBike(theBikeID).then(function(dataset) {
-      // START LOADING HERE
+        // START LOADING HERE
         console.log('getting rides')
 
         var ageData = sortDataBy2('age', dataset)
 
         var sortedData = sortDataBy2(organizer, dataset, 'subscriber') // returns data already parsed by customer type
         var customerData = sortDataBy2(organizer, dataset, 'customer')
-      //   console.log(sortedData)
-
-        plotDataByMonth(sortedData, customerData)
-        // END LOADING HERE
+        plotDataByMonth(sortedData, customerData, 1)
+        var h = document.createElement("h1")                // Create a <h1> element
+        var t = document.createTextNode("Bike " + theBikeID);     // Create a text node
+        h.appendChild(t);
+        var titleDiv = document.getElementsByClassName('title-area');
+        titleDiv[0].append(h);
+            // END LOADING HERE
         return [ageData, sortedData, customerData]
     });
 };
@@ -75,15 +81,17 @@ function update(rawdata) {
 }
 
 function orgByMonth() {
-   theDataSets.then(function(data) {
-      plotDataByMonth(data[1], data[2])
-   })
+    organizerType = 'month';
+    theDataSets.then(function(data) {
+        plotDataByMonth(data[1], data[2], 0)
+    })
 }
 
 function orgByAge() {
-      theDataSets.then(function(data) {
-         plotDataByAge(data[0]) // age data
-      })
+    organizerType = 'age';
+    theDataSets.then(function(data) {
+        plotDataByAge(data[0]) // age data
+    })
 }
 
 function byTime() {
@@ -129,6 +137,8 @@ function getRidesForBike(bikeID) {
                 segmentNumber = 9;
             }
 
+            var segIndex = (numSegments * dateStamp.getMonth()) + segmentNumber
+
             if (dataObject.user.type == 'Subscriber') {
                 var theRefactoredObject = {
                     'rideID': childSnapshot.key,
@@ -138,7 +148,10 @@ function getRidesForBike(bikeID) {
                     'userType': dataObject.user.type,
                     'age': 2016 - Number(dataObject.user.birthYear),
                     'startTime': dataObject.startTime,
-                    'segment': segmentNumber
+                    'segment': segmentNumber,
+                    'month': dateStamp.getMonth(),
+                    'segmentIndex': segIndex,
+                    'duration': dataObject.duration
                 }
 
                 fullDataArray.subscriber.push(theRefactoredObject);
@@ -151,7 +164,10 @@ function getRidesForBike(bikeID) {
                     'userType': dataObject.user.type,
                     'age': 'not available',
                     'startTime': dataObject.startTime,
-                    'segment': segmentNumber
+                    'segment': segmentNumber,
+                    'month': dateStamp.getMonth(),
+                    'segmentIndex': segIndex,
+                    'duration': dataObject.duration
                 }
 
                 fullDataArray.customer.push(theRefactoredObject);
@@ -166,6 +182,7 @@ function sortDataBy2(organizer, dataset, userType) {
     // Organizer -> age/month (x axis)
 
     // Nest rides by age (for AGE AXIS)
+    console.log(dataset.subscriber)
     if (organizer == 'age') {
         var sortedRides = d3.nest()
             .key(function(d) {
@@ -173,6 +190,7 @@ function sortDataBy2(organizer, dataset, userType) {
             }).sortKeys(d3.ascending) // Sort by age within bin
             .entries(dataset.subscriber);
 
+        console.log(sortedRides)
         var validAges = 60;
         var minAge = 16
         var maxAge = 75
@@ -180,11 +198,11 @@ function sortDataBy2(organizer, dataset, userType) {
         // add fix for if ages
 
         for (age = 0; age < validAges; age++) {
-           if (sortedRides[age] == undefined) {
-              sortedRides[age] = {
-                   key: 'x'
-              }
-           }
+            if (sortedRides[age] == undefined) {
+                sortedRides[age] = {
+                    key: 'x'
+                }
+            }
             if (sortedRides[age].key == age + 16) {
                 // all is well
             } else {
@@ -255,22 +273,26 @@ function sortDataBy2(organizer, dataset, userType) {
             }
         }
     }
-
     return sortedRides
 }
 
 function plotDataByAge(ridesByAge) {
-   // console.log(ridesByAge)
+    // console.log(ridesByAge)
     // Get width of div
     var element = document.getElementsByClassName('viz-area');
 
     var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
     var totalAxisWidth = (axisBoxWidth * 6) + (boxSpacing * 4)
 
-   xSpacing = axisBoxWidth + boxSpacing
+    xSpacing = axisBoxWidth + boxSpacing + widthAddition
+
+    var div = d3.select("body").append("div")
+       .attr("class", "tooltip")
+       .style("opacity", 0);
 
     // AXIS DEFINITION
     vis.append('g')
+        .attr('class', 'age-axis')
         .selectAll('body')
         .data([0, 1, 2, 3, 4, 5])
         .enter()
@@ -281,9 +303,11 @@ function plotDataByAge(ridesByAge) {
         .attr('y', ySpacing + 8)
         .attr('height', 15)
         .attr('width', axisBoxWidth)
-        .style('fill', 'black')
+        .style('opacity', 0)
+        .transition().duration(axisAnimationDuration).style("opacity", 1);
 
     vis.append('g')
+        .attr('class', 'age-axis-label')
         .selectAll('body')
         .data(['16-25', '26-35', '36-45', '46-55', '56-65', '66-75'])
         .enter()
@@ -297,22 +321,36 @@ function plotDataByAge(ridesByAge) {
         .attr('y', ySpacing + 20)
         .attr('height', 25)
         .attr('width', axisBoxWidth)
-        .style('fill', 'white')
         .style('font-size', '14px')
+        .style('opacity', 0)
+        .transition().duration(axisAnimationDuration).style("opacity", 1);
 
+    vis.selectAll('.month-axis')
+       .transition().duration(axisAnimationDuration).style("opacity", 0);
+
+    vis.selectAll('.month-axis-label')
+       .transition().duration(axisAnimationDuration).style("opacity", 0);
+
+    vis.selectAll('.cust-box')
+        .transition().duration(fwooshAnimDuration)
+        .ease(fwooshAnimType)
+        .attr('y', ySpacing + 15)
+        .style("opacity", 0);
+
+
+    var groupIndex = 0;
     for (i = 16 - 16; i <= 75 - 16; i++) {
         var svg = d3.select('svg');
 
         if (ridesByAge[i].values !== undefined) {
-
-            // Gender Dist
-            vis.append('g')
-                .selectAll('body')
+            console.log('foo')
+            vis.selectAll('.age' + (i + 16))
                 .data(ridesByAge[i].values)
-                .enter()
-                .append('rect')
-                .transition().duration(shuffleAnimDuration)
-               .ease(shuffleAnimType)
+                .transition().duration(fwooshAnimDuration)
+                .ease(fwooshAnimType)
+                .delay(function(d, j) {
+                    return j * delayTime
+                })
                 .attr('x', ((i + 0) * boxWidthMultipler) + xSpacing + 1) // circle -> cx
                 .attr('y', function(d, j) { // circle -> cy
                     return ySpacing - (j * boxHeightMultipler);
@@ -326,22 +364,50 @@ function plotDataByAge(ridesByAge) {
                         var genderClass = 'case-female';
                     }
 
-                    var rectClass = 'age' + d.age;
+                    if (d.userType == 'Customer') {
+                        var typeClassifier = 'cust';
+                    } else if (d.userType == 'Subscriber') {
+                        var typeClassifier = 'sub';
+                    }
+
+                    var rectClass = 'month' + d.month + '-' + typeClassifier + ' segment' + d.segment + '-' + typeClassifier + ' age' + d.age + ' age-group' + groupIndex + ' month-group' + d.segmentIndex + '-sub';
 
                     return 'ride-box ' + rectClass + ' ' + genderClass
                 })
                 .attr("rx", boxRadius)
                 .attr("ry", boxRadius)
+            groupIndex++;
         }
     }
+
+   vis.selectAll('.ride-box')
+      .on("mouseover", function(d) {
+        div.transition()
+         .duration(200)
+         .style("opacity", .9);
+        div.html('<strong>Ride ' + d.rideID + "</strong><br/>Date: " + d.startTime + "<br/>Age: " + d.age +'<br/>Duration: ' + d.duration + '<br/>Start Station Name: 4th & 12th<br/>End Station Name: 45th & 8th<br/>Gender: ' + d.gender + '<br/>Rider Type: ' + d.userType)
+         .style("left", (d3.event.pageX) + "px")
+         .style("top", (d3.event.pageY - 28) + "px");
+        })
+      .on("mouseout", function(d) {
+        div.transition()
+         .duration(500)
+         .style("opacity", 0);
+        });
 }
 
-function plotDataByMonth(sortedData, customerData) {
-    var axisBoxWidth = (numSegments * boxWidth) + ((numSegments - 1) * boxSpacing)
-    var totalAxisWidth = (axisBoxWidth * validMonths) + (boxSpacing * 10)
+function plotDataByMonth(sortedData, customerData, isInit) {
+   var div = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    xSpacing = widthAddition;
+    var axisBoxWidth = (numSegments * boxWidth) + ((numSegments - 1) * boxSpacing);
+    var totalAxisWidth = (axisBoxWidth * validMonths) + (boxSpacing * 10);
 
     // AXIS DEFINITION
     vis.append('g')
+        .attr('class', 'month-axis')
         .selectAll('body')
         .data([0, 1, 2, 3, 4, 5, 6, 7])
         .enter()
@@ -352,9 +418,11 @@ function plotDataByMonth(sortedData, customerData) {
         .attr('y', ySpacing + 8)
         .attr('height', 15)
         .attr('width', axisBoxWidth)
-        .style('fill', 'black')
+        .style('opacity', 0)
+        .transition().duration(axisAnimationDuration).style("opacity", 1);
 
     vis.append('g')
+        .attr('class', 'month-axis-label')
         .selectAll('body')
         .data(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'])
         .enter()
@@ -368,124 +436,267 @@ function plotDataByMonth(sortedData, customerData) {
         .attr('y', ySpacing + 20)
         .attr('height', 25)
         .attr('width', axisBoxWidth)
-        .style('fill', 'white')
         .style('font-size', '14px')
         .attr('class', 'bikeView-year-label')
+        .style('opacity', 0)
+        .transition().duration(axisAnimationDuration).style("opacity", 1);
 
-    var columnIndex = 0;
+     vis.selectAll('.age-axis')
+        .transition().duration(axisAnimationDuration).style("opacity", 0);
+
+     vis.selectAll('.age-axis-label')
+        .transition().duration(axisAnimationDuration).style("opacity", 0);
+
+    // SUBSCRIBER
     for (month = 0; month < validMonths; month++) {
         var svg = d3.select('svg');
         if (sortedData[month].values !== undefined) {
             for (seg = 0; seg < numSegments; seg++) {
                 if (sortedData[month].values[seg].values !== undefined) {
-                        // Gender Dist
+                    // Gender Dist
                     var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
-                    vis.append('g')
-                        .attr('class', 'case-group')
-                        .selectAll('body')
-                        .data(sortedData[month].values[seg].values)
-                        .enter()
-                        .append('rect')
-                        .transition().duration(shuffleAnimDuration)
-                        .ease(shuffleAnimType)
-                        .attr('x', xLoc) // circle -> cx
-                        .attr('y', function(d, j) { // circle -> cy
-                            return ySpacing - (j * boxHeightMultipler);
-                        })
-                        .attr('height', boxHeight) // circle -> r -> boxSize/2
-                        .attr('width', boxWidth)
-                        .attr("class", function(d, i) {
-                            if (d.gender == 1) {
-                                var genderClass = 'case-male';
-                            } else if (d.gender == 2) {
-                                var genderClass = 'case-female';
-                            } else {
-                                var genderClass = 'case-genderUnknown';
-                            }
 
-                           //  var columnIndex = (5*month) + seg
-                           //  console.log('dex: ' + columnIndex)
-                            var rectClass = 'month' + month + '-sub segment' + seg + '-sub age' + d.age + ' group' + columnIndex + '-sub';
+                    if (isInit == 1) {
+                        vis.append('g')
+                            .attr('class', 'case-group')
+                            .selectAll('body')
+                            .data(sortedData[month].values[seg].values)
+                            .enter()
+                            .append('rect')
+                            .transition().duration(fwooshAnimDuration)
+                            .ease(fwooshAnimType)
+                            .delay(function(d, j) {
+                                return j * delayTime
+                            })
+                            .attr('x', xLoc) // circle -> cx
+                            .attr('y', function(d, j) { // circle -> cy
+                                return ySpacing - (j * boxHeightMultipler);
+                            })
+                            .attr('height', boxHeight) // circle -> r -> boxSize/2
+                            .attr('width', boxWidth)
+                            .attr("class", function(d, i) {
+                                if (d.gender == 1) {
+                                    var genderClass = 'case-male';
+                                } else if (d.gender == 2) {
+                                    var genderClass = 'case-female';
+                                } else {
+                                    var genderClass = 'case-genderUnknown';
+                                }
+
+                                var rectClass = 'month' + d.month + '-sub segment' + d.segment + '-sub  age' + d.age + ' month-group' + d.segmentIndex + '-sub';
+
+                                return 'ride-box ' + rectClass + ' ' + genderClass
+                            })
+                            .attr("rx", boxRadius)
+                            .attr("ry", boxRadius);
+                    } else {
+                        // vis.selectAll('.month-group' + columnIndex + '-sub')
+                        theIndex = (numSegments * month) + seg
+                        vis.selectAll('.month-group' + theIndex + '-sub')
+                            .data(sortedData[month].values[seg].values)
+                            // .enter()
+                            // .append('rect')
+                            .transition().duration(fwooshAnimDuration)
+                            .ease(fwooshAnimType)
+                            .delay(function(d, j) {
+                                return j * delayTime
+                            })
+                            .attr('x', xLoc) // circle -> cx
+                            .attr('y', function(d, j) { // circle -> cy
+                                return ySpacing - (j * boxHeightMultipler);
+                            })
+                            .attr('height', boxHeight) // circle -> r -> boxSize/2
+                            .attr('width', boxWidth)
+                            .attr("class", function(d, i) {
+                                if (d.gender == 1) {
+                                    var genderClass = 'case-male';
+                                } else if (d.gender == 2) {
+                                    var genderClass = 'case-female';
+                                } else {
+                                    var genderClass = 'case-genderUnknown';
+                                }
+
+                                //  var columnIndex = (5*month) + seg
+                                //  console.log('dex: ' + columnIndex)
+                                var rectClass = 'month' + month + '-sub segment' + seg + '-sub age' + d.age + ' month-group' + theIndex + '-sub';
 
 
-                            return 'ride-box ' + rectClass + ' ' + genderClass
-                        })
-                        .attr("rx", boxRadius)
-                        .attr("ry", boxRadius);
-                     columnIndex++;
+                                return 'ride-box ' + rectClass + ' ' + genderClass
+                            })
+                            .attr("rx", boxRadius)
+                            .attr("ry", boxRadius);
+                    }
                 }
             }
         }
     }
 
     // Customers
-    for (month = 0; month < validMonths; month++) {
-        var svg = d3.select('svg');
-        if (customerData[month].values !== undefined) {
-            for (seg = 0; seg < numSegments; seg++) {
-                if (customerData[month].values[seg].values !== undefined) {
-                    console.log('hello')
-                        // Gender Dist
-                    var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
-                    vis.append('g')
-                        .attr('class', 'case-group')
-                        .selectAll('body')
-                        .data(customerData[month].values[seg].values)
-                        .enter()
-                        .append('rect')
-                        .transition().duration(shuffleAnimDuration)
-                        .ease(shuffleAnimType)
-                        .attr('x', xLoc) // circle -> cx
-                        .attr('y', function(d, j) { // circle -> cy
-                            return ySpacing + 27 + (j * boxHeightMultipler);
-                        })
-                        .attr('height', boxHeight) // circle -> r -> boxSize/2
-                        .attr('width', boxWidth)
-                        .attr("class", function(d, i) {
-                            if (d.gender == 1) {
-                                var genderClass = 'case-male';
-                            } else if (d.gender == 2) {
-                                var genderClass = 'case-female';
-                            } else {
-                                var genderClass = 'case-genderUnknown';
-                            }
+    if (isInit == 1) {
+        for (month = 0; month < validMonths; month++) {
+            var svg = d3.select('svg');
+            if (customerData[month].values !== undefined) {
+                for (seg = 0; seg < numSegments; seg++) {
+                    if (customerData[month].values[seg].values !== undefined) {
+                        console.log('hello')
+                            // Gender Dist
+                        var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
+                        vis.append('g')
+                            .attr('class', 'case-group')
+                            .selectAll('body')
+                            .data(customerData[month].values[seg].values)
+                            .enter()
+                            .append('rect')
+                            .transition().duration(fwooshAnimDuration)
+                            .ease(fwooshAnimType)
+                            .attr('x', xLoc) // circle -> cx
+                            .attr('y', function(d, j) { // circle -> cy
+                                return ySpacing + 27 + (j * boxHeightMultipler);
+                            })
+                            .attr('height', boxHeight) // circle -> r -> boxSize/2
+                            .attr('width', boxWidth)
+                            .attr("class", function(d, i) {
+                                if (d.gender == 1) {
+                                    var genderClass = 'case-male';
+                                } else if (d.gender == 2) {
+                                    var genderClass = 'case-female';
+                                } else {
+                                    var genderClass = 'case-genderUnknown';
+                                }
 
-                            var columnIndex = (4*month) + seg
-                            var rectClass = 'month' + month + '-cust segment' + seg + '-cust age' + d.age + ' group' + columnIndex;
+                                theIndex = (numSegments * month) + seg
+                                var rectClass = 'month' + month + '-cust segment' + seg + '-cust age' + d.age + ' month-group' + theIndex + '-cust cust-box';
 
-                            return 'ride-box ' + rectClass + ' ' + genderClass
-                        })
-                        .attr("rx", boxRadius)
-                        .attr("ry", boxRadius)
+                                return 'ride-box ' + rectClass + ' ' + genderClass
+                            })
+                            .attr("rx", boxRadius)
+                            .attr("ry", boxRadius)
+                    }
+                }
+            }
+        }
+    } else {
+        for (month = 0; month < validMonths; month++) {
+            var svg = d3.select('svg');
+            if (customerData[month].values !== undefined) {
+                for (seg = 0; seg < numSegments; seg++) {
+                    if (customerData[month].values[seg].values !== undefined) {
+                        console.log('hello')
+                            // Gender Dist
+                        var xLoc = (((numSegments * month) + seg) * boxWidthMultipler) + xSpacing + 1
+
+                        theIndex = (numSegments * month) + seg
+                        vis.selectAll('.month-group' + theIndex + '-cust')
+                           //  .data(customerData[month].values[seg].values)
+                            .transition().duration(fwooshAnimDuration)
+                            .ease(fwooshAnimType)
+                            .attr('x', xLoc) // circle -> cx
+                            .attr('y', function(d, j) { // circle -> cy
+                                return ySpacing + 27 + (j * boxHeightMultipler);
+                            })
+                            .style("opacity", 1)
+                            .attr('height', boxHeight) // circle -> r -> boxSize/2
+                            .attr('width', boxWidth)
+                            .attr("class", function(d, i) {
+                                if (d.gender == 1) {
+                                    var genderClass = 'case-male';
+                                } else if (d.gender == 2) {
+                                    var genderClass = 'case-female';
+                                } else {
+                                    var genderClass = 'case-genderUnknown';
+                                }
+
+                                var theIndex = (numSegments * month) + seg
+                                var rectClass = 'month' + month + '-cust segment' + seg + '-cust age' + d.age + ' month-group' + theIndex + '-cust cust-box';
+
+                                return 'ride-box ' + rectClass + ' ' + genderClass
+                            })
+                            .attr("rx", boxRadius)
+                            .attr("ry", boxRadius)
+                    }
                 }
             }
         }
     }
+    setTimeout(function() {
+    vis.selectAll('.ride-box')
+      .on("mouseover", function(d) {
+        div.transition()
+         .duration(200)
+         .style("opacity", .9);
+        div.html('<strong>Ride ' + d.rideID + "</strong><br/>Age: " + d.age)
+         .style("left", (d3.event.pageX) + "px")
+         .style("top", (d3.event.pageY - 28) + "px");
+        })
+      .on("mouseout", function(d) {
+        div.transition()
+         .duration(500)
+         .style("opacity", 0);
+      });
+   }, 1000)
 }
 
 function sortByGender() {
-    for (m = 0; m < 75; m++) {
-        vis.selectAll('.group' + m + '-sub').sort(function(a, b) {
-                return d3.ascending(a.gender, b.gender)
-            })
-            .transition().duration(shuffleAnimDuration)
-            .ease(shuffleAnimType)
-            .attr('y', function(d, j) {
-                return ySpacing - (j * boxHeightMultipler);
-            })
+    if (organizerType == 'month') {
+        for (m = 0; m < 80; m++) {
+            vis.selectAll('.month-group' + m + '-sub').sort(function(a, b) {
+                    return d3.ascending(a.gender, b.gender)
+                })
+                .transition().duration(shuffleAnimDuration)
+                .ease(shuffleAnimType)
+                .delay(function(d, j) {
+                    return j * delayTime
+                })
+                .attr('y', function(d, j) {
+                    return ySpacing - (j * boxHeightMultipler);
+                })
+        }
+    } else if (organizerType == 'age') {
+        for (m = 0; m < 80; m++) { // what is 75?
+            vis.selectAll('.age-group' + m).sort(function(a, b) {
+                    return d3.ascending(a.gender, b.gender)
+                })
+                .transition().duration(shuffleAnimDuration)
+                .ease(shuffleAnimType)
+                .delay(function(d, j) {
+                    return j * delayTime
+                })
+                .attr('y', function(d, j) {
+                    return ySpacing - (j * boxHeightMultipler);
+                })
+        }
     }
 }
 
 function sortByTime() {
-    for (m = 0; m < 75; m++) {
-        vis.selectAll('.group' + m + '-sub').sort(function(a, b) {
-                return d3.ascending(a.startTime, b.startTime)
-            })
-            .transition().duration(shuffleAnimDuration)
-            .ease(shuffleAnimType)
-            .attr('y', function(d, j) {
-                return ySpacing - (j * boxHeightMultipler);
-            })
+    if (organizerType == 'month') {
+        for (m = 0; m < 80; m++) {
+            vis.selectAll('.month-group' + m + '-sub').sort(function(a, b) {
+                    return d3.ascending(a.startTime, b.startTime)
+                })
+                .transition().duration(shuffleAnimDuration)
+                .ease(shuffleAnimType)
+                .delay(function(d, j) {
+                    return j * delayTime
+                })
+                .attr('y', function(d, j) {
+                    return ySpacing - (j * boxHeightMultipler);
+                })
+        }
+    } else if (organizerType == 'age') {
+        for (m = 0; m < 80; m++) { // what is 75?
+            vis.selectAll('.age-group' + m).sort(function(a, b) {
+                    return d3.ascending(a.startTime, b.startTime)
+                })
+                .transition().duration(shuffleAnimDuration)
+                .ease(shuffleAnimType)
+                .delay(function(d, j) {
+                    return j * delayTime
+                })
+                .attr('y', function(d, j) {
+                    return ySpacing - (j * boxHeightMultipler);
+                })
+        }
     }
 }
 
