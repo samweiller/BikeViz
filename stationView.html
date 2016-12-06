@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>CitiBikeViz</title>
-    <link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|PT+Sans|PT+Sans+Narrow" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700|PT+Sans:400,400i,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
     <script>
         // Initialize Firebase
@@ -32,7 +34,23 @@
             <section class='SV-action-area'>
                 <div class='SV-title-area'></div>
                 <div class='SV-viz-area' id='vis'></div>
-                <div class='SV-UI-area'></div>
+                <div class='SV-UI-area'>
+                   <div class='BV-sorting-copy'>Organize</div>
+                   <div class="btn-group BV-sort-buttons" role="group" aria-label="...">
+                       <button type="button" onclick="orgByAge()" id='ageBtn' class="btn btn-default BV-button BV-age-button">age</button>
+                       <button type="button" onclick="orgByMonth()" id='monthBtn' class="btn btn-default BV-button BV-month-button active">month</button>
+                   </div>
+                   <div class='BV-sorting-copy'>by</div>
+                   <div class="btn-group BV-sort-buttons" role="group" aria-label="...">
+                       <button type="button" onclick="sortByGender()" id='genderBtn' class="btn btn-default BV-button BV-gender-button">gender</button>
+                       <button type="button" onclick="sortByTime()" id='timeBtn' class="btn btn-default BV-button BV-time-button active">time</button>
+                   </div>
+                   <div class='next-button-div'>
+                       <a class="btn btn-default BV-button" href="#" role="button" id='nextBtn' class='next-button'>Top Stations &rarr;</a>
+                   </div>
+                   <br /><br /><br />
+                   <div class='BV-footnote-area month-footnote'>Standard maintenance and removal of bikes may cause gaps in the data. Age and Gender data is not collected for one-time riders.</div>
+                </div>
             </section>
             <div class='SV-map-area'></div>
         </section>

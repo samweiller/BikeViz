@@ -304,8 +304,11 @@ body {
     border-radius: 5px;
 }
 
-.month-axis {
+.month-axis-box {
     fill: #454545;
+    border-style: solid;
+    border-color: #fafafa;
+    border-width: medium;
 }
 
 .month-axis-label {

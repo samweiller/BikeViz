@@ -4,9 +4,9 @@ var width = 1300; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
 var height = 610; // THIS TOO. //550
 
 var boxSize = 6;
-var boxWidth = 10; //9
-var boxHeight = 4; //4
-var boxSpacing = 2; //2
+var boxWidth = 7; //9
+var boxHeight = 1; //4
+var boxSpacing = 0; //2
 var boxWidthMultipler = boxWidth + boxSpacing
 var boxHeightMultipler = boxHeight + boxSpacing
 var boxRadius = 0;
@@ -22,13 +22,13 @@ var shuffleAnimType = d3.easeExpInOut;
 var fwooshAnimDuration = 1000;
 var fwooshAnimType = d3.easePolyInOut;
 var axisAnimationDuration = 1000;
-var delayTime = 12;
+var delayTime = 20;
 
 var xSpacing = 00;
 var ySpacing = 450; //374
 
-var theBikeID = getRandomBikeNumber();
-console.log(theBikeID)
+var theStationID = getRandomStationNumber(); //324
+console.log(theStationID)
 
 // BLACKLIST -> 17392, 17470, 24303, 16353, 15496, 25971, 25144, 15469, 16331, 25004, 26367
 
@@ -58,7 +58,7 @@ var theDataSets = updateViz(organizerType, 'gender');
 
 //Called when the update button is clicked
 function updateViz(organizer) {
-    return getRidesForBike(theBikeID).then(function(dataset) {
+    return getRidesForStation(theStationID).then(function(dataset) {
         // START LOADING HERE
         console.log('getting rides')
 
@@ -68,42 +68,37 @@ function updateViz(organizer) {
         var customerData = sortDataBy2(organizer, dataset, 'customer')
         plotDataByMonth(sortedData, customerData, 1)
 
-        getBirthStationForBike(theBikeID).then(function(birthInfo) {
            // Create all needed HTML objects
-           var birthStation = birthInfo[0]
-           var birthDate = birthInfo[1]
-
-           var dateStamp = new Date(birthDate);
-
+           getNameForStation(theStationID).then(function(stationName) {
+            //  console.log(stationName)
            var theHeader = document.createElement('div')                // Create a <h1> element
            theHeader.className = 'station-name'
-           var headText = document.createTextNode('Rides through the Station at ' + theBikeID + '.');     // Create a text node
+           var headText = document.createTextNode('Rides through the Station at ' + stationName + '.');     // Create a text node
            theHeader.appendChild(headText);
 
            var titleDiv = document.getElementsByClassName('SV-title-area');
            titleDiv[0].append(theHeader);
 
            var theSubscriberAxisLabel = document.createElement('div')
-           theSubscriberAxisLabel.className = 'sub-axis-label'
+           theSubscriberAxisLabel.className = 'SV-sub-axis-label'
            var subAxisText = document.createTextNode('Annual Riders')
-           var theVizArea = document.getElementsByClassName('viz-area')
+           var theVizArea = document.getElementsByClassName('SV-viz-area')
            theSubscriberAxisLabel.append(subAxisText);
            theVizArea[0].append(theSubscriberAxisLabel)
 
            var theCustomerAxisLabel = document.createElement('div')
-           theCustomerAxisLabel.className = 'cust-axis-label'
+           theCustomerAxisLabel.className = 'SV-cust-axis-label'
            var custAxisText = document.createTextNode('One-Time Riders')
-           var theUIArea = document.getElementsByClassName('UI-area')
+           var theUIArea = document.getElementsByClassName('SV-UI-area')
            theCustomerAxisLabel.append(custAxisText);
            theUIArea[0].append(theCustomerAxisLabel);
 
            var theLegend = document.createElement('div')
-           theLegend.className = 'BV-legend'
-           theLegend.innerHTML = "<div class='BV-legend-male BV-legend-icon'></div><div class='BV-legend-label'>male</div><div class='BV-legend-female BV-legend-icon'></div><div class='BV-legend-label'>female</div><div class='BV-legend-nodata BV-legend-icon'></div><div class='BV-legend-label'>no data</div>"
-           var theUIArea = document.getElementsByClassName('UI-area')
+           theLegend.className = 'SV-legend'
+           theLegend.innerHTML = "<div class='SV-legend-male SV-legend-icon'></div><div class='SV-legend-label'>male</div><div class='SV-legend-female SV-legend-icon'></div><div class='SV-legend-label'>female</div><div class='SV-legend-nodata SV-legend-icon'></div><div class='SV-legend-label'>no data</div>"
+           var theUIArea = document.getElementsByClassName('SV-UI-area')
            theUIArea[0].append(theLegend)
-        })
-
+        });
             // END LOADING HERE
         return [ageData, sortedData, customerData]
     });
@@ -150,7 +145,7 @@ function byTime() {
     updateViz('time');
 }
 
-function getRidesForBike(stationID) {
+function getRidesForStation(stationID) {
     var db = firebase.database();
     var ref = db.ref("/");
     var fullDataArray = {
@@ -194,8 +189,10 @@ function getRidesForBike(stationID) {
             if (dataObject.user.type == 'Subscriber') {
                 var theRefactoredObject = {
                     'rideID': childSnapshot.key,
-                    'bikeID': bikeID,
+                    'bikeID': 99999,
                     'stationID': dataObject.startStation,
+                    'startStation': dataObject.startStation,
+                    'endStation': dataObject.endStation,
                     'gender': dataObject.user.gender,
                     'userType': dataObject.user.type,
                     'age': 2016 - Number(dataObject.user.birthYear),
@@ -209,8 +206,10 @@ function getRidesForBike(stationID) {
             } else if (dataObject.user.type == 'Customer') {
                 var theRefactoredObject = {
                     'rideID': childSnapshot.key,
-                    'bikeID': bikeID,
+                    'bikeID': 99999,
                     'stationID': dataObject.startStation,
+                    'startStation': dataObject.startStation,
+                    'endStation': dataObject.endStation,
                     'gender': 'not available',
                     'userType': dataObject.user.type,
                     'age': 'not available',
@@ -484,6 +483,7 @@ function plotDataByMonth(sortedData, customerData, isInit) {
         .attr('y', ySpacing + 8)
         .attr('height', axisHeight)
         .attr('width', axisBoxWidth)
+        .attr('stroke', '#fafafa')
         .style('opacity', 0)
         .transition().duration(axisAnimationDuration).style("opacity", 1);
 
@@ -688,6 +688,15 @@ function plotDataByMonth(sortedData, customerData, isInit) {
     setTimeout(function() {
       vis.selectAll('.ride-box')
          .on("mouseover", function(d) {
+            console.log(d.endStation)
+            var thePageX = d3.event.pageX;
+            var thePageY = d3.event.pageY;
+            var stationName1 = "";
+            var stationName2 = "";
+            getNameForStation(d.startStation).then(function(stationName1) {
+               getNameForStation(d.endStation).then(function(stationName2) {
+
+
            div.transition()
             .duration(200)
             .style("opacity", .9);
@@ -705,15 +714,19 @@ function plotDataByMonth(sortedData, customerData, isInit) {
                var tipGender = 'not available'
             }
 
-           div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> 4th & 12th<br/><strong>End Station Name:</strong> 45th & 8th<br/><strong>Gender:</strong> ' + tipGender)
-            .style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
+
+           div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> ' + stationName1 + '<br/><strong>End Station Name:</strong> ' + stationName2 + '<br/><strong>Gender:</strong> ' + tipGender)
+            .style("left", (thePageX) + "px")
+            .style("top", (thePageY - 28) + "px");
            })
-         .on("mouseout", function(d) {
-           div.transition()
-            .duration(500)
-            .style("opacity", 0);
-           });
+           })
+
+        })
+        .on("mouseout", function(d) {
+          div.transition()
+           .duration(500)
+           .style("opacity", 0);
+          });
    }, 1000)
 }
 
@@ -1060,6 +1073,194 @@ function getRandomBikeNumber() {
 
     var myArray = Object.keys(bikeObject)
     return myArray[Math.floor(Math.random() * myArray.length)];
+}
+
+function getRandomStationNumber() {
+    var stationObject = new Object()
+
+    stationObject = {
+    "515" : true,
+    "3180" : true,
+    "3014" : true,
+    "3379" : true,
+    "507" : true,
+    "3419" : true,
+    "455" : true,
+    "388" : true,
+    "310" : true,
+    "444" : true,
+    "120" : true,
+    "302" : true,
+    "153" : true,
+    "3292" : true,
+    "335" : true,
+    "2003" : true,
+    "458" : true,
+    "3160" : true,
+    "147" : true,
+    "3047" : true,
+    "436" : true,
+    "3304" : true,
+    "3094" : true,
+    "223" : true,
+    "3396" : true,
+    "216" : true,
+    "3266" : true,
+    "3083" : true,
+    "400" : true,
+    "3106" : true,
+    "411" : true,
+    "3222" : true,
+    "3171" : true,
+    "307" : true,
+    "3058" : true,
+    "501" : true,
+    "519" : true,
+    "3159" : true,
+    "276" : true,
+    "164" : true,
+    "3230" : true,
+    "3326" : true,
+    "3408" : true,
+    "3069" : true,
+    "3119" : true,
+    "526" : true,
+    "3172" : true,
+    "447" : true,
+    "461" : true,
+    "324" : true,
+    "332" : true,
+    "313" : true,
+    "3315" : true,
+    "362" : true,
+    "265" : true,
+    "3284" : true,
+    "3330" : true,
+    "433" : true,
+    "321" : true,
+    "3143" : true,
+    "3340" : true,
+    "537" : true,
+    "3300" : true,
+    "128" : true,
+    "343" : true,
+    "523" : true,
+    "3077" : true,
+    "421" : true,
+    "450" : true,
+    "415" : true,
+    "3411" : true,
+    "534" : true,
+    "3165" : true,
+    "3054" : true,
+    "3244" : true,
+    "418" : true,
+    "373" : true,
+    "3182" : true,
+    "469" : true,
+    "3076" : true,
+    "3234" : true,
+    "3154" : true,
+    "2002" : true,
+    "3065" : true,
+    "3115" : true,
+    "3382" : true,
+    "3311" : true,
+    "284" : true,
+    "3132" : true,
+    "3097" : true,
+    "504" : true,
+    "3422" : true,
+    "475" : true,
+    "3405" : true,
+    "3368" : true,
+    "295" : true,
+    "320" : true,
+    "3137" : true,
+    "481" : true,
+    "3059" : true,
+    "486" : true,
+    "3086" : true,
+    "3353" : true,
+    "396" : true,
+    "3238" : true,
+    "3357" : true,
+    "3148" : true,
+    "3126" : true,
+    "3048" : true,
+    "3121" : true,
+    "236" : true,
+    "385" : true,
+    "3288" : true,
+    "3161" : true,
+    "3427" : true,
+    "497" : true,
+    "492" : true,
+    "3111" : true,
+    "346" : true,
+    "3150" : true,
+    "280" : true,
+    "3400" : true,
+    "454" : true,
+    "3416" : true,
+    "3385" : true,
+    "3249" : true,
+    "466" : true,
+    "351" : true,
+    "3176" : true,
+    "540" : true,
+    "407" : true,
+    "3295" : true,
+    "3043" : true,
+    "3255" : true,
+    "291" : true,
+    "262" : true,
+    "470" : true,
+    "298" : true,
+    "3363" : true,
+    "3308" : true,
+    "250" : true,
+    "399" : true,
+    "392" : true,
+    "3229" : true,
+    "329" : true,
+    "3036" : true,
+    "212" : true,
+    "512" : true,
+    "393" : true,
+    "2022" : true}
+
+    var myArray = Object.keys(stationObject)
+    return myArray[Math.floor(Math.random() * myArray.length)];
+}
+
+function getNameForStation(stationID) {
+   var db = firebase.database();
+   var ref = db.ref("/");
+
+   var stationName = "";
+   return ref.child('stations/' + stationID + '/details/').once("value").then(function(snapshot) {
+      var stationDetailObject = snapshot.val();
+      var stationName = stationDetailObject.name
+      return stationName
+   }).then(function(stationName) {
+      return stationName;
+   });
+}
+
+function getNamesForStation(stationID1, stationID2) {
+   var db = firebase.database();
+   var ref = db.ref("/");
+
+   var stationName = "";
+   return ref.child('stations/' + stationID + '/details/').once("value").then(function(snapshot) {
+      var stationDetailObject = snapshot.val();
+      var stationName = stationDetailObject.name
+      console.log(stationName)
+      return stationName
+   }).then(function(stationName) {
+      return stationName;
+   });
 }
 
 function getBirthStationForBike(bikeID) {

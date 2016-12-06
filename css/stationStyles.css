@@ -41,7 +41,7 @@ body {
 
 .SV-left-rail {
     flex: 0;
-    background-color: blue;
+    background-color: inherit;
     min-width: 10px;
     flex-grow: 1;
 }
@@ -54,35 +54,35 @@ body {
 
 .SV-title-area {
    flex: 0;
-   background-color: red;
+   background-color: inherit;
    font-family: 'Cabin';
-   font-size: 22px;
+   font-size: 18px;
    letter-spacing: 0px;
    min-height: 5%;
 }
 
 .SV-viz-area {
    flex: 1;
-   background-color: yellow;
+   background-color: inherit;
    margin-right: 0px;
    position: relative;
 }
 
 .SV-UI-area {
    flex: 2;
-   background-color: green;
+   background-color: inherit;
    min-height: 70px;
    position: relative;
 }
 
 .SV-map-area {
    flex: 2;
-   background-color: purple;
+   background-color: inherit;
    min-width: 40%;
 }
 
-/* LABELS */
-.sub-axis-label {
+/* AXIS INFO */
+.SV-sub-axis-label {
     font-family: 'PT Sans';
     font-size: 14px;
     font-style: italic;
@@ -92,7 +92,7 @@ body {
     color: #898989;
 }
 
-.cust-axis-label {
+.SV-cust-axis-label {
     font-family: 'PT Sans';
     font-size: 14px;
     font-style: italic;
@@ -100,4 +100,104 @@ body {
     top: -50px;
     right: 50px;
     color: #898989;
+}
+
+.SV-legend {
+   position: absolute;
+   top: -50px;
+   left: 50px;
+}
+
+.SV-legend-icon {
+    width: 12px;
+    height: 4px;
+    float: left;
+    margin-top: 8px;
+    margin-right: 5px
+}
+
+.SV-legend-label {
+   font-family: 'PT Sans';
+   font-size: 14px;
+   float: left;
+   margin-right: 11px;
+}
+
+.SV-legend-male {
+   background-color: #68B3EB;
+}
+
+.SV-legend-female {
+   background-color: #E86E82;
+}
+
+.SV-legend-nodata {
+   background-color: #EB9A5B;
+}
+
+.month-axis {
+    fill: #454545;
+}
+
+.month-axis-label {
+    font-family: 'PT Sans';
+    fill: white;
+}
+
+.age-axis {
+    fill: #454545;
+}
+
+.age-axis-label {
+   margin-top: 2px;
+    font-family: 'PT Sans';
+    fill: white;
+}
+
+/* TITLE AND TEXT */
+.station-name {
+    font-family: 'Cabin', sans-serif;
+    font-size: 25px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    margin-top: 10px;
+}
+
+/* VIZ BOXES */
+.ride-box:hover {
+    fill: yellow
+}
+
+.case-male {
+    fill: #68B3EB;
+}
+
+.case-female {
+    fill: #E86E82;
+}
+
+.case-genderUnknown {
+    fill: #EB9A5B;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: left;
+    width: 250px;
+    /*height: 50px;*/
+    padding: 6px;
+    padding-left: 8px;
+    font-family: 'PT Sans';
+    font-size: 14px;
+    letter-spacing: .5px;
+    background: #454545;
+    color: #fafafa;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.tip-title {
+   font-size: 19px;
+   font-family: 'Cabin';
 }
