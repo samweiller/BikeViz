@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>CitiBikeViz</title>
-    <link href="https://fonts.googleapis.com/css?family=Cabin|Cabin+Condensed|PT+Sans|PT+Sans+Narrow" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700|PT+Sans:400,400i,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
     <script>
         // Initialize Firebase
@@ -34,7 +34,30 @@
 
 <body onload="init()">
     <div class='bikeView-page'>
-        <div class='master-nav'></div>
+        <div class='master-nav'>
+            <div class='svg-div col-md-2 col-md-offset-5'>
+                <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 340 30" style="enable-background:new 0 0 340 30;" xml:space="preserve">
+  <style type="text/css">
+  	.st0{fill:none;stroke:#979797;stroke-linecap:square;}
+  	.st1{fill:#FFFFFF;stroke:#979797;}
+  	.st2{fill:#454545;stroke:#979797;}
+  </style>
+  <title>Progress-2</title>
+  <desc>Created with Sketch.</desc>
+  <g id="New-New-Bike-View-Color">
+  	<g id="Progress-2">
+  		<g transform="translate(1.000000, 1.000000)">
+  			<path id="Line" class="st0" d="M4.5,14.5h330"/>
+  			<circle id="Oval" class="st1" cx="14" cy="14" r="14"/>
+  			<circle id="Oval_1_" class="st2" cx="117" cy="14" r="14"/>
+  			<circle id="Oval_2_" class="st1" cx="324" cy="14" r="14"/>
+  			<circle id="Oval_3_" class="st1" cx="221" cy="14" r="14"/>
+  		</g>
+  	</g>
+  </g>
+  </svg>
+            </div>
+        </div>
         <section class='viz-container'>
             <section class='rail left-rail'></section>
             <section class='action-area'>
@@ -42,10 +65,22 @@
                 </div>
                 <div class='viz-area' id='vis'></div>
                 <div class='UI-area'>
-                   <button id="month" onclick="orgByMonth()">Organize by Month</button>
-                   <button id="age" onclick="orgByAge()">Organize by Age</button>
-                   <button id="gender" onclick="sortByGender()">Sort by Gender</button>
-                   <button id="time" onclick="sortByTime()">Sort by Time</button>
+                    <div class='BV-sorting-copy'>Organize</div>
+                    <div class="btn-group BV-sort-buttons" role="group" aria-label="...">
+                        <button type="button" onclick="orgByAge()" id='ageBtn' class="btn btn-default BV-button BV-age-button">age</button>
+                        <button type="button" onclick="orgByMonth()" id='monthBtn' class="btn btn-default BV-button BV-month-button active">month</button>
+                    </div>
+                    <div class='BV-sorting-copy'>by</div>
+                    <div class="btn-group BV-sort-buttons" role="group" aria-label="...">
+                        <button type="button" onclick="sortByGender()" id='genderBtn' class="btn btn-default BV-button BV-gender-button">gender</button>
+                        <button type="button" onclick="sortByTime()" id='timeBtn' class="btn btn-default BV-button BV-time-button active">time</button>
+                    </div>
+                    <div class='next-button-div'>
+                       <a class="btn btn-default BV-button" href="#" role="button" id='nextBtn' class='next-button'>Top Stations &rarr;</a>
+                    </div>
+                    <br /><br /><br />
+                    <div class='BV-footnote-area month-footnote'>Standard maintenance and removal of bikes may cause gaps in the data. Age and Gender data is not collected for one-time riders.</div>
+
                 </div>
             </section>
             <section class='rail left-rail'></section>
