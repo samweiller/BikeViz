@@ -1,0 +1,81 @@
+/* GENERAL */
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0px;
+    display: block;
+    height: 100%;
+}
+
+.SV-page {
+   display: flex;
+   flex-direction: column;
+   background-color: #fafafa;
+   min-height: 50px;
+   height: 100%;
+   width: 100%;
+}
+
+.master-nav {
+    flex: 0;
+    background-color: #fafafa;
+    min-height: 50px;
+    height: 7%;
+    width: 100%;
+    border-bottom: solid;
+    border-bottom-width: thin;
+    border-bottom-color: #979797;
+}
+
+.SV-viz-container {
+   flex: 1;
+   display: flex;
+   flex-direction: row;
+   width: 100%;
+   height: 100%;
+   justify-content: center;
+   background-color: inherit;
+}
+
+.SV-left-rail {
+    flex: 0;
+    background-color: blue;
+    min-width: 10px;
+    flex-grow: 1;
+}
+
+.SV-action-area {
+   flex: 1;
+   display: flex;
+   flex-direction: column;
+}
+
+.SV-title-area {
+   flex: 0;
+   background-color: red;
+   font-family: 'Cabin';
+   font-size: 22px;
+   letter-spacing: 0px;
+}
+
+.SV-viz-area {
+   flex: 1;
+   background-color: yellow;
+   margin-right: 0px;
+   position: relative;
+}
+
+.SV-UI-area {
+   flex: 2;
+   background-color: green;
+   min-height: 70px;
+   position: relative;
+}
+
+.SV-map-area {
+   flex: 2;
+   background-color: purple;
+   width: 40%;
+}

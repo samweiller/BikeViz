@@ -9,11 +9,6 @@
     <script>
         // Initialize Firebase
         var config = {
-            // apiKey: "AIzaSyDCb3P4wJcwKoeUnNxp9GbT88-fX6K-O6M",
-            // authDomain: "citiviz3-83044.firebaseapp.com",
-            // databaseURL: "https://citiviz3-83044.firebaseio.com",
-            // storageBucket: "citiviz3-83044.appspot.com",
-            // messagingSenderId: "200437723375"
             apiKey: "AIzaSyDsVBdmHWV5wNtbWbLLR7A5lLJTWIsBBh8",
             authDomain: "citivizsandbox.firebaseapp.com",
             databaseURL: "https://citivizsandbox.firebaseio.com",
@@ -26,20 +21,22 @@
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.27.0/mapbox-gl.css' rel='stylesheet' />
     <script src="./lib/d3.js"></script>
     <script src="./js/viz-station.js"></script>
-    <link href="./css/myStyles.css" rel="stylesheet">
+    <link href="./css/stationStyles.css" rel="stylesheet">
 </head>
 
 <body onload="init()">
-    <div class='bikeView-container'>
-        <section class="bikeView-left" id="vis"></section>
-        <section class="bikeView-right">
-            <div class="col bikeView-mapSection"></div>
-            <div class="col bikeView-imageSection"></div>
-            <div class="col bikeView-UIsection"></div>
+    <div class='SV-page'>
+        <div class='master-nav'></div>
+        <section class='SV-viz-container'>
+            <section class='SV-rail SV-left-rail'></section>
+            <section class='SV-action-area'>
+                <div class='SV-title-area'></div>
+                <div class='SV-viz-area'></div>
+                <div class='SV-UI-area'></div>
+            </section>
+            <div class='SV-map-area'></div>
         </section>
-
-        <!-- init() method defined in coffee.js-->
-
+    </div>
 </body>
 
 </html>
