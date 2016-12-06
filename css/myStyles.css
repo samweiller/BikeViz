@@ -100,7 +100,7 @@ body {
     position: absolute;
     top: 20px;
     right: 50px;
-    color: #454545;
+    color: #898989;
 }
 
 .cust-axis-label {
@@ -110,7 +110,7 @@ body {
     position: absolute;
     top: -50px;
     right: 50px;
-    color: #454545;
+    color: #898989;
 }
 
 .next-button-div {
@@ -169,7 +169,7 @@ body {
 
 .BV-button {
    font-family: 'PT Sans';
-   font-size: 17px;  
+   font-size: 17px;
 }
 
 .BV-sort-buttons {
@@ -181,6 +181,7 @@ body {
    font-family: 'PT Sans';
    font-size: 12px;
    font-style: italic;
+   color: #898989;
 }
 
 .bikeView-right {
