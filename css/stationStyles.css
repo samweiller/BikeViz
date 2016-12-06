@@ -58,6 +58,7 @@ body {
    font-family: 'Cabin';
    font-size: 22px;
    letter-spacing: 0px;
+   min-height: 5%;
 }
 
 .SV-viz-area {
@@ -77,5 +78,26 @@ body {
 .SV-map-area {
    flex: 2;
    background-color: purple;
-   width: 40%;
+   min-width: 40%;
+}
+
+/* LABELS */
+.sub-axis-label {
+    font-family: 'PT Sans';
+    font-size: 14px;
+    font-style: italic;
+    position: absolute;
+    top: 20px;
+    right: 50px;
+    color: #898989;
+}
+
+.cust-axis-label {
+    font-family: 'PT Sans';
+    font-size: 14px;
+    font-style: italic;
+    position: absolute;
+    top: -50px;
+    right: 50px;
+    color: #898989;
 }
