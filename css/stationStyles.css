@@ -1,0 +1,203 @@
+/* GENERAL */
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0px;
+    display: block;
+    height: 100%;
+}
+
+.SV-page {
+   display: flex;
+   flex-direction: column;
+   background-color: #fafafa;
+   min-height: 50px;
+   height: 100%;
+   width: 100%;
+}
+
+.master-nav {
+    flex: 0;
+    background-color: #fafafa;
+    min-height: 50px;
+    height: 7%;
+    width: 100%;
+    border-bottom: solid;
+    border-bottom-width: thin;
+    border-bottom-color: #979797;
+}
+
+.SV-viz-container {
+   flex: 1;
+   display: flex;
+   flex-direction: row;
+   width: 100%;
+   height: 100%;
+   justify-content: center;
+   background-color: inherit;
+}
+
+.SV-left-rail {
+    flex: 0;
+    background-color: inherit;
+    min-width: 10px;
+    flex-grow: 1;
+}
+
+.SV-action-area {
+   flex: 1;
+   display: flex;
+   flex-direction: column;
+}
+
+.SV-title-area {
+   flex: 0;
+   background-color: inherit;
+   font-family: 'Cabin';
+   font-size: 18px;
+   letter-spacing: 0px;
+   min-height: 5%;
+}
+
+.SV-viz-area {
+   flex: 1;
+   background-color: inherit;
+   margin-right: 0px;
+   position: relative;
+}
+
+.SV-UI-area {
+   flex: 2;
+   background-color: inherit;
+   min-height: 70px;
+   position: relative;
+}
+
+.SV-map-area {
+   flex: 2;
+   background-color: inherit;
+   min-width: 40%;
+}
+
+/* AXIS INFO */
+.SV-sub-axis-label {
+    font-family: 'PT Sans';
+    font-size: 14px;
+    font-style: italic;
+    position: absolute;
+    top: 20px;
+    right: 50px;
+    color: #898989;
+}
+
+.SV-cust-axis-label {
+    font-family: 'PT Sans';
+    font-size: 14px;
+    font-style: italic;
+    position: absolute;
+    top: -50px;
+    right: 50px;
+    color: #898989;
+}
+
+.SV-legend {
+   position: absolute;
+   top: -50px;
+   left: 50px;
+}
+
+.SV-legend-icon {
+    width: 12px;
+    height: 4px;
+    float: left;
+    margin-top: 8px;
+    margin-right: 5px
+}
+
+.SV-legend-label {
+   font-family: 'PT Sans';
+   font-size: 14px;
+   float: left;
+   margin-right: 11px;
+}
+
+.SV-legend-male {
+   background-color: #68B3EB;
+}
+
+.SV-legend-female {
+   background-color: #E86E82;
+}
+
+.SV-legend-nodata {
+   background-color: #EB9A5B;
+}
+
+.month-axis {
+    fill: #454545;
+}
+
+.month-axis-label {
+    font-family: 'PT Sans';
+    fill: white;
+}
+
+.age-axis {
+    fill: #454545;
+}
+
+.age-axis-label {
+   margin-top: 2px;
+    font-family: 'PT Sans';
+    fill: white;
+}
+
+/* TITLE AND TEXT */
+.station-name {
+    font-family: 'Cabin', sans-serif;
+    font-size: 25px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    margin-top: 10px;
+}
+
+/* VIZ BOXES */
+.ride-box:hover {
+    fill: yellow
+}
+
+.case-male {
+    fill: #68B3EB;
+}
+
+.case-female {
+    fill: #E86E82;
+}
+
+.case-genderUnknown {
+    fill: #EB9A5B;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: left;
+    width: 250px;
+    /*height: 50px;*/
+    padding: 6px;
+    padding-left: 8px;
+    font-family: 'PT Sans';
+    font-size: 14px;
+    letter-spacing: .5px;
+    background: #454545;
+    color: #fafafa;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.tip-title {
+   font-size: 19px;
+   font-family: 'Cabin';
+}
