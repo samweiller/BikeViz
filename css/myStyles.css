@@ -1,110 +1,208 @@
-/*font-family: 'Cabin', sans-serif;
+    /*font-family: 'Cabin', sans-serif;
 font-family: 'Cabin Condensed', sans-serif;
 font-family: 'PT Sans', sans-serif;
 font-family: 'PT Sans Narrow', sans-serif;*/
 
+
 /* GENERAL STUFF */
+
 html {
-   height: 100%;
+    height: 100%;
 }
 
 body {
-   margin: 0px;
-   display: block;
-   height: 100%;
+    margin: 0px;
+    display: block;
+    height: 100%;
 }
 
 .svg-area {
-   /*width: 1300px;*/
+    /*width: 1300px;*/
 }
 
+
 /* LAYOUT STUFF */
+
 .bikeView-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 50px;
-  height: 100%;
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #fafafa;
+    min-height: 50px;
+    height: 100%;
+    width: 100%;
 }
 
 .master-nav {
-   flex: 0;
-   background-color: inherit;
-   min-height: 30px;
-   height: 5%;
-   width: 100%;
+    flex: 0;
+    background-color: #fafafa;
+    min-height: 50px;
+    height: 7%;
+    width: 100%;
+    border-bottom: solid;
+    border-bottom-width: thin;
+    border-bottom-color: #979797;
+}
+
+.svg-div {
+    margin-top: 10px;
 }
 
 .viz-container {
-   display: flex;
-   flex-direction: row;
-   width: 100%;
-   height: 100%;
-   justify-content: center;
-   background-color: #ffffff;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    background-color: inherit;
 }
 
 .left-rail {
-   flex: 0;
-   background-color: inherit;
-   min-width: 10px;
-   flex-grow: 1;
+    flex: 0;
+    background-color: inherit;
+    min-width: 10px;
+    flex-grow: 1;
 }
 
 .right-rail {
-   flex: 2;
-   background-color: inherit;
-   flex-grow: 1;
+    flex: 2;
+    background-color: inherit;
+    flex-grow: 1;
 }
 
 .action-area {
-   flex: 1;
-   display: flex;
-   flex-direction: column;
-   /*max-width: 1000px;*/
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    /*max-width: 1000px;*/
 }
 
 .title-area {
-   flex: 0;
-   background-color: inherit;
-   font-family: 'Cabin';
-   font-size: 22px;
-   letter-spacing: 0px;
-   /*font-weight: re;*/
-
+    flex: 0;
+    background-color: inherit;
+    font-family: 'Cabin';
+    font-size: 22px;
+    letter-spacing: 0px;
+    /*font-weight: re;*/
 }
 
 .viz-area {
-  flex: 1;
-  background-color: inherit;
-  margin-right: 0px;
-  /*width: 75%*/
+    flex: 1;
+    background-color: #fafafa;
+    margin-right: 0px;
+    /*width: 75%*/
+    position: relative;
+}
+
+.sub-axis-label {
+    font-family: 'PT Sans';
+    font-size: 14px;
+    font-style: italic;
+    position: absolute;
+    top: 20px;
+    right: 50px;
+    color: #454545;
+}
+
+.cust-axis-label {
+    font-family: 'PT Sans';
+    font-size: 14px;
+    font-style: italic;
+    position: absolute;
+    top: -50px;
+    right: 50px;
+    color: #454545;
+}
+
+.next-button-div {
+   position: absolute;
+   top: 0px;
+   right: 50px;
+}
+
+.BV-legend {
+   position: absolute;
+   top: -50px;
+   left: 50px;
+}
+
+.BV-legend-icon {
+    width: 12px;
+    height: 4px;
+    float: left;
+    margin-top: 8px;
+    margin-right: 5px
+}
+
+.BV-legend-label {
+   font-family: 'PT Sans';
+   font-size: 14px;
+   float: left;
+   margin-right: 11px;
+}
+
+.BV-legend-male {
+   background-color: #68B3EB;
+}
+
+.BV-legend-female {
+   background-color: #E86E82;
+}
+
+.BV-legend-nodata {
+   background-color: #EB9A5B;
 }
 
 .UI-area {
-   flex: 2;
-   background-color: inherit;
-   min-height: 70px;
+    flex: 2;
+    background-color: inherit;
+    min-height: 70px;
+    position: relative;
+}
+
+.BV-sorting-copy {
+   font-family: 'PT Sans';
+   font-size: 18px;
+   margin-top: 7px;
+   margin-right: 10px;
+   float: left;
+}
+
+.BV-button {
+   font-family: 'PT Sans';
+   font-size: 17px;  
+}
+
+.BV-sort-buttons {
+   margin-right: 10px;
+   float: left;
+}
+
+.BV-footnote-area {
+   font-family: 'PT Sans';
+   font-size: 12px;
+   font-style: italic;
 }
 
 .bikeView-right {
-  width: 25%;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  margin: 0;
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 0;
 }
 
 .col {
-  margin: 0px;
+    margin: 0px;
 }
 
 .transitionView-mapSection {
-   height: 100%;
-   margin-bottom: 0px;
-  }
+    height: 100%;
+    margin-bottom: 0px;
+}
+
 
 /* MAP STUFF */
+
 #map {
     position: relative;
     width: 0px;
@@ -147,131 +245,156 @@ body {
 }
 
 #flyButton {
-   width: 100%;
-   height: 100%;
-   margin: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
 }
+
 
 /* IMAGE STUFF */
+
 .theStationImage {
-   /*width: 50%;*/
+    /*width: 50%;*/
 }
 
 .theStationImage {
-   width: 100%;
-   height: 100%;
+    width: 100%;
+    height: 100%;
 }
+
 
 /* VIZ STUFF */
-.bikeVizTitle {
-   font-family: 'Cabin', sans-serif;
-   font-size: 34px;
+
+.bike-number {
+    font-family: 'Cabin', sans-serif;
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    margin-top: 10px;
+}
+
+.birth-certificate {
+    font-family: 'PT Sans';
+    font-size: 18px;
+    margin-bottom: 15px;
 }
 
 .vis {
-   margin: 0;
+    margin: 0;
 }
 
 .ride-box:hover {
-   fill: yellow
+    fill: yellow
 }
 
 .case-male {
-   fill: #5FA4D7;
+    fill: #68B3EB;
 }
 
 .case-female {
-   fill: #F8ABA7;
+    fill: #E86E82;
 }
 
 .case-genderUnknown {
-   fill: #8569AD;
+    fill: #EB9A5B;
 }
 
 .ride-box {
-   border-radius: 5px;
+    border-radius: 5px;
 }
 
 .month-axis {
-   fill: #454545;
+    fill: #454545;
 }
 
 .month-axis-label {
-   font-family: Cabin;
-   fill: white;
+    font-family: 'PT Sans';
+    fill: white;
 }
 
 .age-axis {
-   fill: #454545;
+    fill: #454545;
 }
 
 .age-axis-label {
-   font-family: Cabin;
-   fill: white;
+   margin-top: 2px;
+    font-family: 'PT Sans';
+    fill: white;
 }
 
 div.tooltip {
     position: absolute;
     text-align: left;
-    width: 200px;
+    width: 250px;
     /*height: 50px;*/
-    padding: 2px;
-    font: 12px sans-serif;
-    background: gray;
+    padding: 6px;
+    padding-left: 8px;
+    font-family: 'PT Sans';
+    font-size: 14px;
+    letter-spacing: .5px;
+    background: #454545;
+    color: #fafafa;
     border: 0px;
     border-radius: 8px;
     pointer-events: none;
 }
 
+.tip-title {
+   font-size: 19px;
+   font-family: 'Cabin';
+}
+
+
 /* TRANSITION VIEW */
+
 #transitionView-streetViewImage {
-  position: fixed;
-  height: 150px;
-  width: 300px;
-  background-color: black;
-  top: 85%;
-  left: 50%;
-  opacity: 0;
-  /* bring your own prefixes */
-  transform: translate(-50%, -85%);
+    position: fixed;
+    height: 150px;
+    width: 300px;
+    background-color: black;
+    top: 85%;
+    left: 50%;
+    opacity: 0;
+    /* bring your own prefixes */
+    transform: translate(-50%, -85%);
 }
 
 #transitionView-stationLabel {
-  position: fixed;
-  text-align: center;
-  font-size: 160%;
-  font-family: Lato;
-  height: 100px;
-  width: 300px;
-  top: 97%;
-  left: 50%;
-  background-color: white;
-  /* bring your own prefixes */
-  transform: translate(-50%, -97%);
-  opacity: 0;
+    position: fixed;
+    text-align: center;
+    font-size: 160%;
+    font-family: Lato;
+    height: 100px;
+    width: 300px;
+    top: 97%;
+    left: 50%;
+    background-color: white;
+    /* bring your own prefixes */
+    transform: translate(-50%, -97%);
+    opacity: 0;
 }
 
 .storypart {
-  position: absolute;
-  width: 600px;
-  height: 300px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: table;
+    position: absolute;
+    width: 600px;
+    height: 300px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: table;
 }
 
 .storypart p {
-  display: table-cell;
-  vertical-align: middle;
-  text-align: center;
-  font-family: Lato;
-  font-size: 190%;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    font-family: Lato;
+    font-size: 190%;
 }
 
 #beginningStoryText {
-  opactiy: 0;
+    opactiy: 0;
 }
 
 #FullScreenMapBoxMap {
-  opacity: 0;
+    opacity: 0;
