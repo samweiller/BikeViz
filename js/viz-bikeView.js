@@ -1,18 +1,19 @@
 var chart;
 
 var width = 1300; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 550; // THIS TOO.
+var height = 610; // THIS TOO. //550
 
 var boxSize = 6;
-var boxWidth = 9;
-var boxHeight = 4;
-var boxSpacing = 2;
+var boxWidth = 12; //9
+var boxHeight = 4; //4
+var boxSpacing = 2; //2
 var boxWidthMultipler = boxWidth + boxSpacing
 var boxHeightMultipler = boxHeight + boxSpacing
 var boxRadius = 0;
 var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
 var totalAxisWidth = (axisBoxWidth * 8) + (boxSpacing * 8)
 var widthAddition = 50;
+var axisHeight = 18;
 width = totalAxisWidth + (widthAddition*2);
 
 // ANIMATION STUFF
@@ -24,18 +25,19 @@ var axisAnimationDuration = 1000;
 var delayTime = 12;
 
 var xSpacing = 00;
-var ySpacing = 320;
+var ySpacing = 450; //374
 
-var theBikeID = 17470;
+var theBikeID = getRandomBikeNumber();
 console.log(theBikeID)
 
-// BLACKLIST -> 17470, 24303, 16353, 15496
+// BLACKLIST -> 17392, 17470, 24303, 16353, 15496, 25971, 25144, 15469, 16331, 25004, 26367
 
 // DATA THINGS
 var validMonths = 8;
 var numSegments = 10; // Number of segments per month
 var segmentSize = 3; // Number of days per segment
 var tip;
+var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 //DEFINE YOUR VARIABLES UP HERE
 console.log('in')
@@ -65,11 +67,51 @@ function updateViz(organizer) {
         var sortedData = sortDataBy2(organizer, dataset, 'subscriber') // returns data already parsed by customer type
         var customerData = sortDataBy2(organizer, dataset, 'customer')
         plotDataByMonth(sortedData, customerData, 1)
-        var h = document.createElement("h1")                // Create a <h1> element
-        var t = document.createTextNode("Bike " + theBikeID);     // Create a text node
-        h.appendChild(t);
-        var titleDiv = document.getElementsByClassName('title-area');
-        titleDiv[0].append(h);
+
+        getBirthStationForBike(theBikeID).then(function(birthInfo) {
+           // Create all needed HTML objects
+           var birthStation = birthInfo[0]
+           var birthDate = birthInfo[1]
+
+           var dateStamp = new Date(birthDate);
+
+           var theHeader = document.createElement('div')                // Create a <h1> element
+           theHeader.className = 'bike-number'
+           var headText = document.createTextNode('Your bike is Number ' + theBikeID + '.');     // Create a text node
+           theHeader.appendChild(headText);
+
+           var theMonth = monthNames[dateStamp.getMonth()];
+
+           var theBirthCertificate = document.createElement('div')
+           theBirthCertificate.className = 'birth-certificate'
+           var birthText = document.createTextNode('It was born on ' + theMonth + ' ' + dateStamp.getDate() + ', 2016 at the station at ' + birthStation + '.')
+           theBirthCertificate.appendChild(birthText)
+
+           var titleDiv = document.getElementsByClassName('title-area');
+           titleDiv[0].append(theHeader);
+           titleDiv[0].append(theBirthCertificate);
+
+           var theSubscriberAxisLabel = document.createElement('div')
+           theSubscriberAxisLabel.className = 'sub-axis-label'
+           var subAxisText = document.createTextNode('Annual Riders')
+           var theVizArea = document.getElementsByClassName('viz-area')
+           theSubscriberAxisLabel.append(subAxisText);
+           theVizArea[0].append(theSubscriberAxisLabel)
+
+           var theCustomerAxisLabel = document.createElement('div')
+           theCustomerAxisLabel.className = 'cust-axis-label'
+           var custAxisText = document.createTextNode('One-Time Riders')
+           var theUIArea = document.getElementsByClassName('UI-area')
+           theCustomerAxisLabel.append(custAxisText);
+           theUIArea[0].append(theCustomerAxisLabel);
+
+           var theLegend = document.createElement('div')
+           theLegend.className = 'BV-legend'
+           theLegend.innerHTML = "<div class='BV-legend-male BV-legend-icon'></div><div class='BV-legend-label'>male</div><div class='BV-legend-female BV-legend-icon'></div><div class='BV-legend-label'>female</div><div class='BV-legend-nodata BV-legend-icon'></div><div class='BV-legend-label'>no data</div>"
+           var theUIArea = document.getElementsByClassName('UI-area')
+           theUIArea[0].append(theLegend)
+        })
+
             // END LOADING HERE
         return [ageData, sortedData, customerData]
     });
@@ -84,6 +126,15 @@ function orgByMonth() {
     organizerType = 'month';
     theDataSets.then(function(data) {
         plotDataByMonth(data[1], data[2], 0)
+        var ageOrgButton = document.getElementById('ageBtn')
+        ageOrgButton.classList.remove("active");
+        var monthOrgButton = document.getElementById('monthBtn')
+        monthOrgButton.classList.add("active");
+
+        var genderSortButton = document.getElementById('genderBtn')
+        genderSortButton.classList.remove("active");
+        var timeSortButton = document.getElementById('timeBtn')
+        timeSortButton.classList.add("active");
     })
 }
 
@@ -91,6 +142,15 @@ function orgByAge() {
     organizerType = 'age';
     theDataSets.then(function(data) {
         plotDataByAge(data[0]) // age data
+        var ageOrgButton = document.getElementById('ageBtn')
+        ageOrgButton.classList.add("active");
+        var monthOrgButton = document.getElementById('monthBtn')
+        monthOrgButton.classList.remove("active");
+
+        var genderSortButton = document.getElementById('genderBtn')
+        genderSortButton.classList.remove("active");
+        var timeSortButton = document.getElementById('timeBtn')
+        timeSortButton.classList.add("active");
     })
 }
 
@@ -153,7 +213,6 @@ function getRidesForBike(bikeID) {
                     'segmentIndex': segIndex,
                     'duration': dataObject.duration
                 }
-
                 fullDataArray.subscriber.push(theRefactoredObject);
             } else if (dataObject.user.type == 'Customer') {
                 var theRefactoredObject = {
@@ -301,7 +360,7 @@ function plotDataByAge(ridesByAge) {
             return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)
         })
         .attr('y', ySpacing + 8)
-        .attr('height', 15)
+        .attr('height', axisHeight)
         .attr('width', axisBoxWidth)
         .style('opacity', 0)
         .transition().duration(axisAnimationDuration).style("opacity", 1);
@@ -316,11 +375,12 @@ function plotDataByAge(ridesByAge) {
             return d;
         })
         .attr('x', function(d, i) {
-            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + 10
+            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + (axisBoxWidth/2)
         })
-        .attr('y', ySpacing + 20)
+        .attr('y', ySpacing + 22)
         .attr('height', 25)
         .attr('width', axisBoxWidth)
+        .attr('text-anchor', 'middle')
         .style('font-size', '14px')
         .style('opacity', 0)
         .transition().duration(axisAnimationDuration).style("opacity", 1);
@@ -385,7 +445,21 @@ function plotDataByAge(ridesByAge) {
         div.transition()
          .duration(200)
          .style("opacity", .9);
-        div.html('<strong>Ride ' + d.rideID + "</strong><br/>Date: " + d.startTime + "<br/>Age: " + d.age +'<br/>Duration: ' + d.duration + '<br/>Start Station Name: 4th & 12th<br/>End Station Name: 45th & 8th<br/>Gender: ' + d.gender + '<br/>Rider Type: ' + d.userType)
+         var dateStamp = new Date(d.startTime)
+         var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
+         var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
+         var minutes = Math.floor(d.duration / 60);
+         var seconds = d.duration - minutes * 60;
+         var tipDuration = minutes + ':' + str_pad_left(seconds,'0',2)
+         if (d.gender == 1) {
+            var tipGender = 'Male'
+         } else if (d.gender == 2) {
+            var tipGender = 'Female'
+         } else {
+            var tipGender = 'not available'
+         }
+
+        div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> 4th & 12th<br/><strong>End Station Name:</strong> 45th & 8th<br/><strong>Gender:</strong> ' + tipGender)
          .style("left", (d3.event.pageX) + "px")
          .style("top", (d3.event.pageY - 28) + "px");
         })
@@ -416,7 +490,7 @@ function plotDataByMonth(sortedData, customerData, isInit) {
             return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)
         })
         .attr('y', ySpacing + 8)
-        .attr('height', 15)
+        .attr('height', axisHeight)
         .attr('width', axisBoxWidth)
         .style('opacity', 0)
         .transition().duration(axisAnimationDuration).style("opacity", 1);
@@ -431,11 +505,12 @@ function plotDataByMonth(sortedData, customerData, isInit) {
             return d;
         })
         .attr('x', function(d, i) {
-            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + 40
+            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + (axisBoxWidth/2)
         })
-        .attr('y', ySpacing + 20)
+        .attr('y', ySpacing + 22)
         .attr('height', 25)
         .attr('width', axisBoxWidth)
+        .attr('text-anchor', 'middle')
         .style('font-size', '14px')
         .attr('class', 'bikeView-year-label')
         .style('opacity', 0)
@@ -551,7 +626,7 @@ function plotDataByMonth(sortedData, customerData, isInit) {
                             .ease(fwooshAnimType)
                             .attr('x', xLoc) // circle -> cx
                             .attr('y', function(d, j) { // circle -> cy
-                                return ySpacing + 27 + (j * boxHeightMultipler);
+                                return ySpacing + 30 + (j * boxHeightMultipler);
                             })
                             .attr('height', boxHeight) // circle -> r -> boxSize/2
                             .attr('width', boxWidth)
@@ -619,20 +694,34 @@ function plotDataByMonth(sortedData, customerData, isInit) {
         }
     }
     setTimeout(function() {
-    vis.selectAll('.ride-box')
-      .on("mouseover", function(d) {
-        div.transition()
-         .duration(200)
-         .style("opacity", .9);
-        div.html('<strong>Ride ' + d.rideID + "</strong><br/>Age: " + d.age)
-         .style("left", (d3.event.pageX) + "px")
-         .style("top", (d3.event.pageY - 28) + "px");
-        })
-      .on("mouseout", function(d) {
-        div.transition()
-         .duration(500)
-         .style("opacity", 0);
-      });
+      vis.selectAll('.ride-box')
+         .on("mouseover", function(d) {
+           div.transition()
+            .duration(200)
+            .style("opacity", .9);
+            var dateStamp = new Date(d.startTime)
+            var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
+            var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
+            var minutes = Math.floor(d.duration / 60);
+            var seconds = d.duration - minutes * 60;
+            var tipDuration = minutes + ':' + str_pad_left(seconds,'0',2)
+            if (d.gender == 1) {
+               var tipGender = 'Male'
+            } else if (d.gender == 2) {
+               var tipGender = 'Female'
+            } else {
+               var tipGender = 'not available'
+            }
+
+           div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> 4th & 12th<br/><strong>End Station Name:</strong> 45th & 8th<br/><strong>Gender:</strong> ' + tipGender)
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 28) + "px");
+           })
+         .on("mouseout", function(d) {
+           div.transition()
+            .duration(500)
+            .style("opacity", 0);
+           });
    }, 1000)
 }
 
@@ -666,6 +755,10 @@ function sortByGender() {
                 })
         }
     }
+    var genderSortButton = document.getElementById('genderBtn')
+    genderSortButton.classList.add("active");
+    var timeSortButton = document.getElementById('timeBtn')
+    timeSortButton.classList.remove("active");
 }
 
 function sortByTime() {
@@ -698,6 +791,10 @@ function sortByTime() {
                 })
         }
     }
+    var genderSortButton = document.getElementById('genderBtn')
+    genderSortButton.classList.remove("active");
+    var timeSortButton = document.getElementById('timeBtn')
+    timeSortButton.classList.add("active");
 }
 
 function getRandomBikeNumber() {
@@ -971,4 +1068,36 @@ function getRandomBikeNumber() {
 
     var myArray = Object.keys(bikeObject)
     return myArray[Math.floor(Math.random() * myArray.length)];
+}
+
+function getBirthStationForBike(bikeID) {
+    var db = firebase.database();
+    var ref = db.ref("/");
+
+    var birthStation = "";
+    var birthDate = "";
+    return ref.child('bikes/' + bikeID + '/rides/').orderByKey().limitToFirst(1).once("value").then(function(snapshot) {
+
+        snapshot.forEach(function(childSnapshot) {
+
+            var dataObject = childSnapshot.val();
+            console.log("see this -" + dataObject.startStation);
+
+            if (birthStation == "") {
+                birthStation = dataObject.startStation;
+            }
+
+            if (birthDate == "") {
+               birthDate = dataObject.startTime
+            }
+
+        });
+
+    }).then(function() {
+        return [birthStation, birthDate];
+    });
+};
+
+function str_pad_left(string,pad,length) {
+    return (new Array(length+1).join(pad)+string).slice(-length);
 }
