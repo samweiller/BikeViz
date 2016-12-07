@@ -1,12 +1,12 @@
 var chart;
 
 var width = 1300; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 610; // THIS TOO. //550
+var height = 550; // THIS TOO. //550
 
 var boxSize = 6;
-var boxWidth = 7; //9
-var boxHeight = 1; //4
-var boxSpacing = 0; //2
+var boxWidth = 9; //9 // 6
+var boxHeight = 1; //4 // 1
+var boxSpacing = 0; //2 //0
 var boxWidthMultipler = boxWidth + boxSpacing
 var boxHeightMultipler = boxHeight + boxSpacing
 var boxRadius = 0;
@@ -22,14 +22,15 @@ var shuffleAnimType = d3.easeExpInOut;
 var fwooshAnimDuration = 1000;
 var fwooshAnimType = d3.easePolyInOut;
 var axisAnimationDuration = 1000;
-var delayTime = 20;
+var delayTime = 10;
 
 var xSpacing = 00;
-var ySpacing = 450; //374
+var ySpacing = 374; //374
 
 //TODO: get bike id from bikeview page / cookie
 var bikeIDTEST = 23458;
-var theStationID = getRandomStationNumber(); //324
+var theStationID = getRandomStationNumber(); //324 //3065(demofixed)
+
 console.log(theStationID)
 
 var top50Stations;
@@ -111,10 +112,10 @@ function init() {
 }
 
 var organizerType = 'month';
-var theDataSets = updateViz(organizerType, 'gender');
+var theDataSets = updateViz(organizerType, theStationID);
 
 //Called when the update button is clicked
-function updateViz(organizer) {
+function updateViz(organizer, theStationID) {
     return getRidesForStation(theStationID).then(function(dataset) {
         // START LOADING HERE
         console.log('getting rides')
@@ -252,7 +253,7 @@ function getRidesForStation(stationID) {
                     'endStation': dataObject.endStation,
                     'gender': dataObject.user.gender,
                     'userType': dataObject.user.type,
-                    'age': 2016 - Number(dataObject.user.birthYear),
+                    'age': Number(2016 - Number(dataObject.user.birthYear)),
                     'startTime': dataObject.startTime,
                     'segment': segmentNumber,
                     'month': dateStamp.getMonth(),
@@ -294,10 +295,12 @@ function sortDataBy2(organizer, dataset, userType) {
         var sortedRides = d3.nest()
             .key(function(d) {
                 return d.age; // return age as nesting key
-            }).sortKeys(d3.ascending) // Sort by age within bin
+            }).sortKeys(function(a,b){return (+a)-(+b);}) // Sort by age within bin
             .entries(dataset.subscriber);
 
+        console.log(sortedRides.length)
         console.log(sortedRides)
+        console.log(sortedRides[sortedRides.length-1])
         var validAges = 60;
         var minAge = 16
         var maxAge = 75
@@ -320,7 +323,13 @@ function sortDataBy2(organizer, dataset, userType) {
             }
         }
 
+        console.log(sortedRides.length)
+
         sortedRides = sortedRides.slice(0, validAges);
+
+        console.log(sortedRides.length)
+
+        console.log(sortedRides)
 
         // Nest rides by time (for TIME AXIS)
     } else if (organizer == 'month') {
@@ -488,8 +497,15 @@ function plotDataByAge(ridesByAge) {
         }
     }
 
-   vis.selectAll('.ride-box')
+    vis.selectAll('.ride-box')
       .on("mouseover", function(d) {
+         console.log(d.endStation)
+         var thePageX = d3.event.pageX;
+         var thePageY = d3.event.pageY;
+         var stationName1 = "";
+         var stationName2 = "";
+         getNameForStation(d.startStation).then(function(stationName1) {
+            getNameForStation(d.endStation).then(function(stationName2) {
         div.transition()
          .duration(200)
          .style("opacity", .9);
@@ -507,15 +523,19 @@ function plotDataByAge(ridesByAge) {
             var tipGender = 'not available'
          }
 
-        div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> 4th & 12th<br/><strong>End Station Name:</strong> 45th & 8th<br/><strong>Gender:</strong> ' + tipGender)
-         .style("left", (d3.event.pageX) + "px")
-         .style("top", (d3.event.pageY - 28) + "px");
+
+        div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> ' + stationName1 + '<br/><strong>End Station Name:</strong> ' + stationName2 + '<br/><strong>Gender:</strong> ' + tipGender)
+         .style("left", (thePageX) + "px")
+         .style("top", (thePageY - 28) + "px");
         })
-      .on("mouseout", function(d) {
-        div.transition()
-         .duration(500)
-         .style("opacity", 0);
-        });
+        })
+
+     })
+     .on("mouseout", function(d) {
+       div.transition()
+        .duration(500)
+        .style("opacity", 0);
+       });
 }
 
 function plotDataByMonth(sortedData, customerData, isInit) {
@@ -535,7 +555,7 @@ function plotDataByMonth(sortedData, customerData, isInit) {
         .enter()
         .append('rect')
         .attr('x', function(d, i) {
-            return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)
+            return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth) + 2
         })
         .attr('y', ySpacing + 8)
         .attr('height', axisHeight)
@@ -752,8 +772,6 @@ function plotDataByMonth(sortedData, customerData, isInit) {
             var stationName2 = "";
             getNameForStation(d.startStation).then(function(stationName1) {
                getNameForStation(d.endStation).then(function(stationName2) {
-
-
            div.transition()
             .duration(200)
             .style("opacity", .9);

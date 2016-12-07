@@ -202,6 +202,31 @@ div.tooltip {
    font-family: 'Cabin';
 }
 
+/* UI */
+.SV-sorting-copy {
+   font-family: 'PT Sans';
+   font-size: 18px;
+   margin-top: 7px;
+   margin-right: 10px;
+   float: left;
+}
+
+.SV-button {
+   font-family: 'PT Sans';
+   font-size: 17px;
+}
+
+.SV-sort-buttons {
+   margin-right: 10px;
+   float: left;
+}
+
+.SV-footnote-area {
+   font-family: 'PT Sans';
+   font-size: 12px;
+   font-style: italic;
+   color: #898989;
+}
 
 .SV-bike-name {
    flex: 0;
