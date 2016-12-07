@@ -227,3 +227,22 @@ div.tooltip {
    font-style: italic;
    color: #898989;
 }
+
+.SV-bike-name {
+   flex: 0;
+   position: fixed;
+   margin-top: 4%;
+   margin-left: 3%;
+   padding-left: 10px;
+   padding-right: 5px;
+   z-index: 1;
+   background-color: white;
+   font-family: 'Cabin';
+   font-size: 50px;
+   letter-spacing: 0px;
+   min-height: 5%;
+}
+
+.SV-title-area {
+  position: relative;
+}
