@@ -27,8 +27,9 @@ var delayTime = 12;
 var xSpacing = 00;
 var ySpacing = 450; //374
 
-var theBikeID = getRandomBikeNumber();
-console.log(theBikeID)
+//var theBikeID = getRandomBikeNumber();
+var theBikeID = readCookie("selectedBike");
+console.log("from the cookie" + theBikeID)
 
 // BLACKLIST -> 17392, 17470, 24303, 16353, 15496, 25971, 25144, 15469, 16331, 25004, 26367
 
@@ -1165,4 +1166,15 @@ function getNameForStation(stationID) {
     }).then(function(stationName) {
         return stationName;
     });
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
 }

@@ -5,7 +5,7 @@ var chart;
 var width = 850; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
 var height = 700; // THIS TOO.
 
-var theBikeID = 23458;
+//var theBikeID = 23458;
 
 // DATA THINGS
 validMonths = 8;
@@ -16,7 +16,9 @@ var map;
 var service;
 var currentStationCentered = 0;
 
-var bikeIDForTesting = 23459;
+var bikeID = readCookie("selectedBike");
+console.log("selected bike " + bikeID);
+
 var allStations;
 var allPOIs;
 
@@ -33,12 +35,12 @@ function init() {
     rightDiv[0].appendChild(mapBoxMapDiv);
 
     // Initialize the MapBox Map - Center on the middle of New York
-    mapboxgl.accessToken = 'pk.eyJ1IjoiY2VlZm9zdGVyIiwiYSI6ImJJdjN1V1UifQ.7unwlg_mgObhfSto2HqA-w';
+    mapboxgl.accessToken = 'pk.eyJ1IjoidTJwcmlkZSIsImEiOiJjaXVxdzQwZXgwMDJtMnlsZmhiZ210bXAxIn0.sagkmIswAS2ter40NW0DBA';
     map = new mapboxgl.Map({
         container: 'mapBoxMap',
         center: [-73.985130, 40.758896],
         zoom: 14,
-        style: 'mapbox://styles/ceefoster/civshbtsd00052jqixmnpt9n6'
+        style: 'mapbox://styles/u2pride/ciwe2r5w500012psgzw5womb0'
     });
 
     map.on('load', function () {
@@ -46,7 +48,6 @@ function init() {
     });
 
     var fadeInStory = document.getElementById("beginningStoryText");
-    console.log(fadeInStory);
     fadeIn(fadeInStory);
 
     setTimeout(fadeInMapComponents, 5000);
@@ -55,7 +56,6 @@ function init() {
 
 
 function fadeOutEverything() {
-
 
     var element1 = document.getElementById("transitionView-streetViewImage");
     fadeOut(element1);
@@ -66,11 +66,22 @@ function fadeOutEverything() {
     var element3 = document.getElementById("FullScreenMapBoxMap");
     fadeOut(element3);
 
-    var fadeOutStory = document.getElementById("beginningStoryText");
-    fadeOutStory.style.display = "table-cell";
-    fadeIn(fadeOutStory);
+    document.getElementById("beginningStoryText").innerHTML = "TEST";
+    document.getElementById("beginningStoryText").style.display = "inline-grid";
+    var element4 = document.getElementById("beginningStoryText");
+    fadeIn(element4);
+
+    //var endStory = document.getElementById("endStoryText");
+    //endStory.style.display = "table-cell";
+    //fadeIn(endStory);
+
+    setTimeout(navigateToStationView, 2000);
 
 
+}
+
+function navigateToStationView() {
+  window.location.href = "./stationView.html";
 }
 
 
@@ -107,6 +118,8 @@ function initMap() {
   allStations = new Array();
   allPOIs = new Array();
 
+
+
   setTimeout(flyToNextStation, 8000);
   setTimeout(flyToNextStation, 12000);
   setTimeout(flyToNextStation, 16000);
@@ -115,7 +128,7 @@ function initMap() {
   setTimeout(fadeOutEverything, 25000);
 
     //Get Birth Station
-    getBirthStationForBike(bikeIDForTesting).then(function(birthStationID) {
+    getBirthStationForBike(bikeID).then(function(birthStationID) {
 
         getStationForID(birthStationID).then(function(stationData) {
 
@@ -130,7 +143,7 @@ function initMap() {
                 ]
             });
 
-            document.getElementById('transitionView-stationLabel').innerHTML = allStations[0].name;
+            document.getElementById('transitionView-stationLabel').innerHTML = "Birth Station";
 
             //console.log("Station Data" + JSON.stringify(stationData));
             //console.log("getting the station latitude " + stationData.latitude)
@@ -139,7 +152,7 @@ function initMap() {
             //TODO getPOIForStation(stationData);
             // Once the map loads, add the Markers from the GeoJSON File
             //   map.on('style.load', function() {
-            getPopularStationIDsForBike(bikeIDForTesting).then(function(stationsList) {
+            getPopularStationIDsForBike(bikeID).then(function(stationsList) {
                 console.log("popular station IDs - " + stationsList);
 
                 for (var i = 0; i < stationsList.length; i++) {
@@ -207,7 +220,26 @@ function flyToNextStation() {
       ]
   });
 
-  document.getElementById('transitionView-stationLabel').innerHTML = allStations[currentStationCentered].name;
+  if (currentStationCentered == 1) {
+    document.getElementById('transitionView-stationLabel').innerHTML = "Most Popular Station";
+
+  }
+
+  if (currentStationCentered == 2) {
+    document.getElementById('transitionView-stationLabel').innerHTML = "Second Most Popular Station";
+
+  }
+
+  if (currentStationCentered == 3) {
+    document.getElementById('transitionView-stationLabel').innerHTML = "Third Most Popular Station";
+
+  }
+
+  if (currentStationCentered == 4) {
+    document.getElementById('transitionView-stationLabel').innerHTML = "Fourth Most Popular Station";
+
+  }
+
 
   findImageForCoords(allStations[currentStationCentered].latitude, allStations[currentStationCentered].longitude);
 
@@ -269,7 +301,7 @@ function getStationForID(stationID) {
     return ref.child('stations/' + stationID + '/details/').orderByKey().once("value").then(function(snapshot) {
 
         var latitude = snapshot.val();
-        console.log("hey - " + JSON.stringify(latitude));
+        console.log("station object - " + JSON.stringify(latitude));
 
         var dataObject = snapshot.val()
 
@@ -338,8 +370,8 @@ function getPOIForStation(station) {
 
 function getMarkers(theStations) {
 
-    console.log("check all this " + theStations);
-    console.log("check all this " + JSON.stringify(theStations));
+    //console.log("check all this " + theStations);
+    //console.log("check all this " + JSON.stringify(theStations));
 
     var station1Lat = parseFloat(theStations[0].latitude);
     var station1Lng = parseFloat(theStations[0].longitude);
@@ -428,7 +460,7 @@ function findImageForCoords(latitude, longitude) {
       theIMG = document.createElement("IMG");
     }
 
-    theIMG.src = "https://maps.googleapis.com/maps/api/streetview?size=300x150&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
+    theIMG.src = "https://maps.googleapis.com/maps/api/streetview?size=450x300&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
 
     var img = document.getElementById('transitionView-streetViewImage').appendChild(theIMG);
 
@@ -459,4 +491,16 @@ function fadeOut(el){
       requestAnimationFrame(fade);
     }
   })();
+}
+
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
 }
