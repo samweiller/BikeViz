@@ -116,8 +116,6 @@ function init() {
         });
         map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
     });
-
-
 }
 
 function d3SpecificInit() {
