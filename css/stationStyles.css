@@ -265,6 +265,6 @@ div.tooltip {
 .all-stations-button-div {
   z-index: 2;
   position: absolute;
-  top: 3%;
-  left: 33%;
+  bottom: 5%;
+  right: 5%;
 }

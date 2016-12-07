@@ -21,36 +21,36 @@ text {
   margin: 0 auto;
 }*/
 
-path.male-color0 {
+.male-color0 {
   fill: #68B3EB;
 }
 
-path.male-color1 {
-  fill: #35526b;
+.male-color1 {
+  fill: #E0E0E0;
 }
 
-path.female-color0 {
+.female-color0 {
   fill: #E86E82;
 }
 
-path.female-color1 {
-  fill: #35526b;
+.female-color1 {
+  fill: #E0E0E0;
 }
 
-path.sub-color0 {
+.sub-color0 {
   fill: #7947A6;
 }
 
-path.sub-color1 {
-  fill: #35526b;
+.sub-color1 {
+  fill: #E0E0E0;
 }
 
-path.cust-color0 {
+.cust-color0 {
   fill: #EB9A5B;
 }
 
-path.cust-color1 {
-  fill: #35526b;
+.cust-color1 {
+  fill: #E0E0E0;
 }
 
 .donut-title {
