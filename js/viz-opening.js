@@ -56,8 +56,8 @@ function init() {
     $(this).parents('.dropdown').find('.dropdown-toggle').html(selText+'<span class="caret"></span>');
 
     //testing cookies
-    //console.log("age cookie" + readCookie("ageBucket"));
-    //console.log("gender cookie" + readCookie("genderBucket"));
+    console.log("age cookie" + readCookie("ageBucket"));
+    console.log("gender cookie" + readCookie("genderBucket"));
 
   });
 
@@ -146,11 +146,10 @@ function init() {
     setTimeout(navigateToBikeView, 1400);
 
   });
-
 }
 
 function navigateToBikeView() {
-  window.location.href = "./bikeView.html";
+  window.location.href = "./bikeInfoTrans.html";
 }
 
 function randomIntFromInterval(min,max) {

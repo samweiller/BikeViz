@@ -72,7 +72,7 @@ function init() {
     //Add header to map
     var theMapHeader = document.createElement('div');
     theMapHeader.className = 'SV-bike-name';
-    var mapHeaderText = document.createTextNode('Top 50 Stations for bike #' + bikeID + '.');
+    var mapHeaderText = document.createTextNode('Top 50 Stations for bike ' + bikeID + '.');
     theMapHeader.appendChild(mapHeaderText);
 
     var mapTitleDiv = document.getElementsByClassName('SV-map-area');
@@ -98,7 +98,7 @@ function init() {
 
     map.on('click', function(e) {
         var features = map.queryRenderedFeatures(e.point, {
-            layers: ['markers']
+            layers: ['markers', 'allStationsMarkers']
         });
 
         if (!features.length) {

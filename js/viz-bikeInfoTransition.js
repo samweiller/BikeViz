@@ -1,6 +1,6 @@
-console.log('hey')
-
-var theBikeID = 23459;
+// var theBikeID = 23459;
+var theBikeID = readCookie("selectedBike");
+// console.log("from the cookie" + theBikeID)
 
 var duration   = 500,
     transition = 200;
@@ -142,7 +142,8 @@ function drawDonutChart(element, percent, width, height, text_y, theClass) {
 
   var text = svg.append("text")
         .attr("text-anchor", "middle")
-        .attr("dy", text_y);
+        .attr("dy", text_y)
+        .attr('class', theClass + 'color0')
 
   if (typeof(percent) === "string") {
     text.text(percent);
@@ -172,3 +173,14 @@ function drawDonutChart(element, percent, width, height, text_y, theClass) {
 function calcPercent(percent) {
   return [percent, 100-percent];
 };
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}

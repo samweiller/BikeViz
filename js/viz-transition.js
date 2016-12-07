@@ -221,22 +221,22 @@ function flyToNextStation() {
   });
 
   if (currentStationCentered == 1) {
-    document.getElementById('transitionView-stationLabel').innerHTML = "Most Popular Station";
+    document.getElementById('transitionView-stationLabel').innerHTML = "Most Visited Station";
 
   }
 
   if (currentStationCentered == 2) {
-    document.getElementById('transitionView-stationLabel').innerHTML = "Second Most Popular Station";
+    document.getElementById('transitionView-stationLabel').innerHTML = "Second Most Visited Station";
 
   }
 
   if (currentStationCentered == 3) {
-    document.getElementById('transitionView-stationLabel').innerHTML = "Third Most Popular Station";
+    document.getElementById('transitionView-stationLabel').innerHTML = "Third Most Visited Station";
 
   }
 
   if (currentStationCentered == 4) {
-    document.getElementById('transitionView-stationLabel').innerHTML = "Fourth Most Popular Station";
+    document.getElementById('transitionView-stationLabel').innerHTML = "Fourth Most Visited Station";
 
   }
 
