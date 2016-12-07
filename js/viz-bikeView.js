@@ -123,6 +123,10 @@ function update(rawdata) {
 }
 
 function orgByMonth() {
+   var theTooltipDiv = document.getElementsByClassName('tooltip')
+   if (theTooltipDiv[0] !== undefined) {
+       theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
+   }
     organizerType = 'month';
     theDataSets.then(function(data) {
         plotDataByMonth(data[1], data[2], 0)
@@ -139,6 +143,10 @@ function orgByMonth() {
 }
 
 function orgByAge() {
+   var theTooltipDiv = document.getElementsByClassName('tooltip')
+   if (theTooltipDiv[0] !== undefined) {
+       theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
+   }
     organizerType = 'age';
     theDataSets.then(function(data) {
         plotDataByAge(data[0]) // age data
@@ -204,6 +212,8 @@ function getRidesForBike(bikeID) {
                     'rideID': childSnapshot.key,
                     'bikeID': bikeID,
                     'stationID': dataObject.startStation,
+                    'startStation': dataObject.startStation,
+                    'endStation': dataObject.endStation,
                     'gender': dataObject.user.gender,
                     'userType': dataObject.user.type,
                     'age': 2016 - Number(dataObject.user.birthYear),
@@ -219,6 +229,8 @@ function getRidesForBike(bikeID) {
                     'rideID': childSnapshot.key,
                     'bikeID': bikeID,
                     'stationID': dataObject.startStation,
+                    'startStation': dataObject.startStation,
+                    'endStation': dataObject.endStation,
                     'gender': 'not available',
                     'userType': dataObject.user.type,
                     'age': 'not available',
@@ -246,7 +258,9 @@ function sortDataBy2(organizer, dataset, userType) {
         var sortedRides = d3.nest()
             .key(function(d) {
                 return d.age; // return age as nesting key
-            }).sortKeys(d3.ascending) // Sort by age within bin
+            }).sortKeys(function(a, b) {
+                return (+a) - (+b);
+            }) // Sort by age within bin
             .entries(dataset.subscriber);
 
         console.log(sortedRides)
@@ -282,20 +296,28 @@ function sortDataBy2(organizer, dataset, userType) {
                 .key(function(d) {
                     var dateObject = new Date(d.startTime); // Convert timestamp to Date object
                     return dateObject.getMonth(); // return month from object
-                }).sortKeys(d3.ascending)
+                }).sortKeys(function(a, b) {
+                   return (+a) - (+b);
+               })
                 .key(function(d) {
                     return d.segment; // Subnest by segment
-                }).sortKeys(d3.ascending)
+                }).sortKeys(function(a, b) {
+                   return (+a) - (+b);
+               })
                 .entries(dataset.subscriber);
         } else if (userType == 'customer') {
             var sortedRides = d3.nest() // Nest into months
                 .key(function(d) {
                     var dateObject = new Date(d.startTime); // Convert timestamp to Date object
                     return dateObject.getMonth(); // return month from object
-                }).sortKeys(d3.ascending)
+                }).sortKeys(function(a, b) {
+                   return (+a) - (+b);
+               })
                 .key(function(d) {
                     return d.segment; // Subnest by segment
-                }).sortKeys(d3.ascending)
+                }).sortKeys(function(a, b) {
+                   return (+a) - (+b);
+               })
                 .entries(dataset.customer);
         }
 
@@ -440,34 +462,45 @@ function plotDataByAge(ridesByAge) {
         }
     }
 
-   vis.selectAll('.ride-box')
+    vis.selectAll('.ride-box')
       .on("mouseover", function(d) {
-        div.transition()
-         .duration(200)
-         .style("opacity", .9);
-         var dateStamp = new Date(d.startTime)
-         var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
-         var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
-         var minutes = Math.floor(d.duration / 60);
-         var seconds = d.duration - minutes * 60;
-         var tipDuration = minutes + ':' + str_pad_left(seconds,'0',2)
-         if (d.gender == 1) {
-            var tipGender = 'Male'
-         } else if (d.gender == 2) {
-            var tipGender = 'Female'
-         } else {
-            var tipGender = 'not available'
-         }
+           console.log(d.endStation)
+           var thePageX = d3.event.pageX;
+           var thePageY = d3.event.pageY;
+           var stationName1 = "";
+           var stationName2 = "";
+           getNameForStation(d.startStation).then(function(stationName1) {
+               getNameForStation(d.endStation).then(function(stationName2) {
+                   div.transition()
+                       .duration(200)
+                       .style("opacity", .9);
+                   var dateStamp = new Date(d.startTime)
+                   var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
+                   var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
+                   var minutes = Math.floor(d.duration / 60);
+                   var seconds = d.duration - minutes * 60;
+                   var tipDuration = minutes + ':' + str_pad_left(seconds, '0', 2)
+                   if (d.gender == 1) {
+                       var tipGender = 'Male'
+                   } else if (d.gender == 2) {
+                       var tipGender = 'Female'
+                   } else {
+                       var tipGender = 'not available'
+                   }
 
-        div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> 4th & 12th<br/><strong>End Station Name:</strong> 45th & 8th<br/><strong>Gender:</strong> ' + tipGender)
-         .style("left", (d3.event.pageX) + "px")
-         .style("top", (d3.event.pageY - 28) + "px");
-        })
+
+                   div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age + '<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> ' + stationName1 + '<br/><strong>End Station Name:</strong> ' + stationName2 + '<br/><strong>Gender:</strong> ' + tipGender)
+                       .style("left", (thePageX) + "px")
+                       .style("top", (thePageY - 28) + "px");
+               })
+           })
+
+      })
       .on("mouseout", function(d) {
-        div.transition()
-         .duration(500)
-         .style("opacity", 0);
-        });
+           div.transition()
+               .duration(500)
+               .style("opacity", 0);
+      });
 }
 
 function plotDataByMonth(sortedData, customerData, isInit) {
@@ -695,37 +728,51 @@ function plotDataByMonth(sortedData, customerData, isInit) {
     }
     setTimeout(function() {
       vis.selectAll('.ride-box')
-         .on("mouseover", function(d) {
-           div.transition()
-            .duration(200)
-            .style("opacity", .9);
-            var dateStamp = new Date(d.startTime)
-            var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
-            var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
-            var minutes = Math.floor(d.duration / 60);
-            var seconds = d.duration - minutes * 60;
-            var tipDuration = minutes + ':' + str_pad_left(seconds,'0',2)
-            if (d.gender == 1) {
-               var tipGender = 'Male'
-            } else if (d.gender == 2) {
-               var tipGender = 'Female'
-            } else {
-               var tipGender = 'not available'
-            }
+          .on("mouseover", function(d) {
+              console.log(d.endStation)
+              var thePageX = d3.event.pageX;
+              var thePageY = d3.event.pageY;
+              var stationName1 = "";
+              var stationName2 = "";
+              getNameForStation(d.startStation).then(function(stationName1) {
+                  getNameForStation(d.endStation).then(function(stationName2) {
+                      div.transition()
+                          .duration(200)
+                          .style("opacity", .9);
+                      var dateStamp = new Date(d.startTime)
+                      var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
+                      var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
+                      var minutes = Math.floor(d.duration / 60);
+                      var seconds = d.duration - minutes * 60;
+                      var tipDuration = minutes + ':' + str_pad_left(seconds, '0', 2)
+                      if (d.gender == 1) {
+                          var tipGender = 'Male'
+                      } else if (d.gender == 2) {
+                          var tipGender = 'Female'
+                      } else {
+                          var tipGender = 'not available'
+                      }
 
-           div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> 4th & 12th<br/><strong>End Station Name:</strong> 45th & 8th<br/><strong>Gender:</strong> ' + tipGender)
-            .style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
-           })
-         .on("mouseout", function(d) {
-           div.transition()
-            .duration(500)
-            .style("opacity", 0);
-           });
+                      div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age + '<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> ' + stationName1 + '<br/><strong>End Station Name:</strong> ' + stationName2 + '<br/><strong>Gender:</strong> ' + tipGender)
+                          .style("left", (thePageX) + "px")
+                          .style("top", (thePageY - 28) + "px");
+                  })
+              })
+
+          })
+          .on("mouseout", function(d) {
+              div.transition()
+                  .duration(500)
+                  .style("opacity", 0);
+          });
    }, 1000)
 }
 
 function sortByGender() {
+   var theTooltipDiv = document.getElementsByClassName('tooltip')
+   if (theTooltipDiv[0] !== undefined) {
+       theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
+   }
     if (organizerType == 'month') {
         for (m = 0; m < 80; m++) {
             vis.selectAll('.month-group' + m + '-sub').sort(function(a, b) {
@@ -762,6 +809,10 @@ function sortByGender() {
 }
 
 function sortByTime() {
+   var theTooltipDiv = document.getElementsByClassName('tooltip')
+   if (theTooltipDiv[0] !== undefined) {
+       theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
+   }
     if (organizerType == 'month') {
         for (m = 0; m < 80; m++) {
             vis.selectAll('.month-group' + m + '-sub').sort(function(a, b) {
@@ -1100,4 +1151,18 @@ function getBirthStationForBike(bikeID) {
 
 function str_pad_left(string,pad,length) {
     return (new Array(length+1).join(pad)+string).slice(-length);
+}
+
+function getNameForStation(stationID) {
+    var db = firebase.database();
+    var ref = db.ref("/");
+
+    var stationName = "";
+    return ref.child('stations/' + stationID + '/details/').once("value").then(function(snapshot) {
+        var stationDetailObject = snapshot.val();
+        var stationName = stationDetailObject.name
+        return stationName
+    }).then(function(stationName) {
+        return stationName;
+    });
 }
