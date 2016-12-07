@@ -27,14 +27,16 @@ var delayTime = 10;
 var xSpacing = 00;
 var ySpacing = 400; //374
 
-//TODO: get bike id from bikeview page / cookie
-var bikeIDTEST = 23458;
+//TODO: show station data for birth station of bike?
+//var bikeIDTEST = 23458;
+var bikeID = readCookie("selectedBike");
 var theStationID = getRandomStationNumber(); //324 //3065(demofixed)
 var previouslyClickedStation = 0;
 
 console.log(theStationID)
 
 var top50Stations;
+var allStationsForOneBike;
 
 // BLACKLIST -> 17392, 17470, 24303, 16353, 15496, 25971, 25144, 15469, 16331, 25004, 26367
 
@@ -60,16 +62,20 @@ function init() {
     mapBoxMapDiv.style.height = "100%";
     rightDiv[0].appendChild(mapBoxMapDiv);
 
-    // Loading Inits
+    //Testing Selected Bike
+    console.log("selected bike " + bikeID);
+    // All Stations Button
+    document.getElementById("allStationsButton").onclick = showAllBikes;
 
+    // Loading Inits
 
     //Add header to map
     var theMapHeader = document.createElement('div');
     theMapHeader.className = 'SV-bike-name';
-    var mapHeaderText = document.createTextNode('Top 50 Stations for bike #' + bikeIDTEST + '.');
+    var mapHeaderText = document.createTextNode('Top 50 Stations for bike #' + bikeID + '.');
     theMapHeader.appendChild(mapHeaderText);
 
-    var mapTitleDiv = document.getElementsByClassName('SV-map-title-area');
+    var mapTitleDiv = document.getElementsByClassName('SV-map-area');
     mapTitleDiv[0].append(theMapHeader);
 
     // Initialize the MapBox Map - Center on the middle of New York
@@ -85,6 +91,7 @@ function init() {
         //initMap();
         console.log("Map loaded");
         top50Stations = new Array();
+        allStationsForOneBike = new Array();
         loadTop50Stations();
     });
 
@@ -1485,7 +1492,7 @@ function str_pad_left(string, pad, length) {
 
 
 function loadTop50Stations() {
-  getPopularStationIDsForBike(bikeIDTEST).then(function(stationsList) {
+  getPopularStationIDsForBike(bikeID).then(function(stationsList) {
 
       //console.log("THIS PART IS FOR ALEX TO SEE.....")
       //console.log("popular station IDs - " + stationsList);
@@ -1584,6 +1591,25 @@ function getPopularStationIDsForBike(bikeID) {
     });
 };
 
+function getAllStationsForBike (bikeID) {
+    var db = firebase.database();
+    var ref = db.ref("/");
+
+    var stations = new Array();
+    return ref.child('bikes/' + bikeID + '/stations/').orderByValue().once("value").then(function(snapshot) {
+
+        snapshot.forEach(function(childSnapshot) {
+
+            var dataObject = childSnapshot.val();
+            stations.push(childSnapshot.key);
+
+        });
+
+    }).then(function() {
+        return stations;
+    });
+};
+
 function getStationForID(stationID) {
     var db = firebase.database();
     var ref = db.ref("/");
@@ -1638,4 +1664,104 @@ function getMarkers(theStations) {
 
     return fullJSONObject;
 
+}
+
+function showAllBikes() {
+  console.log("SHOWING ALL BIKES");
+
+  allStationsForOneBike = new Array();
+
+  getAllStationsForBike(bikeID).then(function(allStationsForBike) {
+
+        //console.log("THIS PART IS FOR ALEX TO SEE.....")
+        //console.log("popular station IDs - " + allStationsForBike);
+        console.log("total number of stations " + allStationsForBike.length);
+
+        for (var i = 0; i < allStationsForBike.length; i++) {
+            if (i == (allStationsForBike.length - 1)) {
+                getStationForID(allStationsForBike[i]).then(function(theStation) {
+                    allStationsForOneBike.push(theStation);
+
+                    //console.log("here are all stations" + JSON.stringify(allStationsForOneBike));
+                    //console.log("heres' what getMarkers returns " + JSON.stringify(getMarkers(allStationsForOneBike)));
+
+                    var mapMarkers = getMarkers(allStationsForOneBike);
+
+                    map.addSource("allStationsMarkers", {
+                        "type": "geojson",
+                        "data": mapMarkers
+                    });
+
+
+                    map.addLayer({
+                        "id": "allStationsMarkers",
+                        "type": "symbol",
+                        "source": "allStationsMarkers",
+                        "layout": {
+                            "icon-image": "beer-15",
+                            "text-field": "{title}",
+                            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                            "text-offset": [0, 0.6],
+                            "text-anchor": "top"
+                        }
+                    });
+
+
+                    // add markers to map
+
+                    mapMarkers.features.forEach(function(marker, idx, array) {
+                        // create a DOM element for the marker
+                        var el = document.createElement('div');
+                        el.className = 'marker';
+                        el.id = 'marker' + idx;
+                        el.style.backgroundImage = 'url(img/defaultMarker.png)';
+                        //el.style.backgroundImage = 'url(https://placekitten.com/g/200/200)';
+                        el.style.width = '45px';
+                        el.style.height = '45px';
+
+                        el.addEventListener('click', function() {
+                            //window.alert(marker.properties.message);
+                            if (previouslyClickedStation) {
+                              var previousSelectionElement = document.getElementById(previouslyClickedStation);
+                              previousSelectionElement.style.backgroundImage = 'url(img/defaultMarker.png)';
+                            }
+                            el.style.backgroundImage = 'url(img/currentMarker.png)';
+                            previouslyClickedStation = el.id;
+
+                        });
+
+                        // add marker to map
+                        new mapboxgl.Marker(el, {offset: [-22.5, -30]})
+                            .setLngLat(marker.geometry.coordinates)
+                            .addTo(map);
+                    });
+
+                    // Find Streetview Images for a Lat & Long Pair
+                    //findImageForCoords(allStations[0].latitude, allStations[0].longitude);
+                });
+              } else {
+
+                  getStationForID(allStationsForBike[i]).then(function(theStation) {
+                      allStationsForOneBike.push(theStation);
+                  });
+
+              }
+
+          }
+
+      })
+
+
+}
+
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
 }

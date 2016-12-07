@@ -100,7 +100,7 @@ function init() {
       }
 
       createCookie("selectedBike", bikeSelection, 1);
-
+      console.log("stored bike cookie " + bikeSelection);
 
     } else {
       console.log("Currently male selection");
@@ -136,6 +136,7 @@ function init() {
       }
 
       createCookie("selectedBike", bikeSelection, 1);
+      console.log("stored bike cookie " + bikeSelection);
 
     }
 

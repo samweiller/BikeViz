@@ -5,7 +5,7 @@ var chart;
 var width = 850; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
 var height = 700; // THIS TOO.
 
-var theBikeID = 23458;
+//var theBikeID = 23458;
 
 // DATA THINGS
 validMonths = 8;
@@ -16,7 +16,9 @@ var map;
 var service;
 var currentStationCentered = 0;
 
-var bikeIDForTesting = 23459;
+var bikeID = readCookie("selectedBike");
+console.log("selected bike " + bikeID);
+
 var allStations;
 var allPOIs;
 
@@ -116,6 +118,8 @@ function initMap() {
   allStations = new Array();
   allPOIs = new Array();
 
+
+
   setTimeout(flyToNextStation, 8000);
   setTimeout(flyToNextStation, 12000);
   setTimeout(flyToNextStation, 16000);
@@ -124,7 +128,7 @@ function initMap() {
   setTimeout(fadeOutEverything, 25000);
 
     //Get Birth Station
-    getBirthStationForBike(bikeIDForTesting).then(function(birthStationID) {
+    getBirthStationForBike(bikeID).then(function(birthStationID) {
 
         getStationForID(birthStationID).then(function(stationData) {
 
@@ -148,7 +152,7 @@ function initMap() {
             //TODO getPOIForStation(stationData);
             // Once the map loads, add the Markers from the GeoJSON File
             //   map.on('style.load', function() {
-            getPopularStationIDsForBike(bikeIDForTesting).then(function(stationsList) {
+            getPopularStationIDsForBike(bikeID).then(function(stationsList) {
                 console.log("popular station IDs - " + stationsList);
 
                 for (var i = 0; i < stationsList.length; i++) {
@@ -297,7 +301,7 @@ function getStationForID(stationID) {
     return ref.child('stations/' + stationID + '/details/').orderByKey().once("value").then(function(snapshot) {
 
         var latitude = snapshot.val();
-        console.log("hey - " + JSON.stringify(latitude));
+        console.log("station object - " + JSON.stringify(latitude));
 
         var dataObject = snapshot.val()
 
@@ -366,8 +370,8 @@ function getPOIForStation(station) {
 
 function getMarkers(theStations) {
 
-    console.log("check all this " + theStations);
-    console.log("check all this " + JSON.stringify(theStations));
+    //console.log("check all this " + theStations);
+    //console.log("check all this " + JSON.stringify(theStations));
 
     var station1Lat = parseFloat(theStations[0].latitude);
     var station1Lng = parseFloat(theStations[0].longitude);
@@ -487,4 +491,16 @@ function fadeOut(el){
       requestAnimationFrame(fade);
     }
   })();
+}
+
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
 }
