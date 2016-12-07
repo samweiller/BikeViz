@@ -33,12 +33,12 @@ function init() {
     rightDiv[0].appendChild(mapBoxMapDiv);
 
     // Initialize the MapBox Map - Center on the middle of New York
-    mapboxgl.accessToken = 'pk.eyJ1IjoiY2VlZm9zdGVyIiwiYSI6ImJJdjN1V1UifQ.7unwlg_mgObhfSto2HqA-w';
+    mapboxgl.accessToken = 'pk.eyJ1IjoidTJwcmlkZSIsImEiOiJjaXVxdzQwZXgwMDJtMnlsZmhiZ210bXAxIn0.sagkmIswAS2ter40NW0DBA';
     map = new mapboxgl.Map({
         container: 'mapBoxMap',
         center: [-73.985130, 40.758896],
         zoom: 14,
-        style: 'mapbox://styles/ceefoster/civshbtsd00052jqixmnpt9n6'
+        style: 'mapbox://styles/u2pride/ciwe2r5w500012psgzw5womb0'
     });
 
     map.on('load', function () {
@@ -46,7 +46,6 @@ function init() {
     });
 
     var fadeInStory = document.getElementById("beginningStoryText");
-    console.log(fadeInStory);
     fadeIn(fadeInStory);
 
     setTimeout(fadeInMapComponents, 5000);
@@ -55,7 +54,6 @@ function init() {
 
 
 function fadeOutEverything() {
-
 
     var element1 = document.getElementById("transitionView-streetViewImage");
     fadeOut(element1);
@@ -66,11 +64,22 @@ function fadeOutEverything() {
     var element3 = document.getElementById("FullScreenMapBoxMap");
     fadeOut(element3);
 
-    var fadeOutStory = document.getElementById("beginningStoryText");
-    fadeOutStory.style.display = "table-cell";
-    fadeIn(fadeOutStory);
+    document.getElementById("beginningStoryText").innerHTML = "TEST";
+    document.getElementById("beginningStoryText").style.display = "inline-grid";
+    var element4 = document.getElementById("beginningStoryText");
+    fadeIn(element4);
+
+    //var endStory = document.getElementById("endStoryText");
+    //endStory.style.display = "table-cell";
+    //fadeIn(endStory);
+
+    setTimeout(navigateToStationView, 2000);
 
 
+}
+
+function navigateToStationView() {
+  window.location.href = "./stationView.html";
 }
 
 
@@ -130,7 +139,7 @@ function initMap() {
                 ]
             });
 
-            document.getElementById('transitionView-stationLabel').innerHTML = allStations[0].name;
+            document.getElementById('transitionView-stationLabel').innerHTML = "Birth Station";
 
             //console.log("Station Data" + JSON.stringify(stationData));
             //console.log("getting the station latitude " + stationData.latitude)
@@ -207,7 +216,26 @@ function flyToNextStation() {
       ]
   });
 
-  document.getElementById('transitionView-stationLabel').innerHTML = allStations[currentStationCentered].name;
+  if (currentStationCentered == 1) {
+    document.getElementById('transitionView-stationLabel').innerHTML = "Most Popular Station";
+
+  }
+
+  if (currentStationCentered == 2) {
+    document.getElementById('transitionView-stationLabel').innerHTML = "Second Most Popular Station";
+
+  }
+
+  if (currentStationCentered == 3) {
+    document.getElementById('transitionView-stationLabel').innerHTML = "Third Most Popular Station";
+
+  }
+
+  if (currentStationCentered == 4) {
+    document.getElementById('transitionView-stationLabel').innerHTML = "Fourth Most Popular Station";
+
+  }
+
 
   findImageForCoords(allStations[currentStationCentered].latitude, allStations[currentStationCentered].longitude);
 
@@ -428,7 +456,7 @@ function findImageForCoords(latitude, longitude) {
       theIMG = document.createElement("IMG");
     }
 
-    theIMG.src = "https://maps.googleapis.com/maps/api/streetview?size=300x150&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
+    theIMG.src = "https://maps.googleapis.com/maps/api/streetview?size=450x300&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
 
     var img = document.getElementById('transitionView-streetViewImage').appendChild(theIMG);
 

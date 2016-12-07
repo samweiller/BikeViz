@@ -246,10 +246,14 @@ div.tooltip {
    z-index: 1;
    background-color: #fafafa;
    font-family: 'Cabin';
-   font-size: 25px;
    letter-spacing: 0px;
    min-height: 5%;
+   font-size: 25px;
+   font-weight: 600;
+   margin-bottom: 5px;
+   margin-top: 10px;
 }
+
 
 .SV-footnote-area {
    font-family: 'PT Sans';
