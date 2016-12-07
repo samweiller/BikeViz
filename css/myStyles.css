@@ -304,7 +304,7 @@ body {
     border-radius: 5px;
 }
 
-.month-axis-box {
+.month-axis {
     fill: #454545;
     border-style: solid;
     border-color: #fafafa;
@@ -329,7 +329,7 @@ body {
 div.tooltip {
     position: absolute;
     text-align: left;
-    width: 250px;
+    width: auto;
     /*height: 50px;*/
     padding: 6px;
     padding-left: 8px;

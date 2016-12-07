@@ -1,7 +1,7 @@
 var chart;
 
 var width = 1300; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 550; // THIS TOO. //550
+var height = 625; // THIS TOO. //550
 
 var boxSize = 6;
 var boxWidth = 9; //9 // 6
@@ -14,7 +14,7 @@ var axisBoxWidth = (10 * boxWidth) + (9 * boxSpacing)
 var totalAxisWidth = (axisBoxWidth * 8) + (boxSpacing * 8)
 var widthAddition = 50;
 var axisHeight = 18;
-width = totalAxisWidth + (widthAddition*2);
+width = totalAxisWidth + (widthAddition * 2);
 
 // ANIMATION STUFF
 var shuffleAnimDuration = 700;
@@ -25,7 +25,7 @@ var axisAnimationDuration = 1000;
 var delayTime = 10;
 
 var xSpacing = 00;
-var ySpacing = 374; //374
+var ySpacing = 400; //374
 
 //TODO: get bike id from bikeview page / cookie
 var bikeIDTEST = 23458;
@@ -49,19 +49,18 @@ console.log('in')
 
 //Gets called when the page is loaded.
 function init() {
-    chart = d3.select('#vis').append('svg')
-        .attr('width', width)
-        .attr('height', height)
-        .attr('class', 'svg-area');
-    vis = chart.append('g');
-    // Define the div for the tooltip
-
+    d3SpecificInit()
+        // Define the div for the tooltip
+        theSpin = beginLoadingScreen();
     // Create neccessary HTML objects - SW
     var rightDiv = document.getElementsByClassName('SV-map-area');
     var mapBoxMapDiv = document.createElement('div');
     mapBoxMapDiv.id = 'SV-mapBoxMap';
     mapBoxMapDiv.style.height = "100%";
     rightDiv[0].appendChild(mapBoxMapDiv);
+
+    // Loading Inits
+
 
     //Add header to map
     var theMapHeader = document.createElement('div');
@@ -72,17 +71,16 @@ function init() {
     var mapTitleDiv = document.getElementsByClassName('SV-map-area');
     mapTitleDiv[0].prepend(theMapHeader);
 
-
     // Initialize the MapBox Map - Center on the middle of New York
     mapboxgl.accessToken = 'pk.eyJ1IjoidTJwcmlkZSIsImEiOiJjaXVxdzQwZXgwMDJtMnlsZmhiZ210bXAxIn0.sagkmIswAS2ter40NW0DBA';
     map = new mapboxgl.Map({
         container: 'SV-mapBoxMap',
         center: [-73.985130, 40.758896],
         zoom: 14,
-        style: 'mapbox://styles/u2pride/ciuqw59cj00bz2inyxffjemqw'
+        style: 'mapbox://styles/u2pride/ciwe2r5w500012psgzw5womb0'
     });
 
-    map.on('load', function () {
+    map.on('load', function() {
         //initMap();
         console.log("Map loaded");
         top50Stations = new Array();
@@ -90,33 +88,64 @@ function init() {
     });
 
 
-    map.on('click', function (e) {
-        var features = map.queryRenderedFeatures(e.point, { layers: ['markers'] });
+    map.on('click', function(e) {
+        var features = map.queryRenderedFeatures(e.point, {
+            layers: ['markers']
+        });
 
         if (!features.length) {
             return;
         }
         var stationID = features[0].properties.description;
 
-        theDataSets = updateViz('month', stationID);
+        theDataSets = updateViz('month', stationID, 0);
 
     });
 
     //TODO: cursor style change
-    map.on('mousemove', function (e) {
-      var features = map.queryRenderedFeatures(e.point, { layers: ['markers'] });
-      map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+    map.on('mousemove', function(e) {
+        var features = map.queryRenderedFeatures(e.point, {
+            layers: ['markers']
+        });
+        map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
     });
 
 
 }
 
-var organizerType = 'month';
-var theDataSets = updateViz(organizerType, theStationID);
+function d3SpecificInit() {
+    chart = d3.select('#vis').append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('class', 'svg-area');
+    vis = chart.append('g');
+}
 
+var organizerType = 'month';
+var theDataSets = updateViz('month', theStationID, 1);
+var theSpin;
 //Called when the update button is clicked
-function updateViz(organizer, theStationID) {
-    return getRidesForStation(theStationID).then(function(dataset) {
+function updateViz(organizer, theStationID, isInit) {
+
+    if (isInit == 0) {
+        d3.select("#vis").selectAll("svg").remove();
+
+        var ageOrgButton = document.getElementById('ageBtn')
+        ageOrgButton.classList.remove("active");
+        var monthOrgButton = document.getElementById('monthBtn')
+        monthOrgButton.classList.remove("active");
+        var monthOrgButton = document.getElementById('monthBtn')
+        monthOrgButton.classList.add("active");
+
+        var theTooltipDiv = document.getElementsByClassName('tooltip')
+        if (theTooltipDiv[0] !== undefined) {
+            theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
+        }
+        theSpin = beginLoadingScreen();
+        d3SpecificInit();
+    }
+
+    return getRidesForStation(theStationID, isInit).then(function(dataset) {
         // START LOADING HERE
         console.log('getting rides')
 
@@ -124,43 +153,106 @@ function updateViz(organizer, theStationID) {
 
         var sortedData = sortDataBy2(organizer, dataset, 'subscriber') // returns data already parsed by customer type
         var customerData = sortDataBy2(organizer, dataset, 'customer')
+
         plotDataByMonth(sortedData, customerData, 1)
 
-           // Create all needed HTML objects
-           getNameForStation(theStationID).then(function(stationName) {
+        // Create all needed HTML objects
+        getNameForStation(theStationID).then(function(stationName) {
             //  console.log(stationName)
-           var theHeader = document.createElement('div')                // Create a <h1> element
-           theHeader.className = 'station-name'
-           var headText = document.createTextNode('Rides through the Station at ' + stationName + '.');     // Create a text node
-           theHeader.appendChild(headText);
+            if (isInit == 1) {
+                var theHeader = document.createElement('div')
+                theHeader.className = 'station-name'
+                var headText = document.createTextNode('Rides through the station at ' + stationName + '.');
+                theHeader.appendChild(headText);
 
-           var titleDiv = document.getElementsByClassName('SV-title-area');
-           titleDiv[0].append(theHeader);
+                var theSubscriberAxisLabel = document.createElement('div')
+                theSubscriberAxisLabel.className = 'SV-sub-axis-label'
+                var subAxisText = document.createTextNode('Annual Riders')
+                var theVizArea = document.getElementsByClassName('SV-viz-area')
+                theSubscriberAxisLabel.append(subAxisText);
+                theVizArea[0].append(theSubscriberAxisLabel)
 
-           var theSubscriberAxisLabel = document.createElement('div')
-           theSubscriberAxisLabel.className = 'SV-sub-axis-label'
-           var subAxisText = document.createTextNode('Annual Riders')
-           var theVizArea = document.getElementsByClassName('SV-viz-area')
-           theSubscriberAxisLabel.append(subAxisText);
-           theVizArea[0].append(theSubscriberAxisLabel)
+                var theCustomerAxisLabel = document.createElement('div')
+                theCustomerAxisLabel.className = 'SV-cust-axis-label'
+                var custAxisText = document.createTextNode('One-Time Riders')
+                var theUIArea = document.getElementsByClassName('SV-UI-area')
+                theCustomerAxisLabel.append(custAxisText);
+                theUIArea[0].append(theCustomerAxisLabel);
 
-           var theCustomerAxisLabel = document.createElement('div')
-           theCustomerAxisLabel.className = 'SV-cust-axis-label'
-           var custAxisText = document.createTextNode('One-Time Riders')
-           var theUIArea = document.getElementsByClassName('SV-UI-area')
-           theCustomerAxisLabel.append(custAxisText);
-           theUIArea[0].append(theCustomerAxisLabel);
+                var theLegend = document.createElement('div')
+                theLegend.className = 'SV-legend'
+                theLegend.innerHTML = "<div class='SV-legend-male SV-legend-icon'></div><div class='SV-legend-label'>male</div><div class='SV-legend-female SV-legend-icon'></div><div class='SV-legend-label'>female</div><div class='SV-legend-nodata SV-legend-icon'></div><div class='SV-legend-label'>no data</div>"
+                var theUIArea = document.getElementsByClassName('SV-UI-area')
+                theUIArea[0].append(theLegend)
+            } else if (isInit == 0) {
+                var theHeader = document.getElementsByClassName('station-name')
+                theHeader = theHeader[0]
+                var headText = document.createTextNode('Rides through the station at ' + stationName + '.');
+                theHeader.innerHTML = "";
+                theHeader.appendChild(headText);
+            }
 
-           var theLegend = document.createElement('div')
-           theLegend.className = 'SV-legend'
-           theLegend.innerHTML = "<div class='SV-legend-male SV-legend-icon'></div><div class='SV-legend-label'>male</div><div class='SV-legend-female SV-legend-icon'></div><div class='SV-legend-label'>female</div><div class='SV-legend-nodata SV-legend-icon'></div><div class='SV-legend-label'>no data</div>"
-           var theUIArea = document.getElementsByClassName('SV-UI-area')
-           theUIArea[0].append(theLegend)
+            var titleDiv = document.getElementsByClassName('SV-title-area');
+            titleDiv[0].append(theHeader);
+
+            theSpin.stop();
         });
-            // END LOADING HERE
+
+
         return [ageData, sortedData, customerData]
     });
 };
+
+function beginLoadingScreen() {
+    var opts = {
+        lines: 13 // The number of lines to draw
+            ,
+        length: 33 // The length of each line
+            ,
+        width: 9 // The line thickness
+            ,
+        radius: 43 // The radius of the inner circle
+            ,
+        scale: 0.25 // Scales overall size of the spinner
+            ,
+        corners: 1 // Corner roundness (0..1)
+            ,
+        color: '#000' // #rgb or #rrggbb or array of colors
+            ,
+        opacity: 0.25 // Opacity of the lines
+            ,
+        rotate: 0 // The rotation offset
+            ,
+        direction: 1 // 1: clockwise, -1: counterclockwise
+            ,
+        speed: 1 // Rounds per second
+            ,
+        trail: 60 // Afterglow percentage
+            ,
+        fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+            ,
+        zIndex: 2e9 // The z-index (defaults to 2000000000)
+            ,
+        className: 'spinner' // The CSS class to assign to the spinner
+            ,
+        top: '50%' // Top position relative to parent
+            ,
+        left: '50%' // Left position relative to parent
+            ,
+        shadow: false // Whether to render a shadow
+            ,
+        hwaccel: false // Whether to use hardware acceleration
+            ,
+        position: 'absolute' // Element positioning
+    }
+    var target = document.getElementById('vis')
+
+    return new Spinner(opts).spin(target);
+}
+
+function endLoadingScreen() {
+
+}
 
 //Callback for when data is loaded
 function update(rawdata) {
@@ -180,6 +272,11 @@ function orgByMonth() {
         genderSortButton.classList.remove("active");
         var timeSortButton = document.getElementById('timeBtn')
         timeSortButton.classList.add("active");
+
+        var theTooltipDiv = document.getElementsByClassName('tooltip')
+        if (theTooltipDiv[0] !== undefined) {
+            theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
+        }
     })
 }
 
@@ -196,6 +293,11 @@ function orgByAge() {
         genderSortButton.classList.remove("active");
         var timeSortButton = document.getElementById('timeBtn')
         timeSortButton.classList.add("active");
+
+        var theTooltipDiv = document.getElementsByClassName('tooltip')
+        if (theTooltipDiv[0] !== undefined) {
+            theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
+        }
     })
 }
 
@@ -295,12 +397,14 @@ function sortDataBy2(organizer, dataset, userType) {
         var sortedRides = d3.nest()
             .key(function(d) {
                 return d.age; // return age as nesting key
-            }).sortKeys(function(a,b){return (+a)-(+b);}) // Sort by age within bin
+            }).sortKeys(function(a, b) {
+                return (+a) - (+b);
+            }) // Sort by age within bin
             .entries(dataset.subscriber);
 
         console.log(sortedRides.length)
         console.log(sortedRides)
-        console.log(sortedRides[sortedRides.length-1])
+        console.log(sortedRides[sortedRides.length - 1])
         var validAges = 60;
         var minAge = 16
         var maxAge = 75
@@ -339,20 +443,28 @@ function sortDataBy2(organizer, dataset, userType) {
                 .key(function(d) {
                     var dateObject = new Date(d.startTime); // Convert timestamp to Date object
                     return dateObject.getMonth(); // return month from object
-                }).sortKeys(d3.ascending)
+                }).sortKeys(function(a, b) {
+                    return (+a) - (+b);
+                })
                 .key(function(d) {
                     return d.segment; // Subnest by segment
-                }).sortKeys(d3.ascending)
+                }).sortKeys(function(a, b) {
+                    return (+a) - (+b);
+                })
                 .entries(dataset.subscriber);
         } else if (userType == 'customer') {
             var sortedRides = d3.nest() // Nest into months
                 .key(function(d) {
                     var dateObject = new Date(d.startTime); // Convert timestamp to Date object
                     return dateObject.getMonth(); // return month from object
-                }).sortKeys(d3.ascending)
+                }).sortKeys(function(a, b) {
+                    return (+a) - (+b);
+                })
                 .key(function(d) {
                     return d.segment; // Subnest by segment
-                }).sortKeys(d3.ascending)
+                }).sortKeys(function(a, b) {
+                    return (+a) - (+b);
+                })
                 .entries(dataset.customer);
         }
 
@@ -403,8 +515,8 @@ function plotDataByAge(ridesByAge) {
     xSpacing = axisBoxWidth + boxSpacing + widthAddition
 
     var div = d3.select("body").append("div")
-       .attr("class", "tooltip")
-       .style("opacity", 0);
+        .attr("class", "tooltip")
+        .style("opacity", 0);
 
     // AXIS DEFINITION
     vis.append('g')
@@ -416,9 +528,10 @@ function plotDataByAge(ridesByAge) {
         .attr('x', function(d, i) {
             return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)
         })
-        .attr('y', ySpacing + 8)
+        .attr('y', ySpacing + 6)
         .attr('height', axisHeight)
         .attr('width', axisBoxWidth)
+        .attr('stroke', '#fafafa')
         .style('opacity', 0)
         .transition().duration(axisAnimationDuration).style("opacity", 1);
 
@@ -432,9 +545,9 @@ function plotDataByAge(ridesByAge) {
             return d;
         })
         .attr('x', function(d, i) {
-            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + (axisBoxWidth/2)
+            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + (axisBoxWidth / 2)
         })
-        .attr('y', ySpacing + 22)
+        .attr('y', ySpacing + 20)
         .attr('height', 25)
         .attr('width', axisBoxWidth)
         .attr('text-anchor', 'middle')
@@ -443,10 +556,10 @@ function plotDataByAge(ridesByAge) {
         .transition().duration(axisAnimationDuration).style("opacity", 1);
 
     vis.selectAll('.month-axis')
-       .transition().duration(axisAnimationDuration).style("opacity", 0);
+        .transition().duration(axisAnimationDuration).style("opacity", 0);
 
     vis.selectAll('.month-axis-label')
-       .transition().duration(axisAnimationDuration).style("opacity", 0);
+        .transition().duration(axisAnimationDuration).style("opacity", 0);
 
     vis.selectAll('.cust-box')
         .transition().duration(fwooshAnimDuration)
@@ -498,50 +611,50 @@ function plotDataByAge(ridesByAge) {
     }
 
     vis.selectAll('.ride-box')
-      .on("mouseover", function(d) {
-         console.log(d.endStation)
-         var thePageX = d3.event.pageX;
-         var thePageY = d3.event.pageY;
-         var stationName1 = "";
-         var stationName2 = "";
-         getNameForStation(d.startStation).then(function(stationName1) {
-            getNameForStation(d.endStation).then(function(stationName2) {
-        div.transition()
-         .duration(200)
-         .style("opacity", .9);
-         var dateStamp = new Date(d.startTime)
-         var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
-         var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
-         var minutes = Math.floor(d.duration / 60);
-         var seconds = d.duration - minutes * 60;
-         var tipDuration = minutes + ':' + str_pad_left(seconds,'0',2)
-         if (d.gender == 1) {
-            var tipGender = 'Male'
-         } else if (d.gender == 2) {
-            var tipGender = 'Female'
-         } else {
-            var tipGender = 'not available'
-         }
+        .on("mouseover", function(d) {
+            console.log(d.endStation)
+            var thePageX = d3.event.pageX;
+            var thePageY = d3.event.pageY;
+            var stationName1 = "";
+            var stationName2 = "";
+            getNameForStation(d.startStation).then(function(stationName1) {
+                getNameForStation(d.endStation).then(function(stationName2) {
+                    div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    var dateStamp = new Date(d.startTime)
+                    var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
+                    var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
+                    var minutes = Math.floor(d.duration / 60);
+                    var seconds = d.duration - minutes * 60;
+                    var tipDuration = minutes + ':' + str_pad_left(seconds, '0', 2)
+                    if (d.gender == 1) {
+                        var tipGender = 'Male'
+                    } else if (d.gender == 2) {
+                        var tipGender = 'Female'
+                    } else {
+                        var tipGender = 'not available'
+                    }
 
 
-        div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> ' + stationName1 + '<br/><strong>End Station Name:</strong> ' + stationName2 + '<br/><strong>Gender:</strong> ' + tipGender)
-         .style("left", (thePageX) + "px")
-         .style("top", (thePageY - 28) + "px");
+                    div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age + '<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> ' + stationName1 + '<br/><strong>End Station Name:</strong> ' + stationName2 + '<br/><strong>Gender:</strong> ' + tipGender)
+                        .style("left", (thePageX) + "px")
+                        .style("top", (thePageY - 28) + "px");
+                })
+            })
+
         })
-        })
-
-     })
-     .on("mouseout", function(d) {
-       div.transition()
-        .duration(500)
-        .style("opacity", 0);
-       });
+        .on("mouseout", function(d) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 }
 
 function plotDataByMonth(sortedData, customerData, isInit) {
-   var div = d3.select("body").append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0);
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
 
     xSpacing = widthAddition;
     var axisBoxWidth = (numSegments * boxWidth) + ((numSegments - 1) * boxSpacing);
@@ -557,7 +670,7 @@ function plotDataByMonth(sortedData, customerData, isInit) {
         .attr('x', function(d, i) {
             return (xSpacing - 1) + ((i + 1) * boxSpacing) + (i * axisBoxWidth) + 2
         })
-        .attr('y', ySpacing + 8)
+        .attr('y', ySpacing + 6)
         .attr('height', axisHeight)
         .attr('width', axisBoxWidth)
         .attr('stroke', '#fafafa')
@@ -574,9 +687,9 @@ function plotDataByMonth(sortedData, customerData, isInit) {
             return d;
         })
         .attr('x', function(d, i) {
-            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + (axisBoxWidth/2)
+            return ((xSpacing - 2) + ((i + 1) * boxSpacing) + (i * axisBoxWidth)) + (axisBoxWidth / 2)
         })
-        .attr('y', ySpacing + 22)
+        .attr('y', ySpacing + 20)
         .attr('height', 25)
         .attr('width', axisBoxWidth)
         .attr('text-anchor', 'middle')
@@ -585,10 +698,10 @@ function plotDataByMonth(sortedData, customerData, isInit) {
         .style('opacity', 0)
         .transition().duration(axisAnimationDuration).style("opacity", 1);
 
-     vis.selectAll('.age-axis')
+    vis.selectAll('.age-axis')
         .transition().duration(axisAnimationDuration).style("opacity", 0);
 
-     vis.selectAll('.age-axis-label')
+    vis.selectAll('.age-axis-label')
         .transition().duration(axisAnimationDuration).style("opacity", 0);
 
     // SUBSCRIBER
@@ -693,6 +806,9 @@ function plotDataByMonth(sortedData, customerData, isInit) {
                             .append('rect')
                             .transition().duration(fwooshAnimDuration)
                             .ease(fwooshAnimType)
+                            .delay(function(d, j) {
+                                return j * delayTime
+                            })
                             .attr('x', xLoc) // circle -> cx
                             .attr('y', function(d, j) { // circle -> cy
                                 return ySpacing + 30 + (j * boxHeightMultipler);
@@ -731,7 +847,7 @@ function plotDataByMonth(sortedData, customerData, isInit) {
 
                         theIndex = (numSegments * month) + seg
                         vis.selectAll('.month-group' + theIndex + '-cust')
-                           //  .data(customerData[month].values[seg].values)
+                            //  .data(customerData[month].values[seg].values)
                             .transition().duration(fwooshAnimDuration)
                             .ease(fwooshAnimType)
                             .attr('x', xLoc) // circle -> cx
@@ -763,49 +879,53 @@ function plotDataByMonth(sortedData, customerData, isInit) {
         }
     }
     setTimeout(function() {
-      vis.selectAll('.ride-box')
-         .on("mouseover", function(d) {
-            console.log(d.endStation)
-            var thePageX = d3.event.pageX;
-            var thePageY = d3.event.pageY;
-            var stationName1 = "";
-            var stationName2 = "";
-            getNameForStation(d.startStation).then(function(stationName1) {
-               getNameForStation(d.endStation).then(function(stationName2) {
-           div.transition()
-            .duration(200)
-            .style("opacity", .9);
-            var dateStamp = new Date(d.startTime)
-            var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
-            var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
-            var minutes = Math.floor(d.duration / 60);
-            var seconds = d.duration - minutes * 60;
-            var tipDuration = minutes + ':' + str_pad_left(seconds,'0',2)
-            if (d.gender == 1) {
-               var tipGender = 'Male'
-            } else if (d.gender == 2) {
-               var tipGender = 'Female'
-            } else {
-               var tipGender = 'not available'
-            }
+        vis.selectAll('.ride-box')
+            .on("mouseover", function(d) {
+                console.log(d.endStation)
+                var thePageX = d3.event.pageX;
+                var thePageY = d3.event.pageY;
+                var stationName1 = "";
+                var stationName2 = "";
+                getNameForStation(d.startStation).then(function(stationName1) {
+                    getNameForStation(d.endStation).then(function(stationName2) {
+                        div.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+                        var dateStamp = new Date(d.startTime)
+                        var tipStartDate = monthNames[dateStamp.getMonth()] + ' ' + dateStamp.getDate() + ', 2016'
+                        var tipStartTime = dateStamp.getHours() + ':' + dateStamp.getMinutes()
+                        var minutes = Math.floor(d.duration / 60);
+                        var seconds = d.duration - minutes * 60;
+                        var tipDuration = minutes + ':' + str_pad_left(seconds, '0', 2)
+                        if (d.gender == 1) {
+                            var tipGender = 'Male'
+                        } else if (d.gender == 2) {
+                            var tipGender = 'Female'
+                        } else {
+                            var tipGender = 'not available'
+                        }
 
 
-           div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age +'<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> ' + stationName1 + '<br/><strong>End Station Name:</strong> ' + stationName2 + '<br/><strong>Gender:</strong> ' + tipGender)
-            .style("left", (thePageX) + "px")
-            .style("top", (thePageY - 28) + "px");
-           })
-           })
+                        div.html("<div class='tip-title'>Ride Details</div><strong>Date:</strong> " + tipStartDate + "<br/><strong>Start Time:</strong> " + tipStartTime + "<br/><strong>Age:</strong> " + d.age + '<br/><strong>Duration:</strong> ' + tipDuration + '<br/><strong>Start Station Name:</strong> ' + stationName1 + '<br/><strong>End Station Name:</strong> ' + stationName2 + '<br/><strong>Gender:</strong> ' + tipGender)
+                            .style("left", (thePageX) + "px")
+                            .style("top", (thePageY - 28) + "px");
+                    })
+                })
 
-        })
-        .on("mouseout", function(d) {
-          div.transition()
-           .duration(500)
-           .style("opacity", 0);
-          });
-   }, 1000)
+            })
+            .on("mouseout", function(d) {
+                div.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+    }, 1000)
 }
 
 function sortByGender() {
+    var theTooltipDiv = document.getElementsByClassName('tooltip')
+    if (theTooltipDiv[0] !== undefined) {
+        theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
+    }
     if (organizerType == 'month') {
         for (m = 0; m < 80; m++) {
             vis.selectAll('.month-group' + m + '-sub').sort(function(a, b) {
@@ -842,6 +962,10 @@ function sortByGender() {
 }
 
 function sortByTime() {
+    var theTooltipDiv = document.getElementsByClassName('tooltip')
+    if (theTooltipDiv[0] !== undefined) {
+        theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
+    }
     if (organizerType == 'month') {
         for (m = 0; m < 80; m++) {
             vis.selectAll('.month-group' + m + '-sub').sort(function(a, b) {
@@ -1154,188 +1278,174 @@ function getRandomStationNumber() {
     var stationObject = new Object()
 
     stationObject = {
-    "515" : true,
-    "3180" : true,
-    "3014" : true,
-    "3379" : true,
-    "507" : true,
-    "3419" : true,
-    "455" : true,
-    "388" : true,
-    "310" : true,
-    "444" : true,
-    "120" : true,
-    "302" : true,
-    "153" : true,
-    "3292" : true,
-    "335" : true,
-    "2003" : true,
-    "458" : true,
-    "3160" : true,
-    "147" : true,
-    "3047" : true,
-    "436" : true,
-    "3304" : true,
-    "3094" : true,
-    "223" : true,
-    "3396" : true,
-    "216" : true,
-    "3266" : true,
-    "3083" : true,
-    "400" : true,
-    "3106" : true,
-    "411" : true,
-    "3222" : true,
-    "3171" : true,
-    "307" : true,
-    "3058" : true,
-    "501" : true,
-    "519" : true,
-    "3159" : true,
-    "276" : true,
-    "164" : true,
-    "3230" : true,
-    "3326" : true,
-    "3408" : true,
-    "3069" : true,
-    "3119" : true,
-    "526" : true,
-    "3172" : true,
-    "447" : true,
-    "461" : true,
-    "324" : true,
-    "332" : true,
-    "313" : true,
-    "3315" : true,
-    "362" : true,
-    "265" : true,
-    "3284" : true,
-    "3330" : true,
-    "433" : true,
-    "321" : true,
-    "3143" : true,
-    "3340" : true,
-    "537" : true,
-    "3300" : true,
-    "128" : true,
-    "343" : true,
-    "523" : true,
-    "3077" : true,
-    "421" : true,
-    "450" : true,
-    "415" : true,
-    "3411" : true,
-    "534" : true,
-    "3165" : true,
-    "3054" : true,
-    "3244" : true,
-    "418" : true,
-    "373" : true,
-    "3182" : true,
-    "469" : true,
-    "3076" : true,
-    "3234" : true,
-    "3154" : true,
-    "2002" : true,
-    "3065" : true,
-    "3115" : true,
-    "3382" : true,
-    "3311" : true,
-    "284" : true,
-    "3132" : true,
-    "3097" : true,
-    "504" : true,
-    "3422" : true,
-    "475" : true,
-    "3405" : true,
-    "3368" : true,
-    "295" : true,
-    "320" : true,
-    "3137" : true,
-    "481" : true,
-    "3059" : true,
-    "486" : true,
-    "3086" : true,
-    "3353" : true,
-    "396" : true,
-    "3238" : true,
-    "3357" : true,
-    "3148" : true,
-    "3126" : true,
-    "3048" : true,
-    "3121" : true,
-    "236" : true,
-    "385" : true,
-    "3288" : true,
-    "3161" : true,
-    "3427" : true,
-    "497" : true,
-    "492" : true,
-    "3111" : true,
-    "346" : true,
-    "3150" : true,
-    "280" : true,
-    "3400" : true,
-    "454" : true,
-    "3416" : true,
-    "3385" : true,
-    "3249" : true,
-    "466" : true,
-    "351" : true,
-    "3176" : true,
-    "540" : true,
-    "407" : true,
-    "3295" : true,
-    "3043" : true,
-    "3255" : true,
-    "291" : true,
-    "262" : true,
-    "470" : true,
-    "298" : true,
-    "3363" : true,
-    "3308" : true,
-    "250" : true,
-    "399" : true,
-    "392" : true,
-    "3229" : true,
-    "329" : true,
-    "3036" : true,
-    "212" : true,
-    "512" : true,
-    "393" : true,
-    "2022" : true}
+        "515": true,
+        "3180": true,
+        "3014": true,
+        "3379": true,
+        "507": true,
+        "3419": true,
+        "455": true,
+        "388": true,
+        "310": true,
+        "444": true,
+        "120": true,
+        "302": true,
+        "153": true,
+        "3292": true,
+        "335": true,
+        "2003": true,
+        "458": true,
+        "3160": true,
+        "147": true,
+        "3047": true,
+        "436": true,
+        "3304": true,
+        "3094": true,
+        "223": true,
+        "3396": true,
+        "216": true,
+        "3266": true,
+        "3083": true,
+        "400": true,
+        "3106": true,
+        "411": true,
+        "3222": true,
+        "3171": true,
+        "307": true,
+        "3058": true,
+        "501": true,
+        "519": true,
+        "3159": true,
+        "276": true,
+        "164": true,
+        "3230": true,
+        "3326": true,
+        "3408": true,
+        "3069": true,
+        "3119": true,
+        "526": true,
+        "3172": true,
+        "447": true,
+        "461": true,
+        "324": true,
+        "332": true,
+        "313": true,
+        "3315": true,
+        "362": true,
+        "265": true,
+        "3284": true,
+        "3330": true,
+        "433": true,
+        "321": true,
+        "3143": true,
+        "3340": true,
+        "537": true,
+        "3300": true,
+        "128": true,
+        "343": true,
+        "523": true,
+        "3077": true,
+        "421": true,
+        "450": true,
+        "415": true,
+        "3411": true,
+        "534": true,
+        "3165": true,
+        "3054": true,
+        "3244": true,
+        "418": true,
+        "373": true,
+        "3182": true,
+        "469": true,
+        "3076": true,
+        "3234": true,
+        "3154": true,
+        "2002": true,
+        "3065": true,
+        "3115": true,
+        "3382": true,
+        "3311": true,
+        "284": true,
+        "3132": true,
+        "3097": true,
+        "504": true,
+        "3422": true,
+        "475": true,
+        "3405": true,
+        "3368": true,
+        "295": true,
+        "320": true,
+        "3137": true,
+        "481": true,
+        "3059": true,
+        "486": true,
+        "3086": true,
+        "3353": true,
+        "396": true,
+        "3238": true,
+        "3357": true,
+        "3148": true,
+        "3126": true,
+        "3048": true,
+        "3121": true,
+        "236": true,
+        "385": true,
+        "3288": true,
+        "3161": true,
+        "3427": true,
+        "497": true,
+        "492": true,
+        "3111": true,
+        "346": true,
+        "3150": true,
+        "280": true,
+        "3400": true,
+        "454": true,
+        "3416": true,
+        "3385": true,
+        "3249": true,
+        "466": true,
+        "351": true,
+        "3176": true,
+        "540": true,
+        "407": true,
+        "3295": true,
+        "3043": true,
+        "3255": true,
+        "291": true,
+        "262": true,
+        "470": true,
+        "298": true,
+        "3363": true,
+        "3308": true,
+        "250": true,
+        "399": true,
+        "392": true,
+        "3229": true,
+        "329": true,
+        "3036": true,
+        "212": true,
+        "512": true,
+        "393": true,
+        "2022": true
+    }
 
     var myArray = Object.keys(stationObject)
     return myArray[Math.floor(Math.random() * myArray.length)];
 }
 
 function getNameForStation(stationID) {
-   var db = firebase.database();
-   var ref = db.ref("/");
+    var db = firebase.database();
+    var ref = db.ref("/");
 
-   var stationName = "";
-   return ref.child('stations/' + stationID + '/details/').once("value").then(function(snapshot) {
-      var stationDetailObject = snapshot.val();
-      var stationName = stationDetailObject.name
-      return stationName
-   }).then(function(stationName) {
-      return stationName;
-   });
-}
-
-function getNamesForStation(stationID1, stationID2) {
-   var db = firebase.database();
-   var ref = db.ref("/");
-
-   var stationName = "";
-   return ref.child('stations/' + stationID + '/details/').once("value").then(function(snapshot) {
-      var stationDetailObject = snapshot.val();
-      var stationName = stationDetailObject.name
-      console.log(stationName)
-      return stationName
-   }).then(function(stationName) {
-      return stationName;
-   });
+    var stationName = "";
+    return ref.child('stations/' + stationID + '/details/').once("value").then(function(snapshot) {
+        var stationDetailObject = snapshot.val();
+        var stationName = stationDetailObject.name
+        return stationName
+    }).then(function(stationName) {
+        return stationName;
+    });
 }
 
 function getBirthStationForBike(bikeID) {
@@ -1356,7 +1466,7 @@ function getBirthStationForBike(bikeID) {
             }
 
             if (birthDate == "") {
-               birthDate = dataObject.startTime
+                birthDate = dataObject.startTime
             }
 
         });
@@ -1366,8 +1476,8 @@ function getBirthStationForBike(bikeID) {
     });
 };
 
-function str_pad_left(string,pad,length) {
-    return (new Array(length+1).join(pad)+string).slice(-length);
+function str_pad_left(string, pad, length) {
+    return (new Array(length + 1).join(pad) + string).slice(-length);
 }
 
 
@@ -1376,52 +1486,52 @@ function str_pad_left(string,pad,length) {
 
 function loadTop50Stations() {
 
-  getPopularStationIDsForBike(bikeIDTEST).then(function(stationsList) {
+    getPopularStationIDsForBike(bikeIDTEST).then(function(stationsList) {
 
-      //console.log("THIS PART IS FOR ALEX TO SEE.....")
-      //console.log("popular station IDs - " + stationsList);
+        //console.log("THIS PART IS FOR ALEX TO SEE.....")
+        //console.log("popular station IDs - " + stationsList);
 
-      for (var i = 0; i < stationsList.length; i++) {
-          if (i == (stationsList.length - 1)) {
-              getStationForID(stationsList[i]).then(function(theStation) {
-                  top50Stations.push(theStation);
+        for (var i = 0; i < stationsList.length; i++) {
+            if (i == (stationsList.length - 1)) {
+                getStationForID(stationsList[i]).then(function(theStation) {
+                    top50Stations.push(theStation);
 
-                  //console.log("here are all 50 stations" + JSON.stringify(top50Stations));
-                  //console.log("heres' what getMarkers returns " + JSON.stringify(getMarkers(top50Stations)));
+                    //console.log("here are all 50 stations" + JSON.stringify(top50Stations));
+                    //console.log("heres' what getMarkers returns " + JSON.stringify(getMarkers(top50Stations)));
 
-                  map.addSource("markers", {
-                      "type": "geojson",
-                      "data": getMarkers(top50Stations)
-                  });
+                    map.addSource("markers", {
+                        "type": "geojson",
+                        "data": getMarkers(top50Stations)
+                    });
 
-                  map.addLayer({
-                      "id": "markers",
-                      "type": "symbol",
-                      "source": "markers",
-                      "layout": {
-                          "icon-image": "{marker-symbol}-15",
-                          "text-field": "{title}",
-                          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-                          "text-offset": [0, 0.6],
-                          "text-anchor": "top"
-                      }
-                  });
+                    map.addLayer({
+                        "id": "markers",
+                        "type": "symbol",
+                        "source": "markers",
+                        "layout": {
+                            "icon-image": "{marker-symbol}-15",
+                            "text-field": "{title}",
+                            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                            "text-offset": [0, 0.6],
+                            "text-anchor": "top"
+                        }
+                    });
 
-                  // Find Streetview Images for a Lat & Long Pair
-                  //findImageForCoords(allStations[0].latitude, allStations[0].longitude);
-              });
+                    // Find Streetview Images for a Lat & Long Pair
+                    //findImageForCoords(allStations[0].latitude, allStations[0].longitude);
+                });
 
-          } else {
+            } else {
 
-              getStationForID(stationsList[i]).then(function(theStation) {
-                  top50Stations.push(theStation);
-              });
+                getStationForID(stationsList[i]).then(function(theStation) {
+                    top50Stations.push(theStation);
+                });
 
-          }
+            }
 
-      }
+        }
 
-  })
+    })
 }
 
 function getPopularStationIDsForBike(bikeID) {
@@ -1475,15 +1585,15 @@ function getMarkers(theStations) {
 
     theStations.forEach(function(oneStation, idx, array) {
 
-      console.log("FIND STATION ID " + oneStation);
-      console.log("FIND STATION ID " + JSON.stringify(oneStation));
+        console.log("FIND STATION ID " + oneStation);
+        console.log("FIND STATION ID " + JSON.stringify(oneStation));
 
 
         //create JSON text for each station marker
         if (idx == array.length - 1) { // on last item, don't add a commma
-          var middleJSON = '{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [' + parseFloat(theStations[idx].longitude) + ', ' + parseFloat(theStations[idx].latitude) + ']}, "properties": {"title": "' + theStations[idx].name + '", "description": "' + theStations[idx].stationNumber + '", "marker-color": "#7947A6", "marker-size": "large", "marker-symbol": "marker", "marker-size": "large"}}'
+            var middleJSON = '{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [' + parseFloat(theStations[idx].longitude) + ', ' + parseFloat(theStations[idx].latitude) + ']}, "properties": {"title": "' + theStations[idx].name + '", "description": "' + theStations[idx].stationNumber + '", "marker-color": "#7947A6", "marker-size": "large", "marker-symbol": "marker", "marker-size": "large"}}'
         } else {
-          var middleJSON = '{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [' + parseFloat(theStations[idx].longitude) + ', ' + parseFloat(theStations[idx].latitude) + ']}, "properties": {"title": "' + theStations[idx].name + '", "description": "' + theStations[idx].stationNumber + '", "marker-color": "#7947A6", "marker-size": "large", "marker-symbol": "marker", "marker-size": "large"}},'
+            var middleJSON = '{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [' + parseFloat(theStations[idx].longitude) + ', ' + parseFloat(theStations[idx].latitude) + ']}, "properties": {"title": "' + theStations[idx].name + '", "description": "' + theStations[idx].stationNumber + '", "marker-color": "#7947A6", "marker-size": "large", "marker-symbol": "marker", "marker-size": "large"}},'
         }
 
         fullFeaturesString = fullFeaturesString.concat(middleJSON);

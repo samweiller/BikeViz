@@ -29,6 +29,10 @@ body {
     border-bottom-color: #979797;
 }
 
+.svg-div {
+    margin-top: 10px;
+}
+
 .SV-viz-container {
    flex: 1;
    display: flex;
@@ -78,7 +82,8 @@ body {
 .SV-map-area {
    flex: 2;
    background-color: inherit;
-   min-width: 40%;
+   min-width: 50%;
+   position: relative;
 }
 
 /* AXIS INFO */
@@ -87,9 +92,13 @@ body {
     font-size: 14px;
     font-style: italic;
     position: absolute;
+    padding-left: 5px;
+    padding-right: 5px;
     top: 20px;
     right: 50px;
-    color: #898989;
+    color: #000;
+    background-color: #fafafa;
+    opacity: 0.6;
 }
 
 .SV-cust-axis-label {
@@ -97,9 +106,13 @@ body {
     font-size: 14px;
     font-style: italic;
     position: absolute;
+    padding-left: 5px;
+    padding-right: 5px;
     top: -50px;
     right: 50px;
-    color: #898989;
+    color: #000;
+    background-color: #fafafa;
+    opacity: 0.6;
 }
 
 .SV-legend {
@@ -136,16 +149,17 @@ body {
 }
 
 .month-axis {
-    fill: #454545;
+    fill: #333;
 }
 
 .month-axis-label {
     font-family: 'PT Sans';
+    font-weight: light;
     fill: white;
 }
 
 .age-axis {
-    fill: #454545;
+    fill: #333;
 }
 
 .age-axis-label {
@@ -183,7 +197,7 @@ body {
 div.tooltip {
     position: absolute;
     text-align: left;
-    width: 250px;
+    width: auto;
     /*height: 50px;*/
     padding: 6px;
     padding-left: 8px;
@@ -221,28 +235,25 @@ div.tooltip {
    float: left;
 }
 
+.SV-bike-name {
+   flex: 0;
+   position: absolute;
+   top: 10px;
+   left: 10px;
+   padding-left: 10px;
+   padding-right: 10px;
+   padding-top: 4px;
+   z-index: 1;
+   background-color: #fafafa;
+   font-family: 'Cabin';
+   font-size: 25px;
+   letter-spacing: 0px;
+   min-height: 5%;
+}
+
 .SV-footnote-area {
    font-family: 'PT Sans';
    font-size: 12px;
    font-style: italic;
    color: #898989;
-}
-
-.SV-bike-name {
-   flex: 0;
-   position: fixed;
-   margin-top: 4%;
-   margin-left: 3%;
-   padding-left: 10px;
-   padding-right: 5px;
-   z-index: 1;
-   background-color: white;
-   font-family: 'Cabin';
-   font-size: 50px;
-   letter-spacing: 0px;
-   min-height: 5%;
-}
-
-.SV-title-area {
-  position: relative;
 }
