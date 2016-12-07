@@ -27,7 +27,7 @@ function init() {
 
     var nextArrow = document.getElementById("openingview-allPersona");
     fadeOut(nextArrow);
-    setTimeout(navigateToBikeView, 2000);
+    setTimeout(navigateToBikeView, 1400);
 
   });
 

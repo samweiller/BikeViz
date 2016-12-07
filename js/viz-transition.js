@@ -23,8 +23,6 @@ var allPOIs;
 var theIMG;
 
 
-
-
 //Gets called when the page is loaded.
 function init() {
 
@@ -150,6 +148,8 @@ function initMap() {
                             allStations.push(theStation);
 
                             console.log("all da stations" + JSON.stringify(allStations));
+                            //var markersReturned = ;
+                            console.log("heres what getMarkers returns" + JSON.stringify(getMarkers(allStations)));
 
                             map.addSource("markers", {
                                 "type": "geojson",

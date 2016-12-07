@@ -27,8 +27,12 @@ var delayTime = 20;
 var xSpacing = 00;
 var ySpacing = 450; //374
 
+//TODO: get bike id from bikeview page / cookie
+var bikeIDTEST = 23458;
 var theStationID = getRandomStationNumber(); //324
 console.log(theStationID)
+
+var top50Stations;
 
 // BLACKLIST -> 17392, 17470, 24303, 16353, 15496, 25971, 25144, 15469, 16331, 25004, 26367
 
@@ -50,6 +54,58 @@ function init() {
         .attr('class', 'svg-area');
     vis = chart.append('g');
     // Define the div for the tooltip
+
+    // Create neccessary HTML objects - SW
+    var rightDiv = document.getElementsByClassName('SV-map-area');
+    var mapBoxMapDiv = document.createElement('div');
+    mapBoxMapDiv.id = 'SV-mapBoxMap';
+    mapBoxMapDiv.style.height = "100%";
+    rightDiv[0].appendChild(mapBoxMapDiv);
+
+    //Add header to map
+    var theMapHeader = document.createElement('div');
+    theMapHeader.className = 'SV-bike-name';
+    var mapHeaderText = document.createTextNode('Top 50 Stations for bike #' + bikeIDTEST + '.');
+    theMapHeader.appendChild(mapHeaderText);
+
+    var mapTitleDiv = document.getElementsByClassName('SV-map-area');
+    mapTitleDiv[0].prepend(theMapHeader);
+
+
+    // Initialize the MapBox Map - Center on the middle of New York
+    mapboxgl.accessToken = 'pk.eyJ1IjoidTJwcmlkZSIsImEiOiJjaXVxdzQwZXgwMDJtMnlsZmhiZ210bXAxIn0.sagkmIswAS2ter40NW0DBA';
+    map = new mapboxgl.Map({
+        container: 'SV-mapBoxMap',
+        center: [-73.985130, 40.758896],
+        zoom: 14,
+        style: 'mapbox://styles/u2pride/ciuqw59cj00bz2inyxffjemqw'
+    });
+
+    map.on('load', function () {
+        //initMap();
+        console.log("Map loaded");
+        top50Stations = new Array();
+        loadTop50Stations();
+    });
+
+
+    map.on('click', function (e) {
+        var features = map.queryRenderedFeatures(e.point, { layers: ['markers'] });
+
+        if (!features.length) {
+            return;
+        }
+        var stationID = features[0].properties.description;
+
+        theDataSets = updateViz('month', stationID);
+
+    });
+
+    //TODO: cursor style change
+    map.on('mousemove', function (e) {
+      var features = map.queryRenderedFeatures(e.point, { layers: ['markers'] });
+      map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+    });
 
 }
 
@@ -1293,4 +1349,135 @@ function getBirthStationForBike(bikeID) {
 
 function str_pad_left(string,pad,length) {
     return (new Array(length+1).join(pad)+string).slice(-length);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+function loadTop50Stations() {
+
+  getPopularStationIDsForBike(bikeIDTEST).then(function(stationsList) {
+
+      //console.log("THIS PART IS FOR ALEX TO SEE.....")
+      //console.log("popular station IDs - " + stationsList);
+
+      for (var i = 0; i < stationsList.length; i++) {
+          if (i == (stationsList.length - 1)) {
+              getStationForID(stationsList[i]).then(function(theStation) {
+                  top50Stations.push(theStation);
+
+                  //console.log("here are all 50 stations" + JSON.stringify(top50Stations));
+                  //console.log("heres' what getMarkers returns " + JSON.stringify(getMarkers(top50Stations)));
+
+                  map.addSource("markers", {
+                      "type": "geojson",
+                      "data": getMarkers(top50Stations)
+                  });
+
+                  map.addLayer({
+                      "id": "markers",
+                      "type": "symbol",
+                      "source": "markers",
+                      "layout": {
+                          "icon-image": "{marker-symbol}-15",
+                          "text-field": "{title}",
+                          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                          "text-offset": [0, 0.6],
+                          "text-anchor": "top"
+                      }
+                  });
+
+                  // Find Streetview Images for a Lat & Long Pair
+                  //findImageForCoords(allStations[0].latitude, allStations[0].longitude);
+              });
+
+          } else {
+
+              getStationForID(stationsList[i]).then(function(theStation) {
+                  top50Stations.push(theStation);
+              });
+
+          }
+
+      }
+
+  })
+}
+
+function getPopularStationIDsForBike(bikeID) {
+    var db = firebase.database();
+    var ref = db.ref("/");
+
+    var stations = new Array();
+    return ref.child('bikes/' + bikeID + '/stations/').orderByValue().limitToFirst(50).once("value").then(function(snapshot) {
+
+        snapshot.forEach(function(childSnapshot) {
+
+            var dataObject = childSnapshot.val();
+            stations.push(childSnapshot.key);
+
+        });
+
+    }).then(function() {
+        return stations;
+    });
+};
+
+function getStationForID(stationID) {
+    var db = firebase.database();
+    var ref = db.ref("/");
+
+    var stationObject = new Object();
+    return ref.child('stations/' + stationID + '/details/').orderByKey().once("value").then(function(snapshot) {
+
+        var latitude = snapshot.val();
+        //console.log("hey - " + JSON.stringify(latitude));
+
+        var dataObject = snapshot.val()
+
+        if (dataObject.latitude) {
+            stationObject = dataObject;
+        }
+
+    }).then(function() {
+        return stationObject;
+    });
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CREATE MARKERS FOR MAPBOX FROM FIREBASE OBJECTS
+
+
+function getMarkers(theStations) {
+
+    var fullFeaturesString = new String();
+
+    theStations.forEach(function(oneStation, idx, array) {
+
+      console.log("FIND STATION ID " + oneStation);
+      console.log("FIND STATION ID " + JSON.stringify(oneStation));
+
+
+        //create JSON text for each station marker
+        if (idx == array.length - 1) { // on last item, don't add a commma
+          var middleJSON = '{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [' + parseFloat(theStations[idx].longitude) + ', ' + parseFloat(theStations[idx].latitude) + ']}, "properties": {"title": "' + theStations[idx].name + '", "description": "' + theStations[idx].stationNumber + '", "marker-color": "#7947A6", "marker-size": "large", "marker-symbol": "marker", "marker-size": "large"}}'
+        } else {
+          var middleJSON = '{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [' + parseFloat(theStations[idx].longitude) + ', ' + parseFloat(theStations[idx].latitude) + ']}, "properties": {"title": "' + theStations[idx].name + '", "description": "' + theStations[idx].stationNumber + '", "marker-color": "#7947A6", "marker-size": "large", "marker-symbol": "marker", "marker-size": "large"}},'
+        }
+
+        fullFeaturesString = fullFeaturesString.concat(middleJSON);
+
+    });
+
+    var initialJSON = '{ "type": "FeatureCollection", "features": [';
+    var middleJSON = fullFeaturesString;
+    var endingJSON = '] }';
+
+    var fullJSONObject = JSON.parse(initialJSON + middleJSON + endingJSON);
+
+
+    return fullJSONObject;
+
 }
