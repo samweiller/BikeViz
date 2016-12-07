@@ -4,9 +4,9 @@ var width = 1300; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
 var height = 610; // THIS TOO. //550
 
 var boxSize = 6;
-var boxWidth = 12; //9
-var boxHeight = 4; //4
-var boxSpacing = 2; //2
+var boxWidth = 12; //9 //12
+var boxHeight = 4; //4 //4
+var boxSpacing = 2; //2 //2
 var boxWidthMultipler = boxWidth + boxSpacing
 var boxHeightMultipler = boxHeight + boxSpacing
 var boxRadius = 0;
