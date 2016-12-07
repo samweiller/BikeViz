@@ -149,7 +149,7 @@ function init() {
 }
 
 function navigateToBikeView() {
-  //window.location.href = "./bikeView.html";
+  window.location.href = "./bikeView.html";
 }
 
 function randomIntFromInterval(min,max) {
