@@ -107,6 +107,7 @@ function init() {
       map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
     });
 
+
 }
 
 var organizerType = 'month';
