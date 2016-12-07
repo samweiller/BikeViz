@@ -5,72 +5,23 @@ var theBikeID = 23459;
 var duration   = 500,
     transition = 200;
 
-var donutSize = 100;
-var yHeight = "7px";
+// drawDonutChart(
+//   '#donut',
+//   80,
+//   290,
+//   290,
+//   ".35em"
+// );
 
 getRidesForBike(theBikeID).then(function(bikeData) {
-   var totalRides = bikeData[4]
-
-   var maleCount = bikeData[0]
-   var femaleCount = bikeData[1]
-   var totalGender = maleCount + femaleCount
-   var malePercentage = Math.round((maleCount/totalGender) * 100)
-   var femalePercentage = Math.round((femaleCount/totalGender) * 100)
-
-   var subCount = bikeData[2]
-   var custCount = bikeData[3]
-   var totalType = subCount + custCount
-   var subPercentage = Math.round((subCount/totalType) * 100)
-   var custPercentage = Math.round((custCount/totalType) * 100)
-
    var titleDiv = document.getElementsByClassName('IT-bike-name')
-   // var titleText = document.createTextNode('Your bike is number ' + theBikeID + '.')
-   // titleDiv[0].appendChild(titleText)
-   titleDiv[0].innerHTML = 'Your bike is number <strong>' + theBikeID + '</strong>.'
-
-   var rideCountDiv = document.getElementsByClassName('IT-bike-info')
-   // var infoText = document.createTextNode('It has taken ' + totalRides + ' rides in 2016.')
-   // rideCountDiv[0].appendChild(infoText)
-   rideCountDiv[0].innerHTML = 'It has taken <strong>' + totalRides + '</strong> rides so far in 2016.'
-
-   setTimeout(function(){
-   drawDonutChart('.IT-male-perc', malePercentage, donutSize, donutSize, yHeight, 'male-')
-   drawDonutChart('.IT-female-perc', femalePercentage, donutSize, donutSize, yHeight, 'female-')
-
-   drawDonutChart('.IT-sub-perc', subPercentage, donutSize, donutSize, yHeight, 'sub-')
-   drawDonutChart('.IT-cust-perc', custPercentage, donutSize, donutSize, yHeight, 'cust-')
-
-
-   var maleDiv = document.getElementsByClassName('IT-male-perc')
-   var maleTitleDiv = document.createElement('div')
-   var maleTitleText = document.createTextNode('Male Riders')
-   maleTitleDiv.appendChild(maleTitleText)
-   maleTitleDiv.className = 'donut-title'
-   maleDiv[0].append(maleTitleDiv)
-
-   var femaleDiv = document.getElementsByClassName('IT-female-perc')
-   var femaleTitleDiv = document.createElement('div')
-   var femaleTitleText = document.createTextNode('Female Riders')
-   femaleTitleDiv.appendChild(femaleTitleText)
-   femaleTitleDiv.className = 'donut-title'
-   femaleDiv[0].append(femaleTitleDiv)
-
-   var subDiv = document.getElementsByClassName('IT-sub-perc')
-   var subTitleDiv = document.createElement('div')
-   var subTitleText = document.createTextNode('Annual Riders')
-   subTitleDiv.appendChild(subTitleText)
-   subTitleDiv.className = 'donut-title'
-   subDiv[0].append(subTitleDiv)
-
-   var custDiv = document.getElementsByClassName('IT-cust-perc')
-   var custTitleDiv = document.createElement('div')
-   var custTitleText = document.createTextNode('One-Time Riders')
-   custTitleDiv.appendChild(custTitleText)
-   custTitleDiv.className = 'donut-title'
-   custDiv[0].append(custTitleDiv)
-
-}, 4000)
+   console.log(titleDiv)
+   var titleText = document.createTextNode('Your bike is number ' + theBikeID + '.')
+   titleDiv[0].appendChild(titleText)
 })
+
+
+
 
 
 function getRidesForBike(bikeID) {
@@ -110,7 +61,7 @@ function getRidesForBike(bikeID) {
     });
 };
 
-function drawDonutChart(element, percent, width, height, text_y, theClass) {
+function drawDonutChart(element, percent, width, height, text_y) {
   width = typeof width !== 'undefined' ? width : 290;
   height = typeof height !== 'undefined' ? height : 290;
   text_y = typeof text_y !== 'undefined' ? text_y : "-.10em";
@@ -136,7 +87,7 @@ function drawDonutChart(element, percent, width, height, text_y, theClass) {
   var path = svg.selectAll("path")
         .data(pie(dataset.lower))
         .enter().append("path")
-        .attr("class", function(d, i) { return theClass + "color" + i })
+        .attr("class", function(d, i) { return "color" + i })
         .attr("d", arc)
         .each(function(d) { this._current = d; }); // store the initial values
 
@@ -152,11 +103,10 @@ function drawDonutChart(element, percent, width, height, text_y, theClass) {
     var timeout = setTimeout(function () {
       clearTimeout(timeout);
       path = path.data(pie(dataset.upper)); // update the data
-      path.transition().duration(duration).delay(1000).attrTween("d", function (a) {
+      path.transition().duration(duration).attrTween("d", function (a) {
         // Store the displayed angles in _current.
         // Then, interpolate from _current to the new angles.
         // During the transition, _current is updated in-place by d3.interpolate.
-
         var i  = d3.interpolate(this._current, a);
         var i2 = d3.interpolate(progress, percent)
         this._current = i(0);

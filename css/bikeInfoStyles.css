@@ -8,11 +8,11 @@ body {
 }
 
 text {
-  font-family: "RamaGothicM-Heavy",Impact,Haettenschweiler,"Franklin Gothic Bold",Charcoal,"Helvetica Inserat","Bitstream Vera Sans Bold","Arial Black",sans-serif;
-  font-size: 7rem;
+  font-family: Cabin;
+  font-size: 18px;
   font-weight: 400;
   line-height: 16rem;
-  fill: #1072b8;
+  fill: #000;
 }
 
 /*#donut {
@@ -21,12 +21,41 @@ text {
   margin: 0 auto;
 }*/
 
-path.color0 {
-  fill: #1072b8;
+path.male-color0 {
+  fill: #68B3EB;
 }
 
-path.color1 {
+path.male-color1 {
   fill: #35526b;
+}
+
+path.female-color0 {
+  fill: #E86E82;
+}
+
+path.female-color1 {
+  fill: #35526b;
+}
+
+path.sub-color0 {
+  fill: #7947A6;
+}
+
+path.sub-color1 {
+  fill: #35526b;
+}
+
+path.cust-color0 {
+  fill: #EB9A5B;
+}
+
+path.cust-color1 {
+  fill: #35526b;
+}
+
+.donut-title {
+   font-family: 'PT Sans';
+   margin-top: 10px;
 }
 
 .IT-page {
@@ -61,63 +90,107 @@ path.color1 {
 }
 
 .IT-bottom-buffer {
-   flex: 4;
+   flex: 5;
    flex-grow: 1;
    min-height: 20%;
    background-color: inherit;
+}
+
+#firstLoad {
+    animation: fadeIn forwards 1.5s ease;
+}
+
+#secondLoad {
+
 }
 
 .IT-bike-name {
    flex: 1;
    background-color: inherit;
    font-family: Cabin;
-   font-size: 25px;
+   max-height: 10%;
+   font-size: 30px;
    text-align: center;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 1s;
 }
 
 .IT-bike-info {
    flex: 2;
    background-color: inherit;
+   max-height: 10%;
    font-family: Cabin;
-   font-size: 25px;
+   font-size: 30px;
    text-align: center;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 3s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .IT-percentages {
    flex: 3;
    display: flex;
+   flex-grow: 1;
    flex-direction: row;
    background-color: inherit;
+   margin-top: 10px;
 }
 
 .IT-male-perc {
    flex: 0;
-   min-width: 10px;
+   flex-grow: 1;
+   text-align: center;
    background-color: inherit;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 5s;
 }
 
 .IT-female-perc {
    flex: 1;
-   min-width: 10px;
+   flex-grow: 1;
+   text-align: center;
    background-color: inherit;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 5s;
 }
 
 .IT-perc-buffer {
    flex: 2;
-   max-width: 15px;
+   min-width: 50px;
+   max-width: 50px;
    background-color: inherit;
 }
 
 .IT-sub-perc {
    flex: 3;
-   min-width: 10px;
+   flex-grow: 1;
+   text-align: center;
    background-color: inherit;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 5s;
 }
 
 .IT-cust-perc {
    flex: 4;
-   min-width: 10px;
+   flex-grow: 1;
+   text-align: center;
    background-color: inherit;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 5s;
 }
 
 .IT-right-rail {
@@ -125,4 +198,18 @@ path.color1 {
    flex-grow: 1;
    min-width: 10px;
    background-color: inherit;
+}
+
+.next-button-div {
+   flex: 4;
+   max-height: 40px;
+   text-align: center;
+   opacity: 0;
+   animation: fadeIn forwards 1.5s ease;
+   animation-delay: 7s;
+}
+
+.BV-button {
+   font-family: 'PT Sans';
+   font-size: 17px;
 }
