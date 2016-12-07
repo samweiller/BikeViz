@@ -495,3 +495,13 @@ div.tooltip {
 #openingview-allPersona {
   opacity: 0;
 }
+
+#openingview-MasterNav {
+  height: 70px;
+}
+
+.openingView-content {
+  width: 100%;
+  height: 100%;
+  background-color: #fafafa;
+}
