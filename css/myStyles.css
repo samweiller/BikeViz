@@ -36,7 +36,7 @@ body {
     flex: 0;
     background-color: #fafafa;
     min-height: 50px;
-    height: 7%;
+    /*height: 7%;*/
     width: 100%;
     border-bottom: solid;
     border-bottom-width: thin;
@@ -305,7 +305,7 @@ body {
 }
 
 .month-axis {
-    fill: #454545;
+    fill: #333;
     border-style: solid;
     border-color: #fafafa;
     border-width: medium;
@@ -317,7 +317,7 @@ body {
 }
 
 .age-axis {
-    fill: #454545;
+    fill: #333;
 }
 
 .age-axis-label {
@@ -504,7 +504,7 @@ div.tooltip {
 }
 
 #openingview-MasterNav {
-  height: 70px;
+  height: 55px;
 }
 
 .openingView-content {

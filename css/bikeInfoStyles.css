@@ -1,0 +1,215 @@
+body {
+  font-family: Cabin;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  padding-top: 20px;
+  background-color: #fafafa;
+}
+
+text {
+  font-family: Cabin;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 16rem;
+  fill: #000;
+}
+
+/*#donut {
+  width: 29rem;
+  height: 29rem;
+  margin: 0 auto;
+}*/
+
+path.male-color0 {
+  fill: #68B3EB;
+}
+
+path.male-color1 {
+  fill: #35526b;
+}
+
+path.female-color0 {
+  fill: #E86E82;
+}
+
+path.female-color1 {
+  fill: #35526b;
+}
+
+path.sub-color0 {
+  fill: #7947A6;
+}
+
+path.sub-color1 {
+  fill: #35526b;
+}
+
+path.cust-color0 {
+  fill: #EB9A5B;
+}
+
+path.cust-color1 {
+  fill: #35526b;
+}
+
+.donut-title {
+   font-family: 'PT Sans';
+   margin-top: 10px;
+}
+
+.IT-page {
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+   background-color: #fafafa;
+}
+
+.IT-left-rail {
+   flex: 0;
+   flex-grow: 1;
+   min-width: 10px;
+   background-color: inherit;
+}
+
+.IT-action-area {
+   flex: 1;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   background-color: inherit;
+}
+
+.IT-top-buffer {
+   flex: 0;
+   flex-grow: 1;
+   min-height: 20%;
+   background-color: inherit;
+}
+
+.IT-bottom-buffer {
+   flex: 5;
+   flex-grow: 1;
+   min-height: 20%;
+   background-color: inherit;
+}
+
+#firstLoad {
+    animation: fadeIn forwards 1.5s ease;
+}
+
+#secondLoad {
+
+}
+
+.IT-bike-name {
+   flex: 1;
+   background-color: inherit;
+   font-family: Cabin;
+   max-height: 10%;
+   font-size: 30px;
+   text-align: center;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 1s;
+}
+
+.IT-bike-info {
+   flex: 2;
+   background-color: inherit;
+   max-height: 10%;
+   font-family: Cabin;
+   font-size: 30px;
+   text-align: center;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 3s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.IT-percentages {
+   flex: 3;
+   display: flex;
+   flex-grow: 1;
+   flex-direction: row;
+   background-color: inherit;
+   margin-top: 10px;
+}
+
+.IT-male-perc {
+   flex: 0;
+   flex-grow: 1;
+   text-align: center;
+   background-color: inherit;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 5s;
+}
+
+.IT-female-perc {
+   flex: 1;
+   flex-grow: 1;
+   text-align: center;
+   background-color: inherit;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 5s;
+}
+
+.IT-perc-buffer {
+   flex: 2;
+   min-width: 50px;
+   max-width: 50px;
+   background-color: inherit;
+}
+
+.IT-sub-perc {
+   flex: 3;
+   flex-grow: 1;
+   text-align: center;
+   background-color: inherit;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 5s;
+}
+
+.IT-cust-perc {
+   flex: 4;
+   flex-grow: 1;
+   text-align: center;
+   background-color: inherit;
+   opacity: 0;
+   animation: fadeIn forwards 2s ease;
+   animation-delay: 5s;
+}
+
+.IT-right-rail {
+   flex: 2;
+   flex-grow: 1;
+   min-width: 10px;
+   background-color: inherit;
+}
+
+.next-button-div {
+   flex: 4;
+   max-height: 40px;
+   text-align: center;
+   opacity: 0;
+   animation: fadeIn forwards 1.5s ease;
+   animation-delay: 7s;
+}
+
+.BV-button {
+   font-family: 'PT Sans';
+   font-size: 17px;
+}

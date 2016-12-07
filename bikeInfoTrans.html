@@ -1,0 +1,47 @@
+<html>
+<head>
+<div id="donut" data-donut="42">
+</div>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js" integrity="sha256-C6CB9UYIS9UJeqinPHWTHVqh/E1uhG5Twh+Y5qFQmYg=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
+<script>
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyDsVBdmHWV5wNtbWbLLR7A5lLJTWIsBBh8",
+        authDomain: "citivizsandbox.firebaseapp.com",
+        databaseURL: "https://citivizsandbox.firebaseio.com",
+        storageBucket: "citivizsandbox.appspot.com",
+        messagingSenderId: "934960558493"
+    };
+    firebase.initializeApp(config);
+</script>
+<link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700|PT+Sans:400,400i,700" rel="stylesheet">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src='./js/viz-bikeInfoTransition.js'></script>
+<link href="./css/bikeInfoStyles.css" rel="stylesheet">
+</head>
+<body>
+   <section class='IT-page'>
+      <div class='IT-left-rail'></div>
+      <section class='IT-action-area'>
+         <div class='IT-top-buffer'></div>
+         <div class='IT-bike-name'></div>
+         <div class='IT-bike-info'></div>
+         <section class='IT-percentages'>
+            <div class='IT-male-perc'></div>
+            <div class='IT-female-perc'></div>
+            <div class='IT-perc-buffer'></div>
+            <div class='IT-sub-perc'></div>
+            <div class='IT-cust-perc'></div>
+         </section>
+         <div class='next-button-div'>
+             <a class="btn btn-default BV-button" href="#" role="button" id='nextBtn' class='next-button'>Explore my Bike &rarr;</a>
+         </div>
+         <div class='IT-bottom-buffer'></div>
+      </section>
+      <div class='IT-right-rail'></div>
+   </section>
+</body>
+</html>
