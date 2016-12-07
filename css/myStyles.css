@@ -353,12 +353,14 @@ div.tooltip {
 
 #transitionView-streetViewImage {
     position: fixed;
-    height: 150px;
-    width: 300px;
+    height: 300px;
+    width: 450px;
     background-color: black;
     top: 85%;
     left: 50%;
     opacity: 0;
+    border-radius: 20px;
+    overflow:hidden;
     /* bring your own prefixes */
     transform: translate(-50%, -85%);
 }
@@ -366,12 +368,13 @@ div.tooltip {
 #transitionView-stationLabel {
   position: fixed;
   text-align: center;
-  font-size: 160%;
+  font-size: 260%;
   font-family: Cabin;
-  height: 100px;
-  width: 300px;
-  top: 97%;
+  height: 70px;
+  width: 600px;
+  top: 94%;
   left: 50%;
+  border-radius: 20px;
   background-color: white;
   /* bring your own prefixes */
   transform: translate(-50%, -97%);
@@ -380,8 +383,8 @@ div.tooltip {
 
 .storypart {
     position: absolute;
-    width: 600px;
-    height: 300px;
+    width: 50%;
+    height: 30%;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -393,11 +396,15 @@ div.tooltip {
   vertical-align: middle;
   text-align: center;
   font-family: Cabin;
-  font-size: 190%;
+  font-size: 240%;
 }
 
 #beginningStoryText {
-    opactiy: 0;
+  opactiy: 0;
+}
+
+#endStoryText {
+  opacity: 0;
 }
 
 #FullScreenMapBoxMap {

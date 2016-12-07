@@ -30,6 +30,7 @@ var ySpacing = 374; //374
 //TODO: get bike id from bikeview page / cookie
 var bikeIDTEST = 23458;
 var theStationID = getRandomStationNumber(); //324 //3065(demofixed)
+var previouslyClickedStation = 0;
 
 console.log(theStationID)
 
@@ -69,8 +70,8 @@ function init() {
     var mapHeaderText = document.createTextNode('Top 50 Stations for bike #' + bikeIDTEST + '.');
     theMapHeader.appendChild(mapHeaderText);
 
-    var mapTitleDiv = document.getElementsByClassName('SV-map-area');
-    mapTitleDiv[0].prepend(theMapHeader);
+    var mapTitleDiv = document.getElementsByClassName('SV-map-title-area');
+    mapTitleDiv[0].append(theMapHeader);
 
 
     // Initialize the MapBox Map - Center on the middle of New York
@@ -79,7 +80,7 @@ function init() {
         container: 'SV-mapBoxMap',
         center: [-73.985130, 40.758896],
         zoom: 14,
-        style: 'mapbox://styles/u2pride/ciuqw59cj00bz2inyxffjemqw'
+        style: 'mapbox://styles/u2pride/ciwe2r5w500012psgzw5womb0'
     });
 
     map.on('load', function () {
@@ -98,7 +99,7 @@ function init() {
         }
         var stationID = features[0].properties.description;
 
-        theDataSets = updateViz('month', stationID);
+        //theDataSets = updateViz('month', stationID);
 
     });
 
@@ -1389,23 +1390,61 @@ function loadTop50Stations() {
                   //console.log("here are all 50 stations" + JSON.stringify(top50Stations));
                   //console.log("heres' what getMarkers returns " + JSON.stringify(getMarkers(top50Stations)));
 
+                  var mapMarkers = getMarkers(top50Stations);
+
                   map.addSource("markers", {
                       "type": "geojson",
-                      "data": getMarkers(top50Stations)
+                      "data": mapMarkers
                   });
+
 
                   map.addLayer({
                       "id": "markers",
                       "type": "symbol",
                       "source": "markers",
                       "layout": {
-                          "icon-image": "{marker-symbol}-15",
+                          "icon-image": "beer-15",
                           "text-field": "{title}",
                           "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
                           "text-offset": [0, 0.6],
                           "text-anchor": "top"
                       }
                   });
+
+
+                  // add markers to map
+
+                  mapMarkers.features.forEach(function(marker, idx, array) {
+                      // create a DOM element for the marker
+                      var el = document.createElement('div');
+                      el.className = 'marker';
+                      el.id = 'marker' + idx;
+                      el.style.backgroundImage = 'url(img/defaultMarker.png)';
+                      //el.style.backgroundImage = 'url(https://placekitten.com/g/200/200)';
+                      el.style.width = '45px';
+                      el.style.height = '45px';
+
+                      el.addEventListener('click', function() {
+                          //window.alert(marker.properties.message);
+                          if (previouslyClickedStation) {
+                            var previousSelectionElement = document.getElementById(previouslyClickedStation);
+                            previousSelectionElement.style.backgroundImage = 'url(img/defaultMarker.png)';
+                          }
+                          el.style.backgroundImage = 'url(img/currentMarker.png)';
+                          previouslyClickedStation = el.id;
+
+                      });
+
+                      // add marker to map
+                      new mapboxgl.Marker(el, {offset: [-22.5, -30]})
+                          .setLngLat(marker.geometry.coordinates)
+                          .addTo(map);
+                  });
+
+
+
+
+
 
                   // Find Streetview Images for a Lat & Long Pair
                   //findImageForCoords(allStations[0].latitude, allStations[0].longitude);
@@ -1474,10 +1513,6 @@ function getMarkers(theStations) {
     var fullFeaturesString = new String();
 
     theStations.forEach(function(oneStation, idx, array) {
-
-      console.log("FIND STATION ID " + oneStation);
-      console.log("FIND STATION ID " + JSON.stringify(oneStation));
-
 
         //create JSON text for each station marker
         if (idx == array.length - 1) { // on last item, don't add a commma
