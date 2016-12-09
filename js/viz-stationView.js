@@ -21,8 +21,8 @@ var shuffleAnimDuration = 700;
 var shuffleAnimType = d3.easeExpInOut;
 var fwooshAnimDuration = 1000;
 var fwooshAnimType = d3.easePolyInOut;
-var axisAnimationDuration = 1000;
-var delayTime = 10;
+var axisAnimationDuration = 20;
+var delayTime = 12;
 
 var xSpacing = 00;
 var ySpacing = 400; //374
@@ -30,7 +30,10 @@ var ySpacing = 400; //374
 //TODO: show station data for birth station of bike?
 //var bikeIDTEST = 23458;
 var bikeID = readCookie("selectedBike");
-var theStationID = getRandomStationNumber(); //324 //3065(demofixed)
+var theStationID = readCookie('birthStationID'); //324 //3065(demofixed)
+console.log(theStationID)
+var birthStationLat = readCookie('birthStationLat');
+var birthStationLng = readCookie('birthStationLng');
 var previouslyClickedStation = 0;
 
 console.log(theStationID)
@@ -46,6 +49,8 @@ var numSegments = 10; // Number of segments per month
 var segmentSize = 3; // Number of days per segment
 var tip;
 var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+var clickedToShowStations = false;
 
 //DEFINE YOUR VARIABLES UP HERE
 console.log('in')
@@ -82,7 +87,7 @@ function init() {
     mapboxgl.accessToken = 'pk.eyJ1IjoidTJwcmlkZSIsImEiOiJjaXVxdzQwZXgwMDJtMnlsZmhiZ210bXAxIn0.sagkmIswAS2ter40NW0DBA';
     map = new mapboxgl.Map({
         container: 'SV-mapBoxMap',
-        center: [-73.985130, 40.758896],
+        center: [birthStationLng, birthStationLat],
         zoom: 14,
         style: 'mapbox://styles/u2pride/ciwe2r5w500012psgzw5womb0'
     });
@@ -97,15 +102,21 @@ function init() {
 
 
     map.on('click', function(e) {
-        var features = map.queryRenderedFeatures(e.point, {
-            layers: ['markers', 'allStationsMarkers']
-        });
+      // if (!features.length) {
+      //     return;
+      // }
+        if (clickedToShowStations) {
+           var features2 = map.queryRenderedFeatures(e.point, {
+             layers: ['allStationsMarkers']
+          });
+          var stationID = features2[0].properties.description
+       } else {
+          var features = map.queryRenderedFeatures(e.point, {
+              layers: ['markers']
+          });
 
-        if (!features.length) {
-            return;
-        }
         var stationID = features[0].properties.description;
-
+}
         theDataSets = updateViz('month', stationID, 0);
     });
 
@@ -567,8 +578,8 @@ function plotDataByAge(ridesByAge) {
         .transition().duration(axisAnimationDuration).style("opacity", 0);
 
     vis.selectAll('.cust-box')
-        .transition().duration(fwooshAnimDuration)
-        .ease(fwooshAnimType)
+      //   .transition().duration(fwooshAnimDuration)
+      //   .ease(fwooshAnimType)
         .attr('y', ySpacing + 15)
         .style("opacity", 0);
 
@@ -581,11 +592,11 @@ function plotDataByAge(ridesByAge) {
             console.log('foo')
             vis.selectAll('.age' + (i + 16))
                 .data(ridesByAge[i].values)
-                .transition().duration(fwooshAnimDuration)
-                .ease(fwooshAnimType)
-                .delay(function(d, j) {
-                    return j * delayTime
-                })
+               //  .transition().duration(fwooshAnimDuration)
+               //  .ease(fwooshAnimType)
+               //  .delay(function(d, j) {
+               //      return j * delayTime
+               //  })
                 .attr('x', ((i + 0) * boxWidthMultipler) + xSpacing + 1) // circle -> cx
                 .attr('y', function(d, j) { // circle -> cy
                     return ySpacing - (j * boxHeightMultipler);
@@ -725,11 +736,11 @@ function plotDataByMonth(sortedData, customerData, isInit) {
                             .data(sortedData[month].values[seg].values)
                             .enter()
                             .append('rect')
-                            .transition().duration(fwooshAnimDuration)
-                            .ease(fwooshAnimType)
-                            .delay(function(d, j) {
-                                return j * delayTime
-                            })
+                           //  .transition().duration(fwooshAnimDuration)
+                           //  .ease(fwooshAnimType)
+                           //  .delay(function(d, j) {
+                           //      return j * delayTime
+                           //  })
                             .attr('x', xLoc) // circle -> cx
                             .attr('y', function(d, j) { // circle -> cy
                                 return ySpacing - (j * boxHeightMultipler);
@@ -758,11 +769,11 @@ function plotDataByMonth(sortedData, customerData, isInit) {
                             .data(sortedData[month].values[seg].values)
                             // .enter()
                             // .append('rect')
-                            .transition().duration(fwooshAnimDuration)
-                            .ease(fwooshAnimType)
-                            .delay(function(d, j) {
-                                return j * delayTime
-                            })
+                           //  .transition().duration(fwooshAnimDuration)
+                           //  .ease(fwooshAnimType)
+                           //  .delay(function(d, j) {
+                           //      return j * delayTime
+                           //  })
                             .attr('x', xLoc) // circle -> cx
                             .attr('y', function(d, j) { // circle -> cy
                                 return ySpacing - (j * boxHeightMultipler);
@@ -809,11 +820,11 @@ function plotDataByMonth(sortedData, customerData, isInit) {
                             .data(customerData[month].values[seg].values)
                             .enter()
                             .append('rect')
-                            .transition().duration(fwooshAnimDuration)
-                            .ease(fwooshAnimType)
-                            .delay(function(d, j) {
-                                return j * delayTime
-                            })
+                           //  .transition().duration(fwooshAnimDuration)
+                           //  .ease(fwooshAnimType)
+                           //  .delay(function(d, j) {
+                           //      return j * delayTime
+                           //  })
                             .attr('x', xLoc) // circle -> cx
                             .attr('y', function(d, j) { // circle -> cy
                                 return ySpacing + 30 + (j * boxHeightMultipler);
@@ -853,12 +864,12 @@ function plotDataByMonth(sortedData, customerData, isInit) {
                         theIndex = (numSegments * month) + seg
                         vis.selectAll('.month-group' + theIndex + '-cust')
                             //  .data(customerData[month].values[seg].values)
-                            .transition().duration(fwooshAnimDuration)
-                            .ease(fwooshAnimType)
-                            .attr('x', xLoc) // circle -> cx
-                            .attr('y', function(d, j) { // circle -> cy
-                                return ySpacing + 27 + (j * boxHeightMultipler);
-                            })
+                           //  .transition().duration(fwooshAnimDuration)
+                           //  .ease(fwooshAnimType)
+                           //  .attr('x', xLoc) // circle -> cx
+                           //  .attr('y', function(d, j) { // circle -> cy
+                           //      return ySpacing + 27 + (j * boxHeightMultipler);
+                           //  })
                             .style("opacity", 1)
                             .attr('height', boxHeight) // circle -> r -> boxSize/2
                             .attr('width', boxWidth)
@@ -931,6 +942,9 @@ function sortByGender() {
     if (theTooltipDiv[0] !== undefined) {
         theTooltipDiv[0].parentNode.removeChild(theTooltipDiv[0])
     }
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
     if (organizerType == 'month') {
         for (m = 0; m < 80; m++) {
             vis.selectAll('.month-group' + m + '-sub').sort(function(a, b) {
@@ -1665,6 +1679,7 @@ function getMarkers(theStations) {
 }
 
 function showAllBikes() {
+   clickedToShowStations = true;
   console.log("SHOWING ALL BIKES");
 
   allStationsForOneBike = new Array();
@@ -1742,14 +1757,9 @@ function showAllBikes() {
                   getStationForID(allStationsForBike[i]).then(function(theStation) {
                       allStationsForOneBike.push(theStation);
                   });
-
               }
-
           }
-
       })
-
-
 }
 
 
