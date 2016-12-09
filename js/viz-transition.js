@@ -129,6 +129,7 @@ function initMap() {
 
     //Get Birth Station
     getBirthStationForBike(bikeID).then(function(birthStationID) {
+      createCookie('birthStationID', birthStationID, 1);
 
         getStationForID(birthStationID).then(function(stationData) {
 
@@ -142,6 +143,8 @@ function initMap() {
                     allStations[0].latitude
                 ]
             });
+            createCookie('birthStationLat', allStations[0].latitude, 1);
+            createCookie('birthStationLng', allStations[0].longitude, 1);
 
             document.getElementById('transitionView-stationLabel').innerHTML = "Birth Station";
 
@@ -460,7 +463,7 @@ function findImageForCoords(latitude, longitude) {
       theIMG = document.createElement("IMG");
     }
 
-    theIMG.src = "https://maps.googleapis.com/maps/api/streetview?size=450x300&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
+    theIMG.src = "https://maps.googleapis.com/maps/api/streetview?size=600x300&location=" + latitude + "," + longitude + "&fov=90&heading=235&pitch=10&key=AIzaSyCqldUCvAMTkbea3wZmY16ghYKLtj6NNFo";
 
     var img = document.getElementById('transitionView-streetViewImage').appendChild(theIMG);
 
@@ -503,4 +506,14 @@ function readCookie(name) {
         if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
     }
     return null;
+}
+
+function createCookie(name,value,days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime()+(days*24*60*60*1000));
+        var expires = "; expires="+date.toGMTString();
+    }
+    else var expires = "";
+    document.cookie = name+"="+value+expires+"; path=/";
 }

@@ -135,7 +135,7 @@ function init() {
         bucket6MaleIdx = bucket6MaleIdx + 1;
       }
 
-      createCookie("selectedBike", bikeSelection, 1);
+      createCookie("selectedBike", 23386, 1);
       console.log("stored bike cookie " + bikeSelection);
 
     }
