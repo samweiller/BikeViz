@@ -1,10 +1,10 @@
 var chart;
 
 var width = 1300; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 625; // THIS TOO. //550
+var height = 550; // THIS TOO. //550
 
-var boxSize = 6;
-var boxWidth = 9; //9 // 6
+var boxSize = 7;
+var boxWidth = 7; //9 // 6
 var boxHeight = 1; //4 // 1
 var boxSpacing = 0; //2 //0
 var boxWidthMultipler = boxWidth + boxSpacing
@@ -25,12 +25,13 @@ var axisAnimationDuration = 20;
 var delayTime = 12;
 
 var xSpacing = 00;
-var ySpacing = 400; //374
+var ySpacing = 370; //374
 
 //TODO: show station data for birth station of bike?
-//var bikeIDTEST = 23458;
+// var bikeID = 23458;
 var bikeID = readCookie("selectedBike");
 var theStationID = readCookie('birthStationID'); //324 //3065(demofixed)
+// var theStationID = 324;
 console.log(theStationID)
 var birthStationLat = readCookie('birthStationLat');
 var birthStationLng = readCookie('birthStationLng');
