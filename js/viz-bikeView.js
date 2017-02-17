@@ -1,12 +1,12 @@
 var chart;
 
 var width = 1300; // TODO: MAKE THIS DYNAMIC OR YOU'RE AN IDIOT
-var height = 610; // THIS TOO. //550
+var height = 500; // THIS TOO. //550 //610
 
 var boxSize = 6;
 var boxWidth = 12; //9 //12
 var boxHeight = 4; //4 //4
-var boxSpacing = 2; //2 //2
+var boxSpacing = 1; //2 //2
 var boxWidthMultipler = boxWidth + boxSpacing
 var boxHeightMultipler = boxHeight + boxSpacing
 var boxRadius = 0;
@@ -25,9 +25,9 @@ var axisAnimationDuration = 1000;
 var delayTime = 12;
 
 var xSpacing = 00;
-var ySpacing = 450; //374
+var ySpacing = 350; //374
 
-//var theBikeID = getRandomBikeNumber();
+// var theBikeID = getRandomBikeNumber();
 var theBikeID = readCookie("selectedBike");
 console.log("from the cookie" + theBikeID)
 
